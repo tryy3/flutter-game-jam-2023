@@ -6,7 +6,7 @@ import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
 class TappingBehavior extends Behavior<Unicorn>
-    with TapCallbacks, HasGameRef<VeryGoodFlameGame> {
+    with TapCallbacks, HasGameRef<StarshipShooterGame> {
   @override
   bool containsLocalPoint(Vector2 point) {
     return parent.containsLocalPoint(point);

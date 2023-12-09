@@ -14,7 +14,7 @@ class _MockAppLocalizations extends Mock implements AppLocalizations {}
 
 class _MockAudioPlayer extends Mock implements AudioPlayer {}
 
-class _VeryGoodFlameGame extends VeryGoodFlameGame {
+class _VeryGoodFlameGame extends StarshipShooterGame {
   _VeryGoodFlameGame({
     required super.l10n,
     required super.effectPlayer,

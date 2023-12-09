@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:starship_shooter/game/game.dart';
 
 class CounterComponent extends PositionComponent
-    with HasGameRef<VeryGoodFlameGame> {
+    with HasGameRef<StarshipShooterGame> {
   CounterComponent({
     required super.position,
   }) : super(anchor: Anchor.center);

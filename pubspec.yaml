@@ -37,4 +37,5 @@ flutter:
   assets:
     - assets/audio/
     - assets/images/
+    - assets/images/klondike_sprites.png
     - assets/licenses/poppins/
