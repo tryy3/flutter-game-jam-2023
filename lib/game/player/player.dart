@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
-import 'package:starship_shooter/game/components/card.dart';
+import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/cards/heal_card.dart';
+import 'package:starship_shooter/game/components/cards/offense_card.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/health_component.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
@@ -25,12 +29,6 @@ class Player {
   // Attempt to go through cards and use them if there is one
   Future<bool> useCard(int card) async {
     return true;
-  }
-
-  // Based on card input, try to take damage from it but also checking game rules
-  // (defense cards)
-  void takeDamage(int value) {
-    health -= value;
   }
 
   double _calculateBaseWidthPosition(CameraComponent camera) {
@@ -92,7 +90,7 @@ class Player {
         // Discard the card
         foundation.removeCard(card);
         _cards.remove(card);
-        card.removeFromParent();
+        (card as PositionComponent).removeFromParent();
         return;
       }
     }
@@ -158,12 +156,23 @@ class Player {
       ..add(waste)
       ..add(unicorn);
 
-    _cards = [
-      for (var rank = 1; rank <= 13; rank++)
-        for (var suit = 0; suit < 4; suit++) Card(rank, suit),
-    ]..shuffle();
+    // _cards = [
+    //   for (var rank = 1; rank <= 13; rank++)
+    //     for (var suit = 0; suit < 4; suit++) OffenseCard(),
+    // ]..shuffle();
 
-    await world.addAll(_cards);
+    // Generate a pile of random cards
+    _cards = List.generate(20, (index) {
+      final cardType = Random().nextInt(100);
+      if (cardType < 50) {
+        return OffenseCard();
+      } else {
+        return HealCard();
+      }
+    })
+      ..shuffle();
+
+    await world.addAll(_cards.cast());
     await world.addAll(foundations);
 
     final cardToDeal = _cards.length - 1;

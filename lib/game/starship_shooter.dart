@@ -3,17 +3,8 @@ import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/components/foundation_pile.dart';
-import 'package:starship_shooter/game/components/stock_pile.dart';
-import 'package:starship_shooter/game/components/tableau_pile.dart';
-import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
-import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/side_view.dart';
-import 'package:starship_shooter/gen/assets.gen.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
 enum GameState {

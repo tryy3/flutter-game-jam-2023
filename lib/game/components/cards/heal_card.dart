@@ -3,35 +3,41 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/tableau_pile.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
-import 'package:starship_shooter/game/rank.dart';
-import 'package:starship_shooter/game/suit.dart';
 
-class Card extends PositionComponent with DragCallbacks {
-  Card(int intRank, int intSuit)
-      : rank = Rank.fromInt(intRank),
-        suit = Suit.fromInt(intSuit),
-        super(size: StarshipShooterGame.cardSize);
+class HealCard extends PositionComponent with DragCallbacks implements Card {
+  HealCard() : super(size: StarshipShooterGame.cardSize);
 
-  final Rank rank;
-  final Suit suit;
+  final int health = Random().nextInt(10) + 1;
   Pile? pile;
   bool _faceUp = false;
   bool _isDragging = false;
   final List<Card> attachedCards = [];
 
+  @override
   bool get isFaceUp => _faceUp;
+  @override
   bool get isFaceDown => !_faceUp;
+  @override
   void flip() => _faceUp = !_faceUp;
 
   @override
-  String toString() => rank.label + suit.label; // e.g. "Q♠" or "10♦"
+  String toString() {
+    return 'Healing card - health: $health';
+  }
 
+  @override
   void useCard(Player player, Player enemy) {
-    enemy.takeDamage(rank.value);
+    player.health += health;
+  }
+
+  @override
+  void updatePile(Pile pile) {
+    this.pile = pile;
   }
 
   //#region Rendering
@@ -103,88 +109,17 @@ class Card extends PositionComponent with DragCallbacks {
       ..drawRRect(cardRRect, frontBackgroundPaint)
       ..drawRRect(
         cardRRect,
-        suit.isRed ? redBorderPaint : blackBorderPaint,
+        redBorderPaint,
       );
 
-    final rankSprite = suit.isBlack ? rank.blackSprite : rank.redSprite;
-    final suitSprite = suit.sprite;
+    final rankSprite = klondikeSprite(243, 170, 92, 123);
+    final suitSprite = klondikeSprite(696, 167, 92, 123);
     _drawSprite(canvas, rankSprite, 0.1, 0.08);
     _drawSprite(canvas, suitSprite, 0.1, 0.18, scale: 0.5);
     _drawSprite(canvas, rankSprite, 0.1, 0.08, rotate: true);
     _drawSprite(canvas, suitSprite, 0.1, 0.18, scale: 0.5, rotate: true);
-    switch (rank.value) {
-      case 1:
-        _drawSprite(canvas, suitSprite, 0.5, 0.5, scale: 2.5);
-      case 2:
-        _drawSprite(canvas, suitSprite, 0.5, 0.25);
-        _drawSprite(canvas, suitSprite, 0.5, 0.25, rotate: true);
-      case 3:
-        _drawSprite(canvas, suitSprite, 0.5, 0.2);
-        _drawSprite(canvas, suitSprite, 0.5, 0.5);
-        _drawSprite(canvas, suitSprite, 0.5, 0.2, rotate: true);
-      case 4:
-        _drawSprite(canvas, suitSprite, 0.3, 0.25);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25);
-        _drawSprite(canvas, suitSprite, 0.3, 0.25, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25, rotate: true);
-      case 5:
-        _drawSprite(canvas, suitSprite, 0.3, 0.25);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25);
-        _drawSprite(canvas, suitSprite, 0.3, 0.25, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.5, 0.5);
-      case 6:
-        _drawSprite(canvas, suitSprite, 0.3, 0.25);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25);
-        _drawSprite(canvas, suitSprite, 0.3, 0.5);
-        _drawSprite(canvas, suitSprite, 0.7, 0.5);
-        _drawSprite(canvas, suitSprite, 0.3, 0.25, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.25, rotate: true);
-      case 7:
-        _drawSprite(canvas, suitSprite, 0.3, 0.2);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2);
-        _drawSprite(canvas, suitSprite, 0.5, 0.35);
-        _drawSprite(canvas, suitSprite, 0.3, 0.5);
-        _drawSprite(canvas, suitSprite, 0.7, 0.5);
-        _drawSprite(canvas, suitSprite, 0.3, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2, rotate: true);
-      case 8:
-        _drawSprite(canvas, suitSprite, 0.3, 0.2);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2);
-        _drawSprite(canvas, suitSprite, 0.5, 0.35);
-        _drawSprite(canvas, suitSprite, 0.3, 0.5);
-        _drawSprite(canvas, suitSprite, 0.7, 0.5);
-        _drawSprite(canvas, suitSprite, 0.3, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.5, 0.35, rotate: true);
-      case 9:
-        _drawSprite(canvas, suitSprite, 0.3, 0.2);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2);
-        _drawSprite(canvas, suitSprite, 0.5, 0.3);
-        _drawSprite(canvas, suitSprite, 0.3, 0.4);
-        _drawSprite(canvas, suitSprite, 0.7, 0.4);
-        _drawSprite(canvas, suitSprite, 0.3, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.3, 0.4, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.4, rotate: true);
-      case 10:
-        _drawSprite(canvas, suitSprite, 0.3, 0.2);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2);
-        _drawSprite(canvas, suitSprite, 0.5, 0.3);
-        _drawSprite(canvas, suitSprite, 0.3, 0.4);
-        _drawSprite(canvas, suitSprite, 0.7, 0.4);
-        _drawSprite(canvas, suitSprite, 0.3, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.2, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.5, 0.3, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.3, 0.4, rotate: true);
-        _drawSprite(canvas, suitSprite, 0.7, 0.4, rotate: true);
-      case 11:
-        _drawSprite(canvas, suit.isRed ? redJack : blackJack, 0.5, 0.5);
-      case 12:
-        _drawSprite(canvas, suit.isRed ? redQueen : blackQueen, 0.5, 0.5);
-      case 13:
-        _drawSprite(canvas, suit.isRed ? redKing : blackKing, 0.5, 0.5);
-    }
+
+    _drawSprite(canvas, redKing, 0.5, 0.5);
   }
 
   void _drawSprite(
@@ -212,11 +147,9 @@ class Card extends PositionComponent with DragCallbacks {
       canvas.restore();
     }
   }
-
   //#endregion
 
   //#region Dragging
-
   @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
@@ -227,7 +160,7 @@ class Card extends PositionComponent with DragCallbacks {
         attachedCards.clear();
         final extraCards = (pile! as TableauPile).cardsOnTop(this);
         for (final card in extraCards) {
-          card.priority = attachedCards.length + 101;
+          (card as Component).priority = attachedCards.length + 101;
           attachedCards.add(card);
         }
       }

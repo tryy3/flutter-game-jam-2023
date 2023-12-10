@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:starship_shooter/game/components/card.dart';
+import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
@@ -35,16 +35,17 @@ class WastePile extends PositionComponent implements Pile {
 
   @override
   void returnCard(Card card) {
-    card.priority = _cards.indexOf(card);
+    (card as Component).priority = _cards.indexOf(card);
     _fanOutTopCards();
   }
 
   @override
   void acquireCard(Card card) {
     assert(card.isFaceUp);
-    card.pile = this;
-    card.position = position;
-    card.priority = _cards.length;
+    card
+      ..updatePile(this)
+      ..position = position;
+    (card as Component).priority = _cards.length;
     _cards.add(card);
     _fanOutTopCards();
   }

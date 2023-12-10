@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:starship_shooter/game/components/card.dart';
+import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
 
@@ -20,13 +20,14 @@ class TableauPile extends PositionComponent implements Pile {
 
   @override
   bool canAcceptCard(Card card) {
-    if (_cards.isEmpty) {
-      return card.rank.value == 13;
-    } else {
-      final topCard = _cards.last;
-      return card.suit.isRed == !topCard.suit.isRed &&
-          card.rank.value == topCard.rank.value - 1;
-    }
+    return true;
+    // if (_cards.isEmpty) {
+    //   return card.rank.value == 13;
+    // } else {
+    //   final topCard = _cards.last;
+    //   return card.suit.isRed == !topCard.suit.isRed &&
+    //       card.rank.value == topCard.rank.value - 1;
+    // }
   }
 
   @override
@@ -42,14 +43,14 @@ class TableauPile extends PositionComponent implements Pile {
 
   @override
   void returnCard(Card card) {
-    card.priority = _cards.indexOf(card);
+    // card.priority = _cards.indexOf(card);
     layOutCards();
   }
 
   @override
   void acquireCard(Card card) {
-    card.pile = this;
-    card.priority = _cards.length;
+    card.updatePile(this);
+    // card.priority = _cards.length;
     _cards.add(card);
     layOutCards();
   }
@@ -71,8 +72,9 @@ class TableauPile extends PositionComponent implements Pile {
         ..setFrom(_cards[i - 1].position)
         ..add(_cards[i - 1].isFaceDown ? _fanOffset1 : _fanOffset2);
     }
-    height =
-        StarshipShooterGame.cardHeight * 1.5 + _cards.last.y - _cards.first.y;
+    height = StarshipShooterGame.cardHeight * 1.5 +
+        (_cards.last as PositionComponent).y -
+        (_cards.first as PositionComponent).y;
   }
 
   List<Card> cardsOnTop(Card card) {

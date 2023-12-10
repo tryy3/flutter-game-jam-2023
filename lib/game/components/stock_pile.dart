@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/painting.dart';
-import 'package:starship_shooter/game/components/card.dart';
+import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
@@ -33,9 +33,10 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
   @override
   void acquireCard(Card card) {
     assert(card.isFaceDown);
-    card.pile = this;
-    card.position = position;
-    card.priority = _cards.length;
+    card
+      ..updatePile(this)
+      ..position = position;
+    (card as Component).priority = _cards.length;
     _cards.add(card);
   }
 
