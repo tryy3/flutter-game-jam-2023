@@ -9,10 +9,6 @@ class WastePile extends PositionComponent implements Pile {
   WastePile({required super.position, required this.side, required this.player})
       : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
 
-  @override
-  // TODO: implement debugMode
-  bool get debugMode => true;
-
   final List<Card> _cards = [];
   final Vector2 _fanOffset = Vector2(StarshipShooterGame.cardWidth * 0.2, 0);
   SideView side;

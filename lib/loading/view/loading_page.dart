@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:starship_shooter/game/view/game_page.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/loading.dart';
 import 'package:starship_shooter/title/title.dart';
@@ -18,7 +19,7 @@ class _LoadingPageState extends State<LoadingPage> {
     if (!mounted) {
       return;
     }
-    await navigator.pushReplacement<void, void>(TitlePage.route());
+    await navigator.pushReplacement<void, void>(GamePage.route());
   }
 
   @override

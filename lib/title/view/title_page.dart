@@ -17,7 +17,10 @@ class TitlePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.titleAppBarTitle),
+        title: Text(
+          l10n.titleAppBarTitle,
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: const SafeArea(child: TitleView()),
     );

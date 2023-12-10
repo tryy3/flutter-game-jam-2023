@@ -13,12 +13,23 @@ import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/side_view.dart';
 
+enum PlayerType {
+  Cold,
+  Hot,
+}
+
 class Player {
-  Player({required this.id, required this.side, this.health = 20});
+  Player({
+    required this.id,
+    required this.side,
+    required this.playerType,
+    this.health = 20,
+  });
 
   SideView side;
   double health;
   final int id;
+  final PlayerType playerType;
 
   late StockPile stock;
   late WastePile waste;
@@ -156,18 +167,13 @@ class Player {
       ..add(waste)
       ..add(unicorn);
 
-    // _cards = [
-    //   for (var rank = 1; rank <= 13; rank++)
-    //     for (var suit = 0; suit < 4; suit++) OffenseCard(),
-    // ]..shuffle();
-
     // Generate a pile of random cards
     _cards = List.generate(20, (index) {
       final cardType = Random().nextInt(100);
       if (cardType < 50) {
-        return OffenseCard();
+        return OffenseCard(playerType: playerType);
       } else {
-        return HealCard();
+        return HealCard(playerType: playerType);
       }
     })
       ..shuffle();

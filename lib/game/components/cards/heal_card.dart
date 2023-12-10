@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/widgets.dart';
 import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/tableau_pile.dart';
 import 'package:starship_shooter/game/game.dart';
@@ -10,13 +11,16 @@ import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
 class HealCard extends PositionComponent with DragCallbacks implements Card {
-  HealCard() : super(size: StarshipShooterGame.cardSize);
+  HealCard({required this.playerType}) {
+    super.size = StarshipShooterGame.cardSize;
+  }
 
-  final int health = Random().nextInt(10) + 1;
+  final int health = Random().nextInt(9) + 1;
   Pile? pile;
   bool _faceUp = false;
   bool _isDragging = false;
   final List<Card> attachedCards = [];
+  PlayerType playerType;
 
   @override
   bool get isFaceUp => _faceUp;
@@ -51,14 +55,11 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
     }
   }
 
-  static final Paint backBackgroundPaint = Paint()
-    ..color = const Color(0xff380c02);
+  static Paint backBackgroundPaint = Paint();
   static final Paint backBorderPaint1 = Paint()
-    ..color = const Color(0xffdbaf58)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 3;
   static final Paint backBorderPaint2 = Paint()
-    ..color = const Color(0x5CEF971B)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 35;
   static final RRect cardRRect = RRect.fromRectAndRadius(
@@ -66,21 +67,34 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
     const Radius.circular(StarshipShooterGame.cardRadius),
   );
   static final RRect backRRectInner = cardRRect.deflate(40);
-  static final Sprite flameSprite = klondikeSprite(1367, 6, 357, 501);
 
   void _renderBack(Canvas canvas) {
+    Sprite backSprite;
+    if (playerType == PlayerType.Hot) {
+      backBackgroundPaint.color = const Color(0xff380c02);
+      backBorderPaint1.color = const Color(0xffdbaf58);
+      backBorderPaint2.color = const Color(0x5CEF971B);
+      backSprite = spriteSheet(160, 2016, 32, 32);
+    } else {
+      backBackgroundPaint.color = const Color.fromARGB(255, 2, 19, 56);
+      backBorderPaint1.color = const Color.fromARGB(255, 88, 160, 219);
+      backBorderPaint2.color = const Color.fromARGB(255, 88, 112, 219);
+      backSprite = spriteSheet(224, 2016, 32, 32);
+    }
+
     canvas
       ..drawRRect(cardRRect, backBackgroundPaint)
       ..drawRRect(cardRRect, backBorderPaint1)
       ..drawRRect(backRRectInner, backBorderPaint2);
-    flameSprite.render(canvas,
-        position: size / 2,
-        size: Vector2.all(size.x / 2),
-        anchor: Anchor.center);
+    backSprite.render(
+      canvas,
+      position: size / 2,
+      size: Vector2.all(size.x / 2),
+      anchor: Anchor.center,
+    );
   }
 
-  static final Paint frontBackgroundPaint = Paint()
-    ..color = const Color(0xff000000);
+  static Paint frontBackgroundPaint = Paint();
   static final Paint redBorderPaint = Paint()
     ..color = const Color(0xffece8a3)
     ..style = PaintingStyle.stroke
@@ -94,17 +108,15 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
       Color(0x880d8bff),
       BlendMode.srcATop,
     );
-  static final Sprite redJack = klondikeSprite(81, 565, 562, 488);
-  static final Sprite redQueen = klondikeSprite(717, 541, 486, 515);
-  static final Sprite redKing = klondikeSprite(1305, 532, 407, 549);
-  static final Sprite blackJack = klondikeSprite(81, 565, 562, 488)
-    ..paint = blueFilter;
-  static final Sprite blackQueen = klondikeSprite(717, 541, 486, 515)
-    ..paint = blueFilter;
-  static final Sprite blackKing = klondikeSprite(1305, 532, 407, 549)
-    ..paint = blueFilter;
+  static final Sprite healSymbol = spriteSheet(0, 160, 32, 32);
 
   void _renderFront(Canvas canvas) {
+    if (playerType == PlayerType.Hot) {
+      frontBackgroundPaint.color = const Color(0xff380c02);
+    } else {
+      frontBackgroundPaint.color = const Color.fromARGB(255, 2, 19, 56);
+    }
+
     canvas
       ..drawRRect(cardRRect, frontBackgroundPaint)
       ..drawRRect(
@@ -112,14 +124,46 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
         redBorderPaint,
       );
 
-    final rankSprite = klondikeSprite(243, 170, 92, 123);
-    final suitSprite = klondikeSprite(696, 167, 92, 123);
-    _drawSprite(canvas, rankSprite, 0.1, 0.08);
-    _drawSprite(canvas, suitSprite, 0.1, 0.18, scale: 0.5);
-    _drawSprite(canvas, rankSprite, 0.1, 0.08, rotate: true);
-    _drawSprite(canvas, suitSprite, 0.1, 0.18, scale: 0.5, rotate: true);
+    _drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4);
+    _drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4, rotate: true);
+    _drawNumber(canvas);
 
-    _drawSprite(canvas, redKing, 0.5, 0.5);
+    _drawSprite(canvas, healSymbol, 0.5, 0.5);
+  }
+
+  void _drawNumber(Canvas canvas) {
+    int pos = 0;
+    for (final ch in health.toString().characters) {
+      var spritePositionX = 0;
+      switch (ch) {
+        case '1':
+          spritePositionX = 32 * 0;
+        case '2':
+          spritePositionX = 32 * 1;
+        case '3':
+          spritePositionX = 32 * 2;
+        case '4':
+          spritePositionX = 32 * 3;
+        case '5':
+          spritePositionX = 32 * 4;
+        case '6':
+          spritePositionX = 32 * 5;
+        case '7':
+          spritePositionX = 32 * 6;
+        case '8':
+          spritePositionX = 32 * 7;
+        case '9':
+          spritePositionX = 32 * 8;
+        case '10':
+          spritePositionX = 32 * 9;
+      }
+      final numberSprite =
+          spriteSheet(spritePositionX.toDouble(), 1248, 32, 32);
+      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
+      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
+
+      pos++;
+    }
   }
 
   void _drawSprite(
@@ -141,7 +185,7 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
       canvas,
       position: Vector2(relativeX * size.x, relativeY * size.y),
       anchor: Anchor.center,
-      size: sprite.srcSize.scaled(0.1).scaled(scale),
+      size: sprite.srcSize.scaled(scale),
     );
     if (rotate) {
       canvas.restore();

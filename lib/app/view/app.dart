@@ -33,15 +33,15 @@ class AppView extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF2A48DF),
-        appBarTheme: const AppBarTheme(color: Color(0xFF2A48DF)),
+        primaryColor: Colors.grey[800],
+        appBarTheme: AppBarTheme(color: Colors.grey[800]),
         colorScheme: ColorScheme.fromSwatch(
-          accentColor: const Color(0xFF2A48DF),
+          accentColor: Colors.grey[600],
         ),
         scaffoldBackgroundColor: const Color(0xFFFFFFFF),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(const Color(0xFF2A48DF)),
+            backgroundColor: MaterialStateProperty.all(Colors.grey[700]),
           ),
         ),
         textTheme: GoogleFonts.poppinsTextTheme(),

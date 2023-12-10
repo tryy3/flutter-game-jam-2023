@@ -41,8 +41,8 @@ class StarshipShooterGame extends FlameGame {
 
   static const double heartGap = 10;
   static const double heartHeightGap = 20;
-  static const double heartWidth = 20;
-  static const double heartHeight = 20;
+  static const double heartWidth = 32;
+  static const double heartHeight = 32;
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
 
   final AppLocalizations l10n;
@@ -54,11 +54,13 @@ class StarshipShooterGame extends FlameGame {
       GameState.drawingCards; // 0 = placing cards, 1 = end turn
   Timer countdown = Timer(.2);
 
-  final Player player1 = Player(id: 1, side: SideView.left);
-  final Player player2 = Player(id: 1, side: SideView.right);
+  final Player player1 =
+      Player(id: 1, side: SideView.left, playerType: PlayerType.Hot);
+  final Player player2 =
+      Player(id: 1, side: SideView.right, playerType: PlayerType.Cold);
 
   @override
-  Color backgroundColor() => const Color(0xFF2A48DF);
+  Color backgroundColor() => Colors.grey[900]!;
 
   void endTurn() {
     gameState = GameState.endDrawingTurn;
@@ -66,7 +68,7 @@ class StarshipShooterGame extends FlameGame {
 
   @override
   Future<void> onLoad() async {
-    await images.load('images/klondike_sprites.png');
+    await images.load('assets/images/sprite_sheet.png');
 
     final world = World(
       children: [],
@@ -117,20 +119,11 @@ class StarshipShooterGame extends FlameGame {
   final TextPaint textPaint = TextPaint(
     style: const TextStyle(color: Colors.white, fontSize: 20),
   );
-
-  // @override
-  // void render(Canvas canvas) {
-  //   textPaint.render(
-  //     canvas,
-  //     "Countdown: ${countdown.current.toString()}",
-  //     Vector2(10, 100),
-  //   );
-  // }
 }
 
-Sprite klondikeSprite(double x, double y, double width, double height) {
+Sprite spriteSheet(double x, double y, double width, double height) {
   return Sprite(
-    Flame.images.fromCache('images/klondike_sprites.png'),
+    Flame.images.fromCache('assets/images/sprite_sheet.png'),
     srcPosition: Vector2(x, y),
     srcSize: Vector2(width, height),
   );

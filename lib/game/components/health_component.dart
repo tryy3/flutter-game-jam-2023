@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
+import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
@@ -24,15 +27,8 @@ class HealthComponent extends SpriteGroupComponent<HeartState>
   Future<void> onLoad() async {
     await super.onLoad();
 
-    final availableSprite = await game.loadSprite(
-      'images/heart.png',
-      srcSize: Vector2.all(32),
-    );
-
-    final unavailableSprite = await game.loadSprite(
-      'images/heart_half.png',
-      srcSize: Vector2.all(32),
-    );
+    final availableSprite = spriteSheet(288, 4224, 32, 32);
+    final unavailableSprite = spriteSheet(192, 4224, 32, 32);
 
     sprites = {
       HeartState.available: availableSprite,
