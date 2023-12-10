@@ -1,14 +1,16 @@
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
+import 'package:starship_shooter/game/components/health_component.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/side_view.dart';
 
 class Player {
-  Player({required this.id, required this.side, this.health = 100});
+  Player({required this.id, required this.side, this.health = 20});
 
   SideView side;
   double health;
@@ -48,6 +50,27 @@ class Player {
           StarshipShooterGame.unicornGap;
     } else {
       return baseWidth - StarshipShooterGame.cardWidth;
+    }
+  }
+
+  double _calculateHealthHeightPosition(CameraComponent camera) {
+    if (side == SideView.left) {
+      return camera.viewport.size.y -
+          StarshipShooterGame.heartHeight -
+          StarshipShooterGame.heartHeightGap;
+    } else {
+      return StarshipShooterGame.heartHeightGap;
+    }
+  }
+
+  double _calculateHealthWidthPosition(CameraComponent camera) {
+    if (side == SideView.left) {
+      return StarshipShooterGame.cardGap + StarshipShooterGame.cardWidth;
+    } else {
+      return camera.viewport.size.x -
+          StarshipShooterGame.heartWidth -
+          StarshipShooterGame.cardWidth -
+          StarshipShooterGame.cardGap;
     }
   }
 
@@ -114,6 +137,29 @@ class Player {
     final cardToDeal = _cards.length - 1;
     for (var n = 0; n <= cardToDeal; n++) {
       stock.acquireCard(_cards[n]);
+    }
+
+    // Add Health HUD
+    final healthStartPositionX = _calculateHealthWidthPosition(camera);
+    final healthStartPositionY = _calculateHealthHeightPosition(camera);
+    for (var i = 1; i <= health; i++) {
+      double positionX = (side == SideView.left)
+          ? healthStartPositionX +
+              ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
+                  i)
+          : healthStartPositionX -
+              ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
+                  i);
+      await world.add(
+        HealthComponent(
+          heartNumber: i,
+          player: this,
+          position: Vector2(
+            positionX,
+            healthStartPositionY,
+          ),
+        ),
+      );
     }
   }
 }
