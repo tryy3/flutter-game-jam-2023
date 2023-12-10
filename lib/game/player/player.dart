@@ -29,8 +29,8 @@ class Player {
 
   // Based on card input, try to take damage from it but also checking game rules
   // (defense cards)
-  Future<int> takeDamage(Card card) async {
-    return 0;
+  void takeDamage(int value) {
+    health -= value;
   }
 
   double _calculateBaseWidthPosition(CameraComponent camera) {
@@ -78,7 +78,25 @@ class Player {
     return _cards.contains(card);
   }
 
-  void startTurn() {}
+  void startTurn(Player enemy) {
+    // Go through the foundation cards until a foundation is found with a card
+    // then start to use it
+    for (final foundation in foundations) {
+      if (foundation.isNotEmpty()) {
+        // Retrieve the top card of the foundation
+        final card = foundation.getTopCard();
+
+        // Use the card's ability
+        card.useCard(this, enemy);
+
+        // Discard the card
+        foundation.removeCard(card);
+        _cards.remove(card);
+        card.removeFromParent();
+        return;
+      }
+    }
+  }
 
   // Check if there is any foundation cards left to draw
   bool canContinue() {

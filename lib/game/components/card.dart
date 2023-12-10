@@ -6,6 +6,7 @@ import 'package:flame/events.dart';
 import 'package:starship_shooter/game/components/tableau_pile.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/rank.dart';
 import 'package:starship_shooter/game/suit.dart';
 
@@ -28,6 +29,10 @@ class Card extends PositionComponent with DragCallbacks {
 
   @override
   String toString() => rank.label + suit.label; // e.g. "Q♠" or "10♦"
+
+  void useCard(Player player, Player enemy) {
+    enemy.takeDamage(rank.value);
+  }
 
   //#region Rendering
 

@@ -47,8 +47,8 @@ class _GameViewState extends State<GameView> {
   @override
   void initState() {
     super.initState();
-    bgm = context.read<AudioCubit>().bgm;
-    bgm.play(Assets.audio.background);
+    // bgm = context.read<AudioCubit>().bgm;
+    // bgm.play(Assets.audio.background);
   }
 
   @override

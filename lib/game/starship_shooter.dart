@@ -98,10 +98,10 @@ class StarshipShooterGame extends FlameGame {
       if (gameState == GameState.endDrawingTurn) {
         gameState = GameState.player1Draws;
       } else if (gameState == GameState.player1Draws) {
-        player1.startTurn();
+        player1.startTurn(player2);
         gameState = GameState.player2Draws;
-      } else if (gameState == GameState.player1Draws) {
-        player2.startTurn();
+      } else if (gameState == GameState.player2Draws) {
+        player2.startTurn(player1);
         gameState = GameState.player1Draws;
       } else if (gameState == GameState.endPlayerTurn) {
         gameState = GameState.drawingCards;
