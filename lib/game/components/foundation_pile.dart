@@ -4,15 +4,17 @@ import 'package:flame/components.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/suit.dart';
 
 class FoundationPile extends PositionComponent implements Pile {
-  FoundationPile(int intSuit, {super.position})
+  FoundationPile(int intSuit, {required this.player, super.position})
       : suit = Suit.fromInt(intSuit),
         super(size: StarshipShooterGame.cardSize);
 
   final Suit suit;
   final List<Card> _cards = [];
+  Player player;
 
   //#region Pile API
 
@@ -23,7 +25,9 @@ class FoundationPile extends PositionComponent implements Pile {
 
   @override
   bool canAcceptCard(Card card) {
-    return _cards.isEmpty;
+    if (_cards.isNotEmpty) return false;
+    if (!player.ownsCard(card)) return false;
+    return true;
     // final topCardRank = _cards.isEmpty ? 0 : _cards.last.rank.value;
     // return card.suit == suit &&
     //     card.rank.value == topCardRank + 1 &&

@@ -1,11 +1,12 @@
 import 'package:flame/components.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class WastePile extends PositionComponent implements Pile {
-  WastePile({required super.position, required this.side})
+  WastePile({required super.position, required this.side, required this.player})
       : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
 
   @override
@@ -15,6 +16,7 @@ class WastePile extends PositionComponent implements Pile {
   final List<Card> _cards = [];
   final Vector2 _fanOffset = Vector2(StarshipShooterGame.cardWidth * 0.2, 0);
   SideView side;
+  Player player;
 
   //#region Pile API
 

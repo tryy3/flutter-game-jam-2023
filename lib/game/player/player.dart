@@ -18,6 +18,7 @@ class Player {
   late WastePile waste;
   late List<FoundationPile> foundations;
   late Unicorn unicorn;
+  late List<Card> _cards;
 
   // Attempt to go through cards and use them if there is one
   Future<bool> useCard(int card) async {
@@ -50,6 +51,10 @@ class Player {
     }
   }
 
+  bool ownsCard(Card card) {
+    return _cards.contains(card);
+  }
+
   Future<void> generatePlayer(World world, CameraComponent camera) async {
     final baseWidth = _calculateBaseWidthPosition(camera);
 
@@ -68,6 +73,7 @@ class Player {
             StarshipShooterGame.cardGap,
       ),
       side: side,
+      player: this,
     );
     foundations = List.generate(
       4,
@@ -81,6 +87,7 @@ class Player {
                   (StarshipShooterGame.cardHeight +
                       StarshipShooterGame.cardGap)),
         ),
+        player: this,
       ),
     );
     unicorn = Unicorn(
@@ -96,17 +103,17 @@ class Player {
       ..add(waste)
       ..add(unicorn);
 
-    final cards = [
+    _cards = [
       for (var rank = 1; rank <= 13; rank++)
         for (var suit = 0; suit < 4; suit++) Card(rank, suit),
     ]..shuffle();
 
-    await world.addAll(cards);
+    await world.addAll(_cards);
     await world.addAll(foundations);
 
-    final cardToDeal = cards.length - 1;
+    final cardToDeal = _cards.length - 1;
     for (var n = 0; n <= cardToDeal; n++) {
-      stock.acquireCard(cards[n]);
+      stock.acquireCard(_cards[n]);
     }
   }
 }

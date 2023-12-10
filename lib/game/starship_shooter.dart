@@ -59,9 +59,6 @@ class StarshipShooterGame extends FlameGame {
 
     final world = World(
       children: [
-        Unicorn(
-          position: Vector2(cardGap + cardWidth + unicornGap, size.y / 2),
-        ),
         CounterComponent(
           position: (size / 2)
             ..sub(
