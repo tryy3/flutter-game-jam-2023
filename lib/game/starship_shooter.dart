@@ -15,6 +15,14 @@ import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
+enum GameState {
+  drawingCards,
+  endDrawingTurn,
+  player1Draws,
+  player2Draws,
+  endPlayerTurn,
+}
+
 class StarshipShooterGame extends FlameGame {
   StarshipShooterGame({
     required this.l10n,
@@ -46,12 +54,12 @@ class StarshipShooterGame extends FlameGame {
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
 
   final AppLocalizations l10n;
-
   final AudioPlayer effectPlayer;
-
   final TextStyle textStyle;
 
   int counter = 0;
+  GameState gameState =
+      GameState.drawingCards; // 0 = placing cards, 1 = end turn
 
   final Player player1 = Player(id: 1, side: SideView.left);
   final Player player2 = Player(id: 1, side: SideView.right);
@@ -59,19 +67,16 @@ class StarshipShooterGame extends FlameGame {
   @override
   Color backgroundColor() => const Color(0xFF2A48DF);
 
+  void endTurn() {
+    gameState = GameState.endDrawingTurn;
+  }
+
   @override
   Future<void> onLoad() async {
     await images.load('images/klondike_sprites.png');
 
     final world = World(
-      children: [
-        CounterComponent(
-          position: (size / 2)
-            ..sub(
-              Vector2(0, 16),
-            ),
-        ),
-      ],
+      children: [],
     );
 
     final camera = CameraComponent(world: world);
@@ -82,6 +87,32 @@ class StarshipShooterGame extends FlameGame {
 
     await player1.generatePlayer(world, camera);
     await player2.generatePlayer(world, camera);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    if (gameState != GameState.drawingCards) {
+      // Different game states of the current turn
+      if (gameState == GameState.endDrawingTurn) {
+        gameState = GameState.player1Draws;
+      } else if (gameState == GameState.player1Draws) {
+        player1.startTurn();
+        gameState = GameState.player2Draws;
+      } else if (gameState == GameState.player1Draws) {
+        player2.startTurn();
+        gameState = GameState.player1Draws;
+      } else if (gameState == GameState.endPlayerTurn) {
+        gameState = GameState.drawingCards;
+        return;
+      }
+      // Check if neither player 1 or player 2 can continue
+      if (player1.canNotContinue() && player2.canNotContinue()) {
+        gameState = GameState.endPlayerTurn;
+        return;
+      }
+    }
   }
 }
 

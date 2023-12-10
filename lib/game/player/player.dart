@@ -78,6 +78,20 @@ class Player {
     return _cards.contains(card);
   }
 
+  void startTurn() {}
+
+  // Check if there is any foundation cards left to draw
+  bool canContinue() {
+    for (final foundation in foundations) {
+      if (foundation.isNotEmpty()) return true;
+    }
+    return false;
+  }
+
+  bool canNotContinue() {
+    return !canContinue();
+  }
+
   Future<void> generatePlayer(World world, CameraComponent camera) async {
     final baseWidth = _calculateBaseWidthPosition(camera);
 
@@ -143,7 +157,7 @@ class Player {
     final healthStartPositionX = _calculateHealthWidthPosition(camera);
     final healthStartPositionY = _calculateHealthHeightPosition(camera);
     for (var i = 1; i <= health; i++) {
-      double positionX = (side == SideView.left)
+      final positionX = (side == SideView.left)
           ? healthStartPositionX +
               ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
                   i)

@@ -57,6 +57,16 @@ class FoundationPile extends PositionComponent implements Pile {
 
   //#endregion
 
+  //#region Foundation Logic
+  bool isEmpty() {
+    return _cards.isEmpty;
+  }
+
+  bool isNotEmpty() {
+    return !isEmpty();
+  }
+  //#endregion
+
   //#region Rendering
 
   final _borderPaint = Paint()

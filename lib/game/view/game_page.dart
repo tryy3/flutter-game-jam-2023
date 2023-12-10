@@ -86,6 +86,22 @@ class _GameViewState extends State<GameView> {
             },
           ),
         ),
+        Center(
+          child: ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.amber),
+            ),
+            onPressed: () => {(_game! as StarshipShooterGame).endTurn()},
+            child: const Text(
+              'End Turn',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
