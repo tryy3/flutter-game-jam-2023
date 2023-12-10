@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/components/card.dart';
@@ -60,6 +61,7 @@ class StarshipShooterGame extends FlameGame {
   int counter = 0;
   GameState gameState =
       GameState.drawingCards; // 0 = placing cards, 1 = end turn
+  Timer countdown = Timer(.2);
 
   final Player player1 = Player(id: 1, side: SideView.left);
   final Player player2 = Player(id: 1, side: SideView.right);
@@ -92,28 +94,47 @@ class StarshipShooterGame extends FlameGame {
   @override
   void update(double dt) {
     super.update(dt);
+    countdown.update(dt);
 
     if (gameState != GameState.drawingCards) {
-      // Different game states of the current turn
-      if (gameState == GameState.endDrawingTurn) {
-        gameState = GameState.player1Draws;
-      } else if (gameState == GameState.player1Draws) {
-        player1.startTurn(player2);
-        gameState = GameState.player2Draws;
-      } else if (gameState == GameState.player2Draws) {
-        player2.startTurn(player1);
-        gameState = GameState.player1Draws;
-      } else if (gameState == GameState.endPlayerTurn) {
-        gameState = GameState.drawingCards;
-        return;
-      }
-      // Check if neither player 1 or player 2 can continue
-      if (player1.canNotContinue() && player2.canNotContinue()) {
-        gameState = GameState.endPlayerTurn;
-        return;
+      if (countdown.finished) {
+        // Probably... not the best way to make a "delay"
+        countdown = Timer(.2);
+
+        // Different game states of the current turn
+        if (gameState == GameState.endDrawingTurn) {
+          gameState = GameState.player1Draws;
+        } else if (gameState == GameState.player1Draws) {
+          player1.startTurn(player2);
+          gameState = GameState.player2Draws;
+        } else if (gameState == GameState.player2Draws) {
+          player2.startTurn(player1);
+          gameState = GameState.player1Draws;
+        } else if (gameState == GameState.endPlayerTurn) {
+          gameState = GameState.drawingCards;
+          return;
+        }
+        // Check if neither player 1 or player 2 can continue
+        if (player1.canNotContinue() && player2.canNotContinue()) {
+          gameState = GameState.endPlayerTurn;
+          return;
+        }
       }
     }
   }
+
+  final TextPaint textPaint = TextPaint(
+    style: const TextStyle(color: Colors.white, fontSize: 20),
+  );
+
+  // @override
+  // void render(Canvas canvas) {
+  //   textPaint.render(
+  //     canvas,
+  //     "Countdown: ${countdown.current.toString()}",
+  //     Vector2(10, 100),
+  //   );
+  // }
 }
 
 Sprite klondikeSprite(double x, double y, double width, double height) {

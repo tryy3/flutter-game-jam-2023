@@ -28,10 +28,6 @@ class FoundationPile extends PositionComponent implements Pile {
     if (_cards.isNotEmpty) return false;
     if (!player.ownsCard(card)) return false;
     return true;
-    // final topCardRank = _cards.isEmpty ? 0 : _cards.last.rank.value;
-    // return card.suit == suit &&
-    //     card.rank.value == topCardRank + 1 &&
-    //     card.attachedCards.isEmpty;
   }
 
   @override
