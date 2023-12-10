@@ -4,15 +4,17 @@ import 'package:flutter/painting.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class StockPile extends PositionComponent with TapCallbacks implements Pile {
-  StockPile({required super.position})
+  StockPile({required super.position, required this.player})
       : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
 
   /// Which cards are currently placed onto this pile. The first card in the
   /// list is at the bottom, the last card is on top.
   final List<Card> _cards = [];
+  final Player player;
 
   //#region Pile API
 
@@ -41,7 +43,7 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
 
   @override
   void onTapUp(TapUpEvent event) {
-    final wastePile = parent!.firstChild<WastePile>()!;
+    final wastePile = player.waste;
     if (_cards.isEmpty) {
       wastePile.removeAllCards().reversed.forEach((card) {
         card.flip();

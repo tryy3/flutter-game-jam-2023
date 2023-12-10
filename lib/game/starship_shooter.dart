@@ -3,12 +3,15 @@ import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/tableau_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/game.dart';
+import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
@@ -31,6 +34,11 @@ class StarshipShooterGame extends FlameGame {
     const Radius.circular(cardRadius),
   );
 
+  static const double unicornGap = 100;
+  static const double unicornWidth = 100;
+  static const double unicornHeight = 100;
+  static final Vector2 unicornSize = Vector2(unicornWidth, unicornHeight);
+
   final AppLocalizations l10n;
 
   final AudioPlayer effectPlayer;
@@ -39,6 +47,9 @@ class StarshipShooterGame extends FlameGame {
 
   int counter = 0;
 
+  final Player player1 = Player(id: 1, side: SideView.left);
+  final Player player2 = Player(id: 1, side: SideView.right);
+
   @override
   Color backgroundColor() => const Color(0xFF2A48DF);
 
@@ -46,31 +57,17 @@ class StarshipShooterGame extends FlameGame {
   Future<void> onLoad() async {
     await images.load('images/klondike_sprites.png');
 
-    final stock = StockPile(position: Vector2.all(cardGap));
-    final waste =
-        WastePile(position: Vector2(cardGap, cardGap + cardHeight + cardGap));
-    final foundations = List.generate(
-      4,
-      (i) => FoundationPile(
-        i,
-        position: Vector2(
-            cardGap,
-            ((cardGap + cardHeight) * 2 + cardGap) +
-                (i * (cardHeight + cardGap))),
-      ),
-    );
-
     final world = World(
       children: [
-        Unicorn(position: size / 2),
+        Unicorn(
+          position: Vector2(cardGap + cardWidth + unicornGap, size.y / 2),
+        ),
         CounterComponent(
           position: (size / 2)
             ..sub(
               Vector2(0, 16),
             ),
         ),
-        stock,
-        waste,
       ],
     );
 
@@ -80,18 +77,8 @@ class StarshipShooterGame extends FlameGame {
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;
 
-    final cards = [
-      for (var rank = 1; rank <= 13; rank++)
-        for (var suit = 0; suit < 4; suit++) Card(rank, suit),
-    ];
-    cards.shuffle();
-    await world.addAll(cards);
-    await world.addAll(foundations);
-
-    var cardToDeal = cards.length - 1;
-    for (var n = 0; n <= cardToDeal; n++) {
-      stock.acquireCard(cards[n]);
-    }
+    await player1.generatePlayer(world, camera);
+    await player2.generatePlayer(world, camera);
   }
 }
 

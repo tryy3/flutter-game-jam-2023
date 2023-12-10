@@ -2,6 +2,7 @@ import 'package:flame/game.dart' hide Route;
 import 'package:flame_audio/bgm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
