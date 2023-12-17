@@ -225,6 +225,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  flame_bloc:
+    dependency: "direct main"
+    description:
+      name: flame_bloc
+      sha256: a8a0b74ff3b6b647d12b623ebab729bde6778613dffb29d968a227f2761672dc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.10.1"
   flame_test:
     dependency: "direct dev"
     description:

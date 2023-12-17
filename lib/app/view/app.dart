@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/loading.dart';
+import 'package:starship_shooter/player/bloc/player_bloc.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -19,6 +20,7 @@ class App extends StatelessWidget {
             AudioCache(prefix: ''),
           )..loadSequentially(),
         ),
+        BlocProvider<PlayerBloc>(create: (_) => PlayerBloc()),
       ],
       child: const AppView(),
     );

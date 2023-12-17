@@ -4,8 +4,11 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/player/bloc/player_bloc.dart';
+import 'package:starship_shooter/player/bloc/player_state.dart';
 
 enum HeartState {
   available,

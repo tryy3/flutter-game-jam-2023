@@ -1,8 +1,9 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
 import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/tableau_pile.dart';
@@ -10,45 +11,26 @@ import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
-class HealCard extends PositionComponent with DragCallbacks implements Card {
+class HealCard extends Card with DragCallbacks {
   HealCard({required this.playerType}) {
     super.size = StarshipShooterGame.cardSize;
   }
 
   final int health = Random().nextInt(9) + 1;
-  Pile? pile;
-  bool _faceUp = false;
   bool _isDragging = false;
   final List<Card> attachedCards = [];
   PlayerType playerType;
-
-  @override
-  bool get isFaceUp => _faceUp;
-  @override
-  bool get isFaceDown => !_faceUp;
-  @override
-  void flip() => _faceUp = !_faceUp;
 
   @override
   String toString() {
     return 'Healing card - health: $health';
   }
 
-  @override
-  void useCard(Player player, Player enemy) {
-    player.health += health;
-  }
-
-  @override
-  void updatePile(Pile pile) {
-    this.pile = pile;
-  }
-
   //#region Rendering
 
   @override
   void render(Canvas canvas) {
-    if (_faceUp) {
+    if (isFaceUp) {
       _renderFront(canvas);
     } else {
       _renderBack(canvas);
@@ -99,15 +81,6 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
     ..color = const Color(0xffece8a3)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 3;
-  static final Paint blackBorderPaint = Paint()
-    ..color = const Color(0xff7ab2e8)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 3;
-  static final blueFilter = Paint()
-    ..colorFilter = const ColorFilter.mode(
-      Color(0x880d8bff),
-      BlendMode.srcATop,
-    );
   static final Sprite healSymbol = spriteSheet(0, 160, 32, 32);
 
   void _renderFront(Canvas canvas) {
@@ -117,6 +90,10 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
       frontBackgroundPaint.color = const Color.fromARGB(255, 2, 19, 56);
     }
 
+    frontBackgroundPaint.color =
+        frontBackgroundPaint.color.withOpacity(opacity);
+    redBorderPaint.color = redBorderPaint.color.withOpacity(opacity);
+
     canvas
       ..drawRRect(cardRRect, frontBackgroundPaint)
       ..drawRRect(
@@ -124,11 +101,11 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
         redBorderPaint,
       );
 
-    _drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4);
-    _drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4, rotate: true);
+    drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4);
+    drawSprite(canvas, healSymbol, 0.12, 0.12, scale: 0.4, rotate: true);
     _drawNumber(canvas);
 
-    _drawSprite(canvas, healSymbol, 0.5, 0.5);
+    drawSprite(canvas, healSymbol, 0.5, 0.5);
   }
 
   void _drawNumber(Canvas canvas) {
@@ -159,36 +136,10 @@ class HealCard extends PositionComponent with DragCallbacks implements Card {
       }
       final numberSprite =
           spriteSheet(spritePositionX.toDouble(), 1248, 32, 32);
-      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
-      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
+      drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
+      drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
 
       pos++;
-    }
-  }
-
-  void _drawSprite(
-    Canvas canvas,
-    Sprite sprite,
-    double relativeX,
-    double relativeY, {
-    double scale = 1,
-    bool rotate = false,
-  }) {
-    if (rotate) {
-      canvas
-        ..save()
-        ..translate(size.x / 2, size.y / 2)
-        ..rotate(pi)
-        ..translate(-size.x / 2, -size.y / 2);
-    }
-    sprite.render(
-      canvas,
-      position: Vector2(relativeX * size.x, relativeY * size.y),
-      anchor: Anchor.center,
-      size: sprite.srcSize.scaled(scale),
-    );
-    if (rotate) {
-      canvas.restore();
     }
   }
   //#endregion

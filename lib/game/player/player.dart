@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/game.dart';
 import 'package:starship_shooter/game/card.dart';
@@ -88,8 +90,6 @@ class Player {
   }
 
   void startTurn(Player enemy) {
-    // Go through the foundation cards until a foundation is found with a card
-    // then start to use it
     for (final foundation in foundations) {
       if (foundation.isNotEmpty()) {
         // Retrieve the top card of the foundation
@@ -100,8 +100,17 @@ class Player {
 
         // Discard the card
         foundation.removeCard(card);
-        _cards.remove(card);
-        (card as PositionComponent).removeFromParent();
+        (card as PositionComponent).add(
+          OpacityEffect.fadeOut(
+            EffectController(duration: .4),
+            target: card as OpacityProvider,
+            onComplete: () {
+              (card as PositionComponent).removeFromParent();
+              _cards.remove(card);
+            },
+          ),
+        );
+
         return;
       }
     }

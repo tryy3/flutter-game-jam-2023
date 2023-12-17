@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/view/game_page.dart';
-import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/loading.dart';
-import 'package:starship_shooter/title/title.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
@@ -42,13 +40,8 @@ class _LoadingInternal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryTextTheme = Theme.of(context).primaryTextTheme;
-    final l10n = context.l10n;
-
     return BlocBuilder<PreloadCubit, PreloadState>(
       builder: (context, state) {
-        final loadingLabel = l10n.loadingPhaseLabel(state.currentLabel);
-        final loadingMessage = l10n.loading(loadingLabel);
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -58,13 +51,6 @@ class _LoadingInternal extends StatelessWidget {
                 progress: state.progress,
                 backgroundColor: const Color(0xFF2A48DF),
                 foregroundColor: const Color(0xFFFFFFFF),
-              ),
-            ),
-            Text(
-              loadingMessage,
-              style: primaryTextTheme.bodySmall!.copyWith(
-                color: const Color(0xFF2A48DF),
-                fontWeight: FontWeight.w900,
               ),
             ),
           ],

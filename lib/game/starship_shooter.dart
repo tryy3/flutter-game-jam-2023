@@ -2,10 +2,13 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
+import 'package:starship_shooter/player/bloc/player_bloc.dart';
 
 enum GameState {
   drawingCards,
@@ -49,6 +52,9 @@ class StarshipShooterGame extends FlameGame {
   final AudioPlayer effectPlayer;
   final TextStyle textStyle;
 
+  double timerCounter = 0;
+  double timerLimit = 0;
+
   int counter = 0;
   GameState gameState =
       GameState.drawingCards; // 0 = placing cards, 1 = end turn
@@ -76,6 +82,7 @@ class StarshipShooterGame extends FlameGame {
 
     final camera = CameraComponent(world: world);
     await addAll([world, camera]);
+    await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;
@@ -85,26 +92,27 @@ class StarshipShooterGame extends FlameGame {
   }
 
   @override
-  void update(double dt) {
+  Future<void> update(double dt) async {
     super.update(dt);
-    countdown.update(dt);
+
+    if (gameState != GameState.drawingCards) timerCounter += dt;
 
     if (gameState != GameState.drawingCards) {
-      if (countdown.finished) {
-        // Probably... not the best way to make a "delay"
-        countdown = Timer(.2);
-
+      if (timerCounter >= timerLimit) {
         // Different game states of the current turn
         if (gameState == GameState.endDrawingTurn) {
           gameState = GameState.player1Draws;
         } else if (gameState == GameState.player1Draws) {
           player1.startTurn(player2);
           gameState = GameState.player2Draws;
+          timerLimit = 2;
         } else if (gameState == GameState.player2Draws) {
           player2.startTurn(player1);
           gameState = GameState.player1Draws;
+          timerLimit = 2;
         } else if (gameState == GameState.endPlayerTurn) {
           gameState = GameState.drawingCards;
+          timerLimit = 0;
           return;
         }
         // Check if neither player 1 or player 2 can continue

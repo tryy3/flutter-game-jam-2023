@@ -10,45 +10,26 @@ import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
-class OffenseCard extends PositionComponent with DragCallbacks implements Card {
+class OffenseCard extends Card with DragCallbacks {
   OffenseCard({required this.playerType}) {
     super.size = StarshipShooterGame.cardSize;
   }
 
   final int damage = Random().nextInt(10) + 1;
-  Pile? pile;
-  bool _faceUp = false;
   bool _isDragging = false;
   final List<Card> attachedCards = [];
   PlayerType playerType;
-
-  @override
-  bool get isFaceUp => _faceUp;
-  @override
-  bool get isFaceDown => !_faceUp;
-  @override
-  void flip() => _faceUp = !_faceUp;
 
   @override
   String toString() {
     return 'Offense card - damage: $damage';
   }
 
-  @override
-  void useCard(Player player, Player enemy) {
-    enemy.health -= damage;
-  }
-
-  @override
-  void updatePile(Pile pile) {
-    this.pile = pile;
-  }
-
   //#region Rendering
 
   @override
   void render(Canvas canvas) {
-    if (_faceUp) {
+    if (isFaceUp) {
       _renderFront(canvas);
     } else {
       _renderBack(canvas);
@@ -119,6 +100,11 @@ class OffenseCard extends PositionComponent with DragCallbacks implements Card {
       damageSymbol = spriteSheet(160, 2720, 32, 32);
       frontBackgroundPaint.color = const Color.fromARGB(255, 2, 19, 56);
     }
+
+    frontBackgroundPaint.color =
+        frontBackgroundPaint.color.withOpacity(opacity);
+    redBorderPaint.color = redBorderPaint.color.withOpacity(opacity);
+
     canvas
       ..drawRRect(cardRRect, frontBackgroundPaint)
       ..drawRRect(
@@ -126,11 +112,11 @@ class OffenseCard extends PositionComponent with DragCallbacks implements Card {
         blackBorderPaint,
       );
 
-    _drawSprite(canvas, damageSymbol, 0.12, 0.12, scale: 0.4);
-    _drawSprite(canvas, damageSymbol, 0.12, 0.12, scale: 0.4, rotate: true);
+    drawSprite(canvas, damageSymbol, 0.12, 0.12, scale: 0.4);
+    drawSprite(canvas, damageSymbol, 0.12, 0.12, scale: 0.4, rotate: true);
     _drawNumber(canvas);
 
-    _drawSprite(canvas, damageSymbol, 0.5, 0.5);
+    drawSprite(canvas, damageSymbol, 0.5, 0.5);
   }
 
   void _drawNumber(Canvas canvas) {
@@ -161,36 +147,10 @@ class OffenseCard extends PositionComponent with DragCallbacks implements Card {
       }
       final numberSprite =
           spriteSheet(spritePositionX.toDouble(), 1248, 32, 32);
-      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
-      _drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
+      drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
+      drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
 
       pos++;
-    }
-  }
-
-  void _drawSprite(
-    Canvas canvas,
-    Sprite sprite,
-    double relativeX,
-    double relativeY, {
-    double scale = 1,
-    bool rotate = false,
-  }) {
-    if (rotate) {
-      canvas
-        ..save()
-        ..translate(size.x / 2, size.y / 2)
-        ..rotate(pi)
-        ..translate(-size.x / 2, -size.y / 2);
-    }
-    sprite.render(
-      canvas,
-      position: Vector2(relativeX * size.x, relativeY * size.y),
-      anchor: Anchor.center,
-      size: sprite.srcSize.scaled(scale),
-    );
-    if (rotate) {
-      canvas.restore();
     }
   }
   //#endregion
