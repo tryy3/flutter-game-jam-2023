@@ -13,9 +13,6 @@ class TableauPile extends PositionComponent implements Pile {
   final Vector2 _fanOffset1 = Vector2(0, StarshipShooterGame.cardHeight * 0.05);
   final Vector2 _fanOffset2 = Vector2(0, StarshipShooterGame.cardHeight * 0.20);
 
-  @override
-  // TODO: implement debugMode
-  bool get debugMode => true;
   //#region Pile API
 
   @override

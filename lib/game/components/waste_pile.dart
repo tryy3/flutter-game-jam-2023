@@ -10,14 +10,14 @@ class WastePile extends PositionComponent implements Pile {
       : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
 
   final List<Card> _cards = [];
-  final Vector2 _fanOffset = Vector2(StarshipShooterGame.cardWidth * 0.2, 0);
+  final Vector2 _fanOffset = Vector2(StarshipShooterGame.cardWidth * 0.3, 0);
   SideView side;
   Player player;
 
   //#region Pile API
 
   @override
-  bool canMoveCard(Card card) => _cards.isNotEmpty && card == _cards.last;
+  bool canMoveCard(Card card) => _cards.isNotEmpty && _cards.contains(card);
 
   @override
   bool canAcceptCard(Card card) => false;
@@ -25,7 +25,8 @@ class WastePile extends PositionComponent implements Pile {
   @override
   void removeCard(Card card) {
     assert(canMoveCard(card));
-    _cards.removeLast();
+    var cardIndex = _cards.indexOf(card);
+    _cards.removeAt(cardIndex);
     _fanOutTopCards();
   }
 
