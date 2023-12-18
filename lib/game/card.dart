@@ -1,13 +1,15 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
-class Card extends PositionComponent implements OpacityProvider {
+class Card extends PositionComponent
+    with DragCallbacks
+    implements OpacityProvider {
   bool _faceUp = false;
   Pile? pile;
 
@@ -15,11 +17,10 @@ class Card extends PositionComponent implements OpacityProvider {
   bool get isFaceDown => !_faceUp;
   void flip() => _faceUp = !_faceUp;
 
-  void useCard(Player player, Player enemy) {}
+  bool _isDragging = false;
+  final List<Card> attachedCards = [];
 
-  void updatePile(Pile pile) {
-    this.pile = pile;
-  }
+  void useCard(Player player, Player enemy) {}
 
   double _opacity = 1;
 
@@ -54,4 +55,61 @@ class Card extends PositionComponent implements OpacityProvider {
       canvas.restore();
     }
   }
+
+  //#region Dragging
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    if (pile?.canMoveCard(this) ?? false) {
+      _isDragging = true;
+      priority = 100;
+    }
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    if (!_isDragging) {
+      return;
+    }
+    final delta = event.delta;
+    position.add(delta);
+    for (final card in attachedCards) {
+      card.position.add(delta);
+    }
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    if (!_isDragging) {
+      return;
+    }
+    _isDragging = false;
+    final dropPiles = parent!
+        .componentsAtPoint(position + size / 2)
+        .whereType<Pile>()
+        .toList();
+    if (dropPiles.isNotEmpty) {
+      if (dropPiles.first.canAcceptCard(this)) {
+        pile!.removeCard(this);
+        dropPiles.first.acquireCard(this);
+        if (attachedCards.isNotEmpty) {
+          for (final card in attachedCards) {
+            dropPiles.first.acquireCard(card);
+          }
+          attachedCards.clear();
+        }
+        return;
+      }
+    }
+    pile!.returnCard(this);
+    if (attachedCards.isNotEmpty) {
+      for (final card in attachedCards) {
+        pile!.returnCard(card);
+      }
+      attachedCards.clear();
+    }
+  }
+
+  //#endregion
 }

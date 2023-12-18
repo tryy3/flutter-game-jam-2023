@@ -123,7 +123,7 @@ void main() {
 
       expect(find.byIcon(Icons.volume_up), findsOneWidget);
 
-      controller.add(AudioState(volume: 0));
+      controller.add(AudioState());
       await tester.pump();
 
       expect(find.byIcon(Icons.volume_off), findsOneWidget);
@@ -148,7 +148,7 @@ void main() {
       );
 
       await tester.tap(find.byIcon(Icons.volume_up));
-      controller.add(AudioState(volume: 0));
+      controller.add(AudioState());
       await tester.pump();
       verify(audioCubit.toggleVolume).called(1);
 

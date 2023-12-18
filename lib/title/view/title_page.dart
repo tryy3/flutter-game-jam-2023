@@ -19,7 +19,7 @@ class TitlePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           l10n.titleAppBarTitle,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: const SafeArea(child: TitleView()),

@@ -75,7 +75,7 @@ void main() {
           unicorn.playAnimation();
           expect(unicorn.animationTicker.currentIndex, equals(0));
 
-          game.update(0.1);
+          await game.update(0.1);
 
           expect(unicorn.animationTicker.currentIndex, equals(1));
           expect(unicorn.isAnimationPlaying(), equals(true));
@@ -90,7 +90,7 @@ void main() {
           await game.ensureAdd(unicorn);
 
           unicorn.playAnimation();
-          game.update(0.1);
+          await game.update(0.1);
           expect(unicorn.animationTicker.currentIndex, equals(1));
           expect(unicorn.isAnimationPlaying(), equals(true));
 
@@ -98,7 +98,7 @@ void main() {
           expect(unicorn.isAnimationPlaying(), equals(false));
           expect(unicorn.animationTicker.currentIndex, equals(0));
 
-          game.update(0.1);
+          await game.update(0.1);
           expect(unicorn.animationTicker.currentIndex, equals(0));
           expect(unicorn.isAnimationPlaying(), equals(false));
         },

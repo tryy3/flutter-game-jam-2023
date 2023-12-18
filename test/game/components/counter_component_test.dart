@@ -61,11 +61,11 @@ void main() {
 
         expect(component.text.text, equals(''));
         game.counter = 1;
-        game.update(0.1);
+        await game.update(0.1);
         expect(component.text.text, equals('counterText: 1'));
 
         game.counter = 2;
-        game.update(0.1);
+        await game.update(0.1);
         expect(component.text.text, equals('counterText: 2'));
       },
     );

@@ -5,8 +5,10 @@ abstract class PlayerEvent extends Equatable {
 }
 
 class PlayerHealthUpdate extends PlayerEvent {
-  const PlayerHealthUpdate(
-      {required this.playerId, required this.playerHealth});
+  const PlayerHealthUpdate({
+    required this.playerId,
+    required this.playerHealth,
+  });
 
   final int playerId;
   final int playerHealth;

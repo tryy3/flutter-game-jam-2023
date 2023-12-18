@@ -24,25 +24,25 @@ class WastePile extends PositionComponent implements Pile {
 
   @override
   void removeCard(Card card) {
-    assert(canMoveCard(card));
-    var cardIndex = _cards.indexOf(card);
+    if (canMoveCard(card)) return;
+    final cardIndex = _cards.indexOf(card);
     _cards.removeAt(cardIndex);
     _fanOutTopCards();
   }
 
   @override
   void returnCard(Card card) {
-    (card as Component).priority = _cards.indexOf(card);
+    card.priority = _cards.indexOf(card);
     _fanOutTopCards();
   }
 
   @override
   void acquireCard(Card card) {
-    assert(card.isFaceUp);
+    if (card.isFaceUp) return;
     card
-      ..updatePile(this)
-      ..position = position;
-    (card as Component).priority = _cards.length;
+      ..pile = this
+      ..position = position
+      ..priority = _cards.length;
     _cards.add(card);
     _fanOutTopCards();
   }

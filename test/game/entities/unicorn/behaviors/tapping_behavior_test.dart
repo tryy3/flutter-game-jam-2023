@@ -70,7 +70,7 @@ void main() {
         await tester.pumpAndSettle();
         game.resumeEngine();
 
-        game.update(0.1);
+        await game.update(0.1);
 
         final unicorn = game.firstChild<Unicorn>()!;
         expect(unicorn.animationTicker.currentIndex, equals(1));

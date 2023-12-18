@@ -7,11 +7,12 @@ import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
 class FoundationPile extends PositionComponent implements Pile {
-  FoundationPile(int intSuit, {required this.player, super.position})
+  FoundationPile(this.intSuit, {required this.player, super.position})
       : super(size: StarshipShooterGame.cardSize);
 
   final List<Card> _cards = [];
   Player player;
+  int intSuit;
 
   //#region Pile API
 
@@ -29,23 +30,24 @@ class FoundationPile extends PositionComponent implements Pile {
 
   @override
   void removeCard(Card card) {
-    assert(canMoveCard(card));
+    if (canMoveCard(card)) return;
     _cards.removeLast();
   }
 
   @override
   void returnCard(Card card) {
-    card.position = position;
-    (card as Component).priority = _cards.indexOf(card);
+    card
+      ..position = position
+      ..priority = _cards.indexOf(card);
   }
 
   @override
   void acquireCard(Card card) {
-    assert(card.isFaceUp);
+    if (card.isFaceUp) return;
     card
-      ..updatePile(this)
-      ..position = position;
-    (card as Component).priority = _cards.length;
+      ..pile = this
+      ..position = position
+      ..priority = _cards.length;
     _cards.add(card);
   }
 

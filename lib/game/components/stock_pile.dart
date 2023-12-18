@@ -2,7 +2,6 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/painting.dart';
 import 'package:starship_shooter/game/card.dart';
-import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
@@ -32,11 +31,11 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
 
   @override
   void acquireCard(Card card) {
-    assert(card.isFaceDown);
+    if (card.isFaceDown) return;
     card
-      ..updatePile(this)
-      ..position = position;
-    (card as Component).priority = _cards.length;
+      ..pile = this
+      ..position = position
+      ..priority = _cards.length;
     _cards.add(card);
   }
 
@@ -53,8 +52,7 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
     } else {
       for (var i = 0; i < 3; i++) {
         if (_cards.isNotEmpty) {
-          final card = _cards.removeLast();
-          card.flip();
+          final card = _cards.removeLast()..flip();
           wastePile.acquireCard(card);
         }
       }
@@ -74,12 +72,13 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRRect(StarshipShooterGame.cardRRect, _borderPaint);
-    canvas.drawCircle(
-      Offset(width / 2, height / 2),
-      StarshipShooterGame.cardWidth * 0.3,
-      _circlePaint,
-    );
+    canvas
+      ..drawRRect(StarshipShooterGame.cardRRect, _borderPaint)
+      ..drawCircle(
+        Offset(width / 2, height / 2),
+        StarshipShooterGame.cardWidth * 0.3,
+        _circlePaint,
+      );
   }
 
   //#endregion

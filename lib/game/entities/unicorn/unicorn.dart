@@ -10,7 +10,7 @@ import 'package:starship_shooter/gen/assets.gen.dart';
 class Unicorn extends PositionedEntity with HasGameRef {
   Unicorn({
     required super.position,
-    required this.side,
+    this.side = SideView.left,
   }) : super(
           anchor: Anchor.center,
           size: StarshipShooterGame.unicornSize,
@@ -22,7 +22,7 @@ class Unicorn extends PositionedEntity with HasGameRef {
   @visibleForTesting
   Unicorn.test({
     required super.position,
-    required this.side,
+    this.side = SideView.left,
     super.behaviors,
   }) : super(size: Vector2.all(32));
 

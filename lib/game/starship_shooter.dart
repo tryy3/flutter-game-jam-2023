@@ -2,13 +2,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
-import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
-import 'package:starship_shooter/player/bloc/player_bloc.dart';
 
 enum GameState {
   drawingCards,
@@ -61,9 +58,9 @@ class StarshipShooterGame extends FlameGame {
   Timer countdown = Timer(.2);
 
   final Player player1 =
-      Player(id: 1, side: SideView.left, playerType: PlayerType.Hot);
+      Player(id: 1, side: SideView.left, playerType: PlayerType.hot);
   final Player player2 =
-      Player(id: 1, side: SideView.right, playerType: PlayerType.Cold);
+      Player(id: 1, side: SideView.right, playerType: PlayerType.cold);
 
   @override
   Color backgroundColor() => Colors.grey[900]!;
@@ -99,6 +96,20 @@ class StarshipShooterGame extends FlameGame {
 
     if (gameState != GameState.drawingCards) {
       if (timerCounter >= timerLimit) {
+        timerCounter = 0;
+
+        // Check if neither player 1 or player 2 can continue
+        if (player1.canNotContinue() && player2.canNotContinue()) {
+          gameState = GameState.endPlayerTurn;
+          return;
+        } else if (gameState == GameState.player1Draws &&
+            player1.canNotContinue()) {
+          gameState = GameState.player2Draws;
+        } else if (gameState == GameState.player2Draws &&
+            player2.canNotContinue()) {
+          gameState = GameState.player1Draws;
+        }
+
         // Different game states of the current turn
         if (gameState == GameState.endDrawingTurn) {
           gameState = GameState.player1Draws;
@@ -113,11 +124,6 @@ class StarshipShooterGame extends FlameGame {
         } else if (gameState == GameState.endPlayerTurn) {
           gameState = GameState.drawingCards;
           timerLimit = 0;
-          return;
-        }
-        // Check if neither player 1 or player 2 can continue
-        if (player1.canNotContinue() && player2.canNotContinue()) {
-          gameState = GameState.endPlayerTurn;
           return;
         }
       }

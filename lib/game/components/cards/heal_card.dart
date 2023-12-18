@@ -1,29 +1,28 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flame/events.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/widgets.dart';
 import 'package:starship_shooter/game/card.dart';
-import 'package:starship_shooter/game/components/tableau_pile.dart';
 import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
-class HealCard extends Card with DragCallbacks {
+class HealCard extends Card {
   HealCard({required this.playerType}) {
     super.size = StarshipShooterGame.cardSize;
   }
 
   final int health = Random().nextInt(9) + 1;
-  bool _isDragging = false;
-  final List<Card> attachedCards = [];
   PlayerType playerType;
 
   @override
   String toString() {
     return 'Healing card - health: $health';
+  }
+
+  @override
+  void useCard(Player player, Player enemy) {
+    super.useCard(player, enemy);
+    player.health += health;
   }
 
   //#region Rendering
@@ -52,7 +51,7 @@ class HealCard extends Card with DragCallbacks {
 
   void _renderBack(Canvas canvas) {
     Sprite backSprite;
-    if (playerType == PlayerType.Hot) {
+    if (playerType == PlayerType.hot) {
       backBackgroundPaint.color = const Color(0xff380c02);
       backBorderPaint1.color = const Color(0xffdbaf58);
       backBorderPaint2.color = const Color(0x5CEF971B);
@@ -84,7 +83,7 @@ class HealCard extends Card with DragCallbacks {
   static final Sprite healSymbol = spriteSheet(0, 160, 32, 32);
 
   void _renderFront(Canvas canvas) {
-    if (playerType == PlayerType.Hot) {
+    if (playerType == PlayerType.hot) {
       frontBackgroundPaint.color = const Color(0xff380c02);
     } else {
       frontBackgroundPaint.color = const Color.fromARGB(255, 2, 19, 56);
@@ -109,7 +108,7 @@ class HealCard extends Card with DragCallbacks {
   }
 
   void _drawNumber(Canvas canvas) {
-    int pos = 0;
+    // int pos = 0;
     for (final ch in health.toString().characters) {
       var spritePositionX = 0;
       switch (ch) {
@@ -139,67 +138,8 @@ class HealCard extends Card with DragCallbacks {
       drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6);
       drawSprite(canvas, numberSprite, 0.14, 0.27, scale: 0.6, rotate: true);
 
-      pos++;
+      // pos++;
     }
   }
-  //#endregion
-
-  //#region Dragging
-  @override
-  void onDragStart(DragStartEvent event) {
-    super.onDragStart(event);
-    if (pile?.canMoveCard(this) ?? false) {
-      _isDragging = true;
-      priority = 100;
-      if (pile is TableauPile) {
-        attachedCards.clear();
-        final extraCards = (pile! as TableauPile).cardsOnTop(this);
-        for (final card in extraCards) {
-          (card as Component).priority = attachedCards.length + 101;
-          attachedCards.add(card);
-        }
-      }
-    }
-  }
-
-  @override
-  void onDragUpdate(DragUpdateEvent event) {
-    if (!_isDragging) {
-      return;
-    }
-    final delta = event.delta;
-    position.add(delta);
-    attachedCards.forEach((card) => card.position.add(delta));
-  }
-
-  @override
-  void onDragEnd(DragEndEvent event) {
-    super.onDragEnd(event);
-    if (!_isDragging) {
-      return;
-    }
-    _isDragging = false;
-    final dropPiles = parent!
-        .componentsAtPoint(position + size / 2)
-        .whereType<Pile>()
-        .toList();
-    if (dropPiles.isNotEmpty) {
-      if (dropPiles.first.canAcceptCard(this)) {
-        pile!.removeCard(this);
-        dropPiles.first.acquireCard(this);
-        if (attachedCards.isNotEmpty) {
-          attachedCards.forEach((card) => dropPiles.first.acquireCard(card));
-          attachedCards.clear();
-        }
-        return;
-      }
-    }
-    pile!.returnCard(this);
-    if (attachedCards.isNotEmpty) {
-      attachedCards.forEach((card) => pile!.returnCard(card));
-      attachedCards.clear();
-    }
-  }
-
   //#endregion
 }

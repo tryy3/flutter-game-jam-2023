@@ -3,8 +3,6 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame/extensions.dart';
-import 'package:flame/game.dart';
 import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
@@ -16,8 +14,8 @@ import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/side_view.dart';
 
 enum PlayerType {
-  Cold,
-  Hot,
+  cold,
+  hot,
 }
 
 class Player {
@@ -89,31 +87,31 @@ class Player {
     return _cards.contains(card);
   }
 
-  void startTurn(Player enemy) {
+  bool startTurn(Player enemy) {
     for (final foundation in foundations) {
       if (foundation.isNotEmpty()) {
         // Retrieve the top card of the foundation
-        final card = foundation.getTopCard();
-
-        // Use the card's ability
-        card.useCard(this, enemy);
+        final card = foundation.getTopCard()
+          // Use the card's ability
+          ..useCard(this, enemy);
 
         // Discard the card
         foundation.removeCard(card);
-        (card as PositionComponent).add(
+        card.add(
           OpacityEffect.fadeOut(
             EffectController(duration: .4),
-            target: card as OpacityProvider,
+            target: card,
             onComplete: () {
-              (card as PositionComponent).removeFromParent();
+              card.removeFromParent();
               _cards.remove(card);
             },
           ),
         );
 
-        return;
+        return true;
       }
     }
+    return false;
   }
 
   // Check if there is any foundation cards left to draw
