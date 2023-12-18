@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockingjay/mockingjay.dart';
 
 import 'package:starship_shooter/title/title.dart';
 
@@ -21,7 +20,8 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    // testWidgets('starts the game when start button is tapped', (tester) async {
+    // testWidgets('starts the game when start button is tapped', (tester)
+    // async {
     //   final navigator = MockNavigator();
     //   when(
     //     () => navigator.pushReplacement<void, void>(any()),

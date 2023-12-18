@@ -1,11 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flame/cache.dart';
-import 'package:flutter/widgets.dart' hide Image;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockingjay/mockingjay.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
@@ -54,7 +52,8 @@ void main() {
 
     // testWidgets('loading text', (tester) async {
     //   Text textWidgetFinder() {
-    //     return find.textContaining('Loading').evaluate().first.widget as Text;
+    //     return find.textContaining('Loading').evaluate().first.widget as
+    // Text;
     //   }
 
     //   await tester.pumpApp(

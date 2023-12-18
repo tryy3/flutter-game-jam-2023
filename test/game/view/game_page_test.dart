@@ -156,6 +156,7 @@ void main() {
       );
 
       await tester.tap(find.byIcon(Icons.volume_up));
+      // ignore: avoid_redundant_argument_values
       controller.add(AudioState(volume: 0));
       await tester.pump();
       verify(audioCubit.toggleVolume).called(1);
