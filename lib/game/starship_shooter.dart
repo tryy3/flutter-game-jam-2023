@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -20,9 +21,13 @@ class StarshipShooterGame extends FlameGame {
     required this.l10n,
     required this.effectPlayer,
     required this.textStyle,
+    required this.statsBloc,
   }) {
     images.prefix = '';
   }
+
+  final GameStatsBloc statsBloc;
+  bool gameOver = false;
 
   static const double cardGap = 40;
   static const double cardWidth = 70;
@@ -101,7 +106,7 @@ class StarshipShooterGame extends FlameGame {
 
         // Check if neither player 1 or player 2 can continue
         if (player1.canNotContinue() && player2.canNotContinue()) {
-          gameState = GameState.endPlayerTurn;
+          gameState = GameState.drawingCards;
           return;
         } else if (gameState == GameState.player1Draws &&
             player1.canNotContinue()) {
@@ -127,6 +132,11 @@ class StarshipShooterGame extends FlameGame {
           timerLimit = 0;
           return;
         }
+      }
+    } else if (!gameOver) {
+      if (player1.isGameOver() || player2.isGameOver()) {
+        gameOver = true;
+        statsBloc.add(const GameOver());
       }
     }
   }

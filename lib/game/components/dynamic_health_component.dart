@@ -46,6 +46,8 @@ class DynamicHealthComponent extends PositionComponent
 
   @override
   void update(double dt) {
+    super.update(dt);
+
     if (renderSprites.length < currentHealth) {
       for (var i = renderSprites.length; i < currentHealth; i++) {
         final column = i % startHealth;

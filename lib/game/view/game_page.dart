@@ -2,7 +2,9 @@ import 'package:flame/game.dart' hide Route;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
+import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
+import 'package:starship_shooter/game/view/game_button.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/cubit/cubit.dart';
 
@@ -17,12 +19,18 @@ class GamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        return AudioCubit(audioCache: context.read<PreloadCubit>().audio);
-      },
-      child: const Scaffold(
-        body: SafeArea(child: GameView()),
+    return Scaffold(
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider<AudioCubit>(
+            create: (context) =>
+                AudioCubit(audioCache: context.read<PreloadCubit>().audio),
+          ),
+          BlocProvider<GameStatsBloc>(create: (_) => GameStatsBloc()),
+        ],
+        child: const Scaffold(
+          body: SafeArea(child: GameView()),
+        ),
       ),
     );
   }
@@ -39,6 +47,7 @@ class GameView extends StatefulWidget {
 
 class _GameViewState extends State<GameView> {
   FlameGame? _game;
+  bool gameOver = false;
 
   // late final Bgm bgm;
 
@@ -67,6 +76,7 @@ class _GameViewState extends State<GameView> {
           l10n: context.l10n,
           effectPlayer: context.read<AudioCubit>().effectPlayer,
           textStyle: textStyle,
+          statsBloc: context.read<GameStatsBloc>(),
         );
     return Stack(
       children: [
@@ -85,21 +95,42 @@ class _GameViewState extends State<GameView> {
           ),
         ),
         Center(
-          child: ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.amber),
-            ),
-            onPressed: () => {(_game! as StarshipShooterGame).endTurn()},
-            child: const Text(
-              'End Turn',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          child: GameButton(
+            game: _game,
           ),
         ),
+        // Center(
+        //   child: ElevatedButton(
+        //     style: ButtonStyle(
+        //       backgroundColor: MaterialStateProperty.all(
+        //         gameOver ? Colors.amber : Colors.blue,
+        //       ),
+        //     ),
+        //     onPressed: () async {
+        //       context.read<GameStatsBloc>().add(const GameOver());
+        //       // if (gameOver) {
+        //       //   final navigator = Navigator.of(context);
+        //       //   await navigator.pushReplacement<void, void>(GamePage.route());
+        //       //   return;
+        //       // }
+        //       // final fGame = _game! as StarshipShooterGame;
+
+        //       // // if (fGame.isOver()) {
+        //       // //   setState(() => gameOver = true);
+        //       // // } else {
+        //       // fGame.endTurn();
+        //       // }
+        //     },
+        //     child: const Text(
+        //       'End Turn',
+        //       style: TextStyle(
+        //         color: Colors.black,
+        //         fontSize: 18,
+        //         fontWeight: FontWeight.bold,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

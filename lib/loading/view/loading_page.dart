@@ -8,6 +8,12 @@ class LoadingPage extends StatefulWidget {
 
   @override
   State<LoadingPage> createState() => _LoadingPageState();
+
+  static Route<void> route() {
+    return MaterialPageRoute<void>(
+      builder: (_) => const LoadingPage(),
+    );
+  }
 }
 
 class _LoadingPageState extends State<LoadingPage> {

@@ -43,13 +43,18 @@ class Player {
 
   int get health => _health;
   set health(int value) {
-    _health = value;
-    healthComponent.currentHealth = value;
+    final v = max(value, 0);
+    _health = v;
+    healthComponent.currentHealth = v;
   }
 
   // Attempt to go through cards and use them if there is one
   Future<bool> useCard(int card) async {
     return true;
+  }
+
+  bool isGameOver() {
+    return _health <= 0 || stock.cardCount() <= 0;
   }
 
   double _calculateBaseWidthPosition(CameraComponent camera) {

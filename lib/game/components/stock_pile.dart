@@ -39,6 +39,10 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
     _cards.add(card);
   }
 
+  int cardCount() {
+    return _cards.length;
+  }
+
   //#endregion
 
   @override
