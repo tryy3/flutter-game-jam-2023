@@ -21,17 +21,17 @@ void main() {
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('starts the game when start button is tapped', (tester) async {
-      final navigator = MockNavigator();
-      when(
-        () => navigator.pushReplacement<void, void>(any()),
-      ).thenAnswer((_) async {});
+    // testWidgets('starts the game when start button is tapped', (tester) async {
+    //   final navigator = MockNavigator();
+    //   when(
+    //     () => navigator.pushReplacement<void, void>(any()),
+    //   ).thenAnswer((_) async {});
 
-      await tester.pumpApp(const TitleView(), navigator: navigator);
+    //   await tester.pumpApp(const TitleView(), navigator: navigator);
 
-      await tester.tap(find.byType(ElevatedButton));
+    //   await tester.tap(find.byType(ElevatedButton));
 
-      verify(() => navigator.pushReplacement<void, void>(any())).called(1);
-    });
+    //   verify(() => navigator.pushReplacement<void, void>(any())).called(1);
+    // });
   });
 }

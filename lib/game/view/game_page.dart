@@ -1,5 +1,4 @@
 import 'package:flame/game.dart' hide Route;
-import 'package:flame_audio/bgm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
@@ -41,7 +40,7 @@ class GameView extends StatefulWidget {
 class _GameViewState extends State<GameView> {
   FlameGame? _game;
 
-  late final Bgm bgm;
+  // late final Bgm bgm;
 
   @override
   void initState() {
@@ -52,7 +51,7 @@ class _GameViewState extends State<GameView> {
 
   @override
   void dispose() {
-    bgm.pause();
+    // bgm.pause();
     super.dispose();
   }
 
