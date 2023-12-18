@@ -71,7 +71,7 @@ class Card extends PositionComponent
     if (!_isDragging) {
       return;
     }
-    final delta = event.delta;
+    final delta = event.localDelta;
     position.add(delta);
     for (final card in attachedCards) {
       card.position.add(delta);
