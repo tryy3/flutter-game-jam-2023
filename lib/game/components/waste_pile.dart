@@ -24,7 +24,7 @@ class WastePile extends PositionComponent implements Pile {
 
   @override
   void removeCard(Card card) {
-    if (canMoveCard(card)) return;
+    if (!canMoveCard(card)) return;
     final cardIndex = _cards.indexOf(card);
     _cards.removeAt(cardIndex);
     _fanOutTopCards();
@@ -38,7 +38,7 @@ class WastePile extends PositionComponent implements Pile {
 
   @override
   void acquireCard(Card card) {
-    if (card.isFaceUp) return;
+    if (card.isFaceDown) return;
     card
       ..pile = this
       ..position = position

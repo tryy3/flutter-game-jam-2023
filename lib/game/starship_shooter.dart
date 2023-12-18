@@ -40,7 +40,7 @@ class StarshipShooterGame extends FlameGame {
   static final Vector2 unicornSize = Vector2(unicornWidth, unicornHeight);
 
   static const double heartGap = 10;
-  static const double heartHeightGap = 20;
+  static const double heartHeightGap = 10;
   static const double heartWidth = 32;
   static const double heartHeight = 32;
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
@@ -78,6 +78,7 @@ class StarshipShooterGame extends FlameGame {
     );
 
     final camera = CameraComponent(world: world);
+
     await addAll([world, camera]);
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 

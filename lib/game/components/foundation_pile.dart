@@ -30,7 +30,7 @@ class FoundationPile extends PositionComponent implements Pile {
 
   @override
   void removeCard(Card card) {
-    if (canMoveCard(card)) return;
+    if (!canMoveCard(card)) return;
     _cards.removeLast();
   }
 
@@ -43,7 +43,7 @@ class FoundationPile extends PositionComponent implements Pile {
 
   @override
   void acquireCard(Card card) {
-    if (card.isFaceUp) return;
+    if (card.isFaceDown) return;
     card
       ..pile = this
       ..position = position

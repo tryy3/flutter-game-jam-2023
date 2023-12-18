@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fullscreen_window/fullscreen_window.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
 class AppBlocObserver extends BlocObserver {
@@ -34,6 +35,10 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
   });
 
   // Add cross-flavor configuration here
+  WidgetsFlutterBinding.ensureInitialized();
+  // await Flame.device.fullScreen();
+  // await Flame.device.setLandscape();
+  await FullScreenWindow.setFullScreen(true);
 
   runApp(await builder());
 }

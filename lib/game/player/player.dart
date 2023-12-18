@@ -6,8 +6,8 @@ import 'package:flame/effects.dart';
 import 'package:starship_shooter/game/card.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
+import 'package:starship_shooter/game/components/dynamic_health_component.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
-import 'package:starship_shooter/game/components/health_component.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
 import 'package:starship_shooter/game/game.dart';
@@ -23,11 +23,14 @@ class Player {
     required this.id,
     required this.side,
     required this.playerType,
-    this.health = 20,
-  });
+    int health = 20,
+  }) {
+    _health = health;
+  }
 
   SideView side;
-  double health;
+  late int _health;
+
   final int id;
   final PlayerType playerType;
 
@@ -36,6 +39,13 @@ class Player {
   late List<FoundationPile> foundations;
   late Unicorn unicorn;
   late List<Card> _cards;
+  late DynamicHealthComponent healthComponent;
+
+  int get health => _health;
+  set health(int value) {
+    _health = value;
+    healthComponent.currentHealth = value;
+  }
 
   // Attempt to go through cards and use them if there is one
   Future<bool> useCard(int card) async {
@@ -74,10 +84,13 @@ class Player {
 
   double _calculateHealthWidthPosition(CameraComponent camera) {
     if (side == SideView.left) {
-      return StarshipShooterGame.cardGap + StarshipShooterGame.cardWidth;
+      return StarshipShooterGame.cardGap +
+          StarshipShooterGame.cardWidth +
+          StarshipShooterGame.heartGap;
     } else {
       return camera.viewport.size.x -
           StarshipShooterGame.heartWidth -
+          StarshipShooterGame.heartGap -
           StarshipShooterGame.cardWidth -
           StarshipShooterGame.cardGap;
     }
@@ -196,24 +209,9 @@ class Player {
     // Add Health HUD
     final healthStartPositionX = _calculateHealthWidthPosition(camera);
     final healthStartPositionY = _calculateHealthHeightPosition(camera);
-    for (var i = 1; i <= health; i++) {
-      final positionX = (side == SideView.left)
-          ? healthStartPositionX +
-              ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
-                  i)
-          : healthStartPositionX -
-              ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
-                  i);
-      await world.add(
-        HealthComponent(
-          heartNumber: i,
-          player: this,
-          position: Vector2(
-            positionX,
-            healthStartPositionY,
-          ),
-        ),
-      );
-    }
+
+    healthComponent = DynamicHealthComponent(startHealth: _health, side: side)
+      ..position = Vector2(healthStartPositionX, healthStartPositionY);
+    await world.add(healthComponent);
   }
 }

@@ -31,7 +31,7 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
 
   @override
   void acquireCard(Card card) {
-    if (card.isFaceDown) return;
+    if (card.isFaceUp) return;
     card
       ..pile = this
       ..position = position
