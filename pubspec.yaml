@@ -30,6 +30,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.0
+  msix: ^3.16.7
   very_good_analysis: ^5.1.0
 
 flutter:
@@ -41,3 +42,10 @@ flutter:
     - assets/images/
     - assets/images/klondike_sprites.png
     - assets/licenses/poppins/
+
+msix_config:
+  display_name: Starship Shooter
+  publicer_display_name: Nexer AB
+  identity_name: com.nexergroup.starship-shooter
+  msix_version: 1.0.0.0
+  languages: en-us

@@ -1,6 +1,7 @@
 import 'package:flame/game.dart' hide Route;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fullscreen_window/fullscreen_window.dart';
 import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
 import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
@@ -78,6 +79,7 @@ class _GameViewState extends State<GameView> {
           textStyle: textStyle,
           statsBloc: context.read<GameStatsBloc>(),
         );
+
     return Stack(
       children: [
         Positioned.fill(child: GameWidget(game: _game!)),

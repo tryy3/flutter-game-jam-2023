@@ -29,9 +29,9 @@ class StarshipShooterGame extends FlameGame {
   final GameStatsBloc statsBloc;
   bool gameOver = false;
 
-  static const double cardGap = 40;
-  static const double cardWidth = 70;
-  static const double cardHeight = 110;
+  static const double cardGap = 30;
+  static const double cardWidth = 63;
+  static const double cardHeight = 105;
   static const double cardRadius = 5;
   static final Vector2 cardSize = Vector2(cardWidth, cardHeight);
   static final cardRRect = RRect.fromRectAndRadius(
@@ -82,7 +82,14 @@ class StarshipShooterGame extends FlameGame {
       children: [],
     );
 
-    final camera = CameraComponent(world: world);
+    // final camera = CameraComponent.withFixedResolution(
+    //   world: world,
+    //   width: 1920,
+    //   height: 1080,
+    // );
+    final camera = CameraComponent(
+      world: world,
+    );
 
     await addAll([world, camera]);
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
