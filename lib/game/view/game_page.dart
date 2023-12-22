@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flame/game.dart' hide Route;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fullscreen_window/fullscreen_window.dart';
 import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
@@ -96,43 +99,43 @@ class _GameViewState extends State<GameView> {
             },
           ),
         ),
+        Container(
+          margin: const EdgeInsets.only(left: 120, top: 20),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(
+                  Colors.white,
+                ),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                exit(0);
+              },
+              child: const Text(
+                'Quit',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
         Center(
           child: GameButton(
             game: _game,
           ),
         ),
-        // Center(
-        //   child: ElevatedButton(
-        //     style: ButtonStyle(
-        //       backgroundColor: MaterialStateProperty.all(
-        //         gameOver ? Colors.amber : Colors.blue,
-        //       ),
-        //     ),
-        //     onPressed: () async {
-        //       context.read<GameStatsBloc>().add(const GameOver());
-        //       // if (gameOver) {
-        //       //   final navigator = Navigator.of(context);
-        //       //   await navigator.pushReplacement<void, void>(GamePage.route());
-        //       //   return;
-        //       // }
-        //       // final fGame = _game! as StarshipShooterGame;
-
-        //       // // if (fGame.isOver()) {
-        //       // //   setState(() => gameOver = true);
-        //       // // } else {
-        //       // fGame.endTurn();
-        //       // }
-        //     },
-        //     child: const Text(
-        //       'End Turn',
-        //       style: TextStyle(
-        //         color: Colors.black,
-        //         fontSize: 18,
-        //         fontWeight: FontWeight.bold,
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
