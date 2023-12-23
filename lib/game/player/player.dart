@@ -143,23 +143,6 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
   Future<void> generatePlayer(World world, CameraComponent camera) async {
     final baseWidth = _calculateBaseWidthPosition(camera);
 
-    stock = StockPile(
-      position: Vector2(
-        baseWidth,
-        StarshipShooterGame.cardGap,
-      ),
-      player: this,
-    );
-    waste = WastePile(
-      position: Vector2(
-        baseWidth,
-        StarshipShooterGame.cardGap +
-            StarshipShooterGame.cardHeight +
-            StarshipShooterGame.cardGap,
-      ),
-      side: side,
-      player: this,
-    );
     foundations = List.generate(
       4,
       (i) => FoundationPile(
@@ -176,9 +159,128 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
       ),
     );
 
-    world
-      ..add(stock)
-      ..add(waste);
+    await world.addAll(foundations);
+  }
+
+  @override
+  Future<void> onLoad() async {
+    // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
+    // to the left
+
+    // Position the player
+    final viewportSize = gameRef.camera.viewport.size;
+
+    // Add Health HUD
+    healthComponent = DynamicHealthComponent(
+      startHealth: _health,
+      side: side,
+      size: StarshipShooterGame.heartSize,
+    );
+
+    // Create the StockPile component
+    stock = StockPile(
+      player: this,
+    );
+
+    // Create the waste pile component
+    waste = WastePile(
+      side: side,
+      player: this,
+    );
+
+    // TODO(tryy3): Think about placing this in each component instead?
+    // Generating position based on side is so different it's better to simply
+    // make a switch case based on it and add them after initization
+    switch (side) {
+      case SideView.left:
+        // Player position
+        position = Vector2(
+          (StarshipShooterGame.unicornWidth / 2) +
+              StarshipShooterGame.cardGap +
+              StarshipShooterGame.cardWidth +
+              StarshipShooterGame.cardGap,
+          viewportSize.y / 2,
+        );
+
+        // Component positions
+        stock.position = Vector2(
+          -position.x + (stock.size.x / 2) + StarshipShooterGame.cardGap,
+          -position.y + (stock.size.y / 2) + StarshipShooterGame.cardGap,
+        );
+
+        healthComponent.position = Vector2(
+          -position.x +
+              (healthComponent.size.x / 2) +
+              StarshipShooterGame.heartWidthGap,
+          viewportSize.y -
+              position.y -
+              (healthComponent.size.y / 2) -
+              StarshipShooterGame.heartHeightGap,
+        );
+
+        waste.position = Vector2(
+          -position.x + (waste.size.x / 2) + StarshipShooterGame.cardGap,
+          -position.y +
+              (stock.size.y / 2) +
+              StarshipShooterGame.cardGap +
+              stock.size.y +
+              StarshipShooterGame.cardGap,
+        );
+
+      case SideView.right:
+        // Player position
+        position = Vector2(
+          viewportSize.x -
+              (StarshipShooterGame.unicornWidth / 2) -
+              StarshipShooterGame.cardGap -
+              StarshipShooterGame.cardWidth -
+              StarshipShooterGame.cardGap,
+          viewportSize.y / 2,
+        );
+
+        // Component positions
+        stock.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (stock.size.x / 2) -
+              StarshipShooterGame.cardGap,
+          viewportSize.y -
+              position.y -
+              (stock.size.y / 2) -
+              StarshipShooterGame.cardGap,
+        );
+
+        healthComponent.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (healthComponent.size.x / 2) -
+              StarshipShooterGame.heartWidthGap,
+          -position.y +
+              (healthComponent.size.y / 2) +
+              StarshipShooterGame.heartHeightGap,
+        );
+
+        waste.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (waste.size.x / 2) -
+              StarshipShooterGame.cardGap,
+          viewportSize.y -
+              position.y -
+              (waste.size.y / 2) -
+              StarshipShooterGame.cardGap -
+              stock.size.y -
+              StarshipShooterGame.cardGap,
+        );
+    }
+
+    // Add components to the world
+    await addAll([
+      Unicorn(),
+      healthComponent,
+      stock,
+      waste,
+    ]);
 
     // Generate a pile of random cards
     _cards = List.generate(20, (index) {
@@ -191,59 +293,13 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
     })
       ..shuffle();
 
-    await world.addAll(_cards.cast());
-    await world.addAll(foundations);
+    await addAll(_cards.cast());
 
+    // Add cards to the stock pile
     final cardToDeal = _cards.length - 1;
     for (var n = 0; n <= cardToDeal; n++) {
       stock.acquireCard(_cards[n]);
     }
-  }
-
-  @override
-  Future<void> onLoad() async {
-    // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
-    // to the left
-    final camera = gameRef.camera;
-    position = Vector2(
-      StarshipShooterGame.cardGap +
-          StarshipShooterGame.cardWidth +
-          StarshipShooterGame.cardGap +
-          (StarshipShooterGame.unicornWidth / 2),
-      camera.viewport.size.y / 2,
-    );
-
-    if (side == SideView.right) {
-      position.x = camera.viewport.size.x - position.x;
-    }
-
-    await add(Unicorn());
-
-    print('Position: ${position}');
-    print('Camera: ${camera.viewport.size}');
-
-    // Add Health HUD
-    // final healthStartPositionX = _calculateHealthWidthPosition(camera);
-    final double healthStartPositionX = 0;
-    final healthStartPositionY = gameRef.camera.viewport.size.y -
-        position.y -
-        StarshipShooterGame.heartHeightGap -
-        StarshipShooterGame.heartHeight;
-
-    healthComponent = DynamicHealthComponent(
-      startHealth: _health,
-      side: side,
-      size: StarshipShooterGame.heartSize,
-      position: Vector2(healthStartPositionX, healthStartPositionY),
-    );
-
-    if (side == SideView.right) {
-      healthComponent.position.invert();
-    }
-    // else {
-    //   healthComponent.position.y -= StarshipShooterGame.heartHeight;
-    // }
-    await add(healthComponent);
   }
 
   void resetAnimation() {

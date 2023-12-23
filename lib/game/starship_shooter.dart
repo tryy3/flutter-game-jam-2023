@@ -36,7 +36,7 @@ class StarshipShooterGame extends FlameGame {
 
   @override
   // TODO: implement debugMode
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   static const double cardGap = 30;
   static const double cardWidth = 63;
@@ -53,8 +53,8 @@ class StarshipShooterGame extends FlameGame {
   static const double unicornHeight = 100;
   static final Vector2 unicornSize = Vector2(unicornWidth, unicornHeight);
 
-  static const double heartGap = 10;
-  static const double heartHeightGap = 10;
+  static const double heartWidthGap = 10;
+  static const double heartHeightGap = 30;
   static const double heartWidth = 32;
   static const double heartHeight = 32;
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);

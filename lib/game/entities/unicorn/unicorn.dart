@@ -4,13 +4,11 @@ import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/entities/unicorn/behaviors/tapping_behavior.dart';
 import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
 class Unicorn extends PositionedEntity with HasGameRef {
-  Unicorn({
-    this.side = SideView.left,
-  }) : super(
+  Unicorn()
+      : super(
           anchor: Anchor.center,
           size: StarshipShooterGame.unicornSize,
           behaviors: [
@@ -21,12 +19,10 @@ class Unicorn extends PositionedEntity with HasGameRef {
   @visibleForTesting
   Unicorn.test({
     required super.position,
-    this.side = SideView.left,
     super.behaviors,
   }) : super(size: Vector2.all(32));
 
   late SpriteAnimationComponent _animationComponent;
-  SideView side;
 
   @visibleForTesting
   SpriteAnimationTicker get animationTicker =>

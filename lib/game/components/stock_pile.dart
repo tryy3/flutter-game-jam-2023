@@ -7,8 +7,8 @@ import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class StockPile extends PositionComponent with TapCallbacks implements Pile {
-  StockPile({required super.position, required this.player})
-      : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
+  StockPile({required this.player, super.position})
+      : super(anchor: Anchor.center, size: StarshipShooterGame.cardSize);
 
   /// Which cards are currently placed onto this pile. The first card in the
   /// list is at the bottom, the last card is on top.

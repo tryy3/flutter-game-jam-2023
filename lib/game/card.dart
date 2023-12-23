@@ -10,6 +10,8 @@ import 'package:starship_shooter/game/player/player.dart';
 class Card extends PositionComponent
     with DragCallbacks
     implements OpacityProvider {
+  Card() : super(anchor: Anchor.center);
+
   bool _faceUp = false;
   Pile? pile;
 

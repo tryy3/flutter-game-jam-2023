@@ -34,9 +34,9 @@ class DynamicHealthComponent extends PositionComponent
         HasGameRef<StarshipShooterGame>,
         FlameBlocListenable<PlayerBloc, PlayerState> {
   DynamicHealthComponent({
-    required super.position,
     required super.size,
     required this.startHealth,
+    super.position,
     this.side = SideView.left,
   }) : super(anchor: Anchor.center) {
     currentHealth = startHealth;
@@ -71,7 +71,8 @@ class DynamicHealthComponent extends PositionComponent
         final row = (i / startHealth).floorToDouble();
 
         var x = 0 +
-            ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
+            ((StarshipShooterGame.heartWidth +
+                    StarshipShooterGame.heartWidthGap) *
                 column);
         if (side == SideView.right) x = -x;
 

@@ -6,8 +6,8 @@ import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class WastePile extends PositionComponent implements Pile {
-  WastePile({required super.position, required this.side, required this.player})
-      : super(anchor: Anchor.topLeft, size: StarshipShooterGame.cardSize);
+  WastePile({required this.side, required this.player, super.position})
+      : super(anchor: Anchor.center, size: StarshipShooterGame.cardSize);
 
   final List<Card> _cards = [];
   final Vector2 _fanOffset = Vector2(StarshipShooterGame.cardWidth * 0.3, 0);
@@ -15,6 +15,10 @@ class WastePile extends PositionComponent implements Pile {
   Player player;
 
   //#region Pile API
+
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => true;
 
   @override
   bool canMoveCard(Card card) => _cards.isNotEmpty && _cards.contains(card);
