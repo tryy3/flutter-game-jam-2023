@@ -1,9 +1,12 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audioplayers.dart' as audio_player;
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
+import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
+import 'package:starship_shooter/game/cubit/player/player_state.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -22,12 +25,18 @@ class StarshipShooterGame extends FlameGame {
     required this.effectPlayer,
     required this.textStyle,
     required this.statsBloc,
+    required this.playerBloc,
   }) {
     images.prefix = '';
   }
 
   final GameStatsBloc statsBloc;
+  final PlayerBloc playerBloc;
   bool gameOver = false;
+
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => true;
 
   static const double cardGap = 30;
   static const double cardWidth = 63;
@@ -51,7 +60,7 @@ class StarshipShooterGame extends FlameGame {
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
 
   final AppLocalizations l10n;
-  final AudioPlayer effectPlayer;
+  final audio_player.AudioPlayer effectPlayer;
   final TextStyle textStyle;
 
   double timerCounter = 0;
@@ -63,7 +72,7 @@ class StarshipShooterGame extends FlameGame {
   Timer countdown = Timer(.2);
 
   final Player player1 =
-      Player(id: 1, side: SideView.left, playerType: PlayerType.hot);
+      Player(id: 0, side: SideView.left, playerType: PlayerType.hot);
   final Player player2 =
       Player(id: 1, side: SideView.right, playerType: PlayerType.cold);
 
@@ -82,17 +91,29 @@ class StarshipShooterGame extends FlameGame {
       children: [],
     );
 
-    // final camera = CameraComponent.withFixedResolution(
-    //   world: world,
-    //   width: 1920,
-    //   height: 1080,
-    // );
     final camera = CameraComponent(
       world: world,
     );
 
-    await addAll([world, camera]);
+    await addAll([
+      world,
+      camera,
+    ]);
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
+
+    await add(
+      FlameMultiBlocProvider(
+        providers: [
+          FlameBlocProvider<PlayerBloc, PlayerState>.value(
+            value: playerBloc,
+          ),
+        ],
+        children: [
+          player1,
+          player2,
+        ],
+      ),
+    );
 
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;

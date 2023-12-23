@@ -2,8 +2,12 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
+import 'package:starship_shooter/game/cubit/player/player_state.dart';
 import 'package:starship_shooter/game/game.dart';
+import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 
 class HealthSprite extends OpacityProvider {
@@ -26,11 +30,15 @@ class HealthSprite extends OpacityProvider {
 }
 
 class DynamicHealthComponent extends PositionComponent
-    with HasGameRef<StarshipShooterGame> {
+    with
+        HasGameRef<StarshipShooterGame>,
+        FlameBlocListenable<PlayerBloc, PlayerState> {
   DynamicHealthComponent({
+    required super.position,
+    required super.size,
     required this.startHealth,
     this.side = SideView.left,
-  }) {
+  }) : super(anchor: Anchor.center) {
     currentHealth = startHealth;
   }
 
@@ -43,6 +51,15 @@ class DynamicHealthComponent extends PositionComponent
   final availableSprite = spriteSheet(288, 4224, 32, 32);
   final unavailableSprite = spriteSheet(192, 4224, 32, 32);
   final extraHealthSprite = spriteSheet(320, 4224, 32, 32);
+
+  @override
+  void onNewState(PlayerState state) {
+    currentHealth = state.players[(parent! as Player).id]!.health;
+  }
+
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => true;
 
   @override
   void update(double dt) {
@@ -95,7 +112,8 @@ class DynamicHealthComponent extends PositionComponent
       }
     }
 
-    for (final rSprite in renderSprites) {
+    for (var i = 0; i < renderSprites.length; i++) {
+      final rSprite = renderSprites[i];
       rSprite.effect.update(dt);
     }
   }
@@ -105,13 +123,23 @@ class DynamicHealthComponent extends PositionComponent
     super.render(canvas);
 
     for (final rSprite in renderSprites) {
-      drawSprite(
+      // canvas
+      //   ..save()
+      //   ..translate(-)
+      rSprite.sprite.render(
         canvas,
-        rSprite.sprite,
-        rSprite.position.x,
-        rSprite.position.y,
-        opacity: rSprite.opacity,
+        size: size,
+        position: rSprite.position,
+        overridePaint: Paint()
+          ..color = Colors.white.withOpacity(rSprite.opacity),
       );
+      // drawSprite(
+      //   canvas,
+      //   rSprite.sprite,
+      //   rSprite.position.x,
+      //   rSprite.position.y,
+      //   opacity: rSprite.opacity,
+      // );
     }
   }
 
@@ -124,21 +152,16 @@ class DynamicHealthComponent extends PositionComponent
     bool rotate = false,
     double opacity = 1,
   }) {
-    if (rotate) {
-      canvas
-        ..save()
-        ..translate(size.x / 2, size.y / 2)
-        ..rotate(pi)
-        ..translate(-size.x / 2, -size.y / 2);
-    }
+    final spriteSize = sprite.srcSize.scaled(scale);
+    canvas
+      ..save()
+      ..translate(-spriteSize.x / 2, -spriteSize.y / 2);
     sprite.render(
       canvas,
       position: Vector2(positionX, positionY),
-      size: sprite.srcSize.scaled(scale),
+      size: spriteSize,
       overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
     );
-    if (rotate) {
-      canvas.restore();
-    }
+    canvas.restore();
   }
 }

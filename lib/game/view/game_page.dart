@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fullscreen_window/fullscreen_window.dart';
 import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
 import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
+import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/game/view/game_button.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -31,6 +32,7 @@ class GamePage extends StatelessWidget {
                 AudioCubit(audioCache: context.read<PreloadCubit>().audio),
           ),
           BlocProvider<GameStatsBloc>(create: (_) => GameStatsBloc()),
+          BlocProvider<PlayerBloc>(create: (_) => PlayerBloc()),
         ],
         child: const Scaffold(
           body: SafeArea(child: GameView()),
@@ -81,6 +83,7 @@ class _GameViewState extends State<GameView> {
           effectPlayer: context.read<AudioCubit>().effectPlayer,
           textStyle: textStyle,
           statsBloc: context.read<GameStatsBloc>(),
+          playerBloc: context.read<PlayerBloc>(),
         );
 
     return Stack(

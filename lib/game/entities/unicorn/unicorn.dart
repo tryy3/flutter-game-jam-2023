@@ -9,7 +9,6 @@ import 'package:starship_shooter/gen/assets.gen.dart';
 
 class Unicorn extends PositionedEntity with HasGameRef {
   Unicorn({
-    required super.position,
     this.side = SideView.left,
   }) : super(
           anchor: Anchor.center,
