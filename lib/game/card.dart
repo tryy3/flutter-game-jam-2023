@@ -88,7 +88,8 @@ class Card extends PositionComponent
     }
     _isDragging = false;
     final dropPiles = parent!
-        .componentsAtPoint(position + size / 2)
+        // .componentsAtPoint(position + size / 2)
+        .componentsAtPoint(position)
         .whereType<Pile>()
         .toList();
     if (dropPiles.isNotEmpty) {

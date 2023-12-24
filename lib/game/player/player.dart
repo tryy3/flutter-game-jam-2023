@@ -72,7 +72,7 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
   }
 
   bool isGameOver() {
-    return _health <= 0 || stock.cardCount() <= 0;
+    return _health <= 0 || (stock.isLoaded && stock.cardCount() <= 0);
   }
 
   double _calculateBaseWidthPosition(CameraComponent camera) {
@@ -140,28 +140,6 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
     return !canContinue();
   }
 
-  Future<void> generatePlayer(World world, CameraComponent camera) async {
-    final baseWidth = _calculateBaseWidthPosition(camera);
-
-    foundations = List.generate(
-      4,
-      (i) => FoundationPile(
-        i,
-        position: Vector2(
-          baseWidth,
-          ((StarshipShooterGame.cardGap + StarshipShooterGame.cardHeight) * 2 +
-                  StarshipShooterGame.cardGap) +
-              (i *
-                  (StarshipShooterGame.cardHeight +
-                      StarshipShooterGame.cardGap)),
-        ),
-        player: this,
-      ),
-    );
-
-    await world.addAll(foundations);
-  }
-
   @override
   Future<void> onLoad() async {
     // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
@@ -186,6 +164,14 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
     waste = WastePile(
       side: side,
       player: this,
+    );
+
+    foundations = List.generate(
+      4,
+      (i) => FoundationPile(
+        i,
+        player: this,
+      ),
     );
 
     // TODO(tryy3): Think about placing this in each component instead?
@@ -221,11 +207,25 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
         waste.position = Vector2(
           -position.x + (waste.size.x / 2) + StarshipShooterGame.cardGap,
           -position.y +
-              (stock.size.y / 2) +
+              (waste.size.y / 2) +
               StarshipShooterGame.cardGap +
               stock.size.y +
               StarshipShooterGame.cardGap,
         );
+
+        for (final (index, element) in foundations.indexed) {
+          element.position = Vector2(
+            -position.x + (waste.size.x / 2) + StarshipShooterGame.cardGap,
+            -position.y +
+                (element.size.y / 2) +
+                StarshipShooterGame.cardGap +
+                stock.size.y +
+                StarshipShooterGame.cardGap +
+                waste.size.y +
+                StarshipShooterGame.cardGap +
+                (index * (element.size.y + StarshipShooterGame.cardGap)),
+          );
+        }
 
       case SideView.right:
         // Player position
@@ -272,6 +272,24 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
               stock.size.y -
               StarshipShooterGame.cardGap,
         );
+
+        for (final (index, element) in foundations.indexed) {
+          element.position = Vector2(
+            viewportSize.x -
+                position.x -
+                (element.size.x / 2) -
+                StarshipShooterGame.cardGap,
+            viewportSize.y -
+                position.y -
+                (element.size.y / 2) -
+                StarshipShooterGame.cardGap -
+                stock.size.y -
+                StarshipShooterGame.cardGap -
+                waste.size.y -
+                StarshipShooterGame.cardGap -
+                (index * (element.size.y + StarshipShooterGame.cardGap)),
+          );
+        }
     }
 
     // Add components to the world
@@ -281,6 +299,7 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
       stock,
       waste,
     ]);
+    await addAll(foundations);
 
     // Generate a pile of random cards
     _cards = List.generate(20, (index) {

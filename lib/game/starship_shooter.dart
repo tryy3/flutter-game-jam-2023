@@ -117,9 +117,6 @@ class StarshipShooterGame extends FlameGame {
 
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;
-
-    await player1.generatePlayer(world, camera);
-    await player2.generatePlayer(world, camera);
   }
 
   @override

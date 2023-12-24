@@ -8,13 +8,16 @@ import 'package:starship_shooter/game/player/player.dart';
 
 class FoundationPile extends PositionComponent implements Pile {
   FoundationPile(this.intSuit, {required this.player, super.position})
-      : super(size: StarshipShooterGame.cardSize);
+      : super(size: StarshipShooterGame.cardSize, anchor: Anchor.center);
 
   final List<Card> _cards = [];
   Player player;
   int intSuit;
 
   //#region Pile API
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => true;
 
   @override
   bool canMoveCard(Card card) {
