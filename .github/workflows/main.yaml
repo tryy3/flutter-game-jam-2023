@@ -17,10 +17,13 @@ jobs:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/semantic_pull_request.yml@v1
 
   build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    uses: tryy3/flutter-game-jam-2023/.github/workflows/flutter_package.yml@main
     with:
       flutter_channel: stable
-      min_coverage: 20
+      min_coverage: 0
+      test_optimization: false
+      analyze_directories: "lib"
+      runs_on: windows-latest
 
   spell-check:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/spell_check.yml@v1

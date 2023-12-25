@@ -58,7 +58,6 @@ class StarshipShooterGame extends FlameGame {
   bool gameOver = false;
 
   @override
-  // TODO: implement debugMode
   bool get debugMode => false;
 
   static const double cardGap = 30;

@@ -16,7 +16,6 @@ class FoundationPile extends PositionComponent implements Pile {
 
   //#region Pile API
   @override
-  // TODO: implement debugMode
   bool get debugMode => false;
 
   @override

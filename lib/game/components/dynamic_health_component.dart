@@ -50,7 +50,6 @@ class DynamicHealthComponent extends PositionComponent
   final extraHealthSprite = spriteSheet(320, 4224, 32, 32);
 
   @override
-  // TODO: implement debugMode
   bool get debugMode => false;
 
   @override

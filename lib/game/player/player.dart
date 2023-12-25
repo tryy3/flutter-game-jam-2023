@@ -57,7 +57,6 @@ class Player extends PositionComponent
   }
 
   @override
-  // TODO: implement debugMode
   bool get debugMode => false;
 
   @override
