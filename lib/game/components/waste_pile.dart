@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
@@ -18,7 +18,7 @@ class WastePile extends PositionComponent implements Pile {
 
   @override
   // TODO: implement debugMode
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   bool canMoveCard(Card card) => _cards.isNotEmpty && _cards.contains(card);

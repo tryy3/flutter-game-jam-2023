@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
@@ -17,7 +17,7 @@ class FoundationPile extends PositionComponent implements Pile {
   //#region Pile API
   @override
   // TODO: implement debugMode
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   bool canMoveCard(Card card) {

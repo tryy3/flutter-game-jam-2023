@@ -59,14 +59,16 @@ class DynamicHealthComponent extends PositionComponent
 
   @override
   // TODO: implement debugMode
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   void update(double dt) {
     super.update(dt);
 
-    if (renderSprites.length < currentHealth) {
-      for (var i = renderSprites.length; i < currentHealth; i++) {
+    var health = max(0, currentHealth);
+
+    if (renderSprites.length < health) {
+      for (var i = renderSprites.length; i < health; i++) {
         final column = i % startHealth;
         final row = (i / startHealth).floorToDouble();
 
@@ -96,8 +98,8 @@ class DynamicHealthComponent extends PositionComponent
 
         renderSprites.add(healthSprite);
       }
-    } else if (renderSprites.length > currentHealth) {
-      for (var i = renderSprites.length; i > currentHealth; i--) {
+    } else if (renderSprites.length > health) {
+      for (var i = renderSprites.length; i > health; i--) {
         final rSprite = renderSprites[i - 1];
         if (rSprite.removing) continue;
 

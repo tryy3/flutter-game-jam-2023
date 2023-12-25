@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/painting.dart';
-import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';

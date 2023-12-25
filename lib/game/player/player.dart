@@ -6,13 +6,16 @@ import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flame_bloc/flame_bloc.dart';
-import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
 import 'package:starship_shooter/game/components/dynamic_health_component.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
+import 'package:starship_shooter/game/cubit/game/game_bloc.dart';
+import 'package:starship_shooter/game/cubit/game/game_events.dart';
+import 'package:starship_shooter/game/cubit/game/game_state.dart';
 import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
 import 'package:starship_shooter/game/cubit/player/player_events.dart';
 import 'package:starship_shooter/game/cubit/player/player_state.dart';
@@ -26,7 +29,10 @@ enum PlayerType {
   hot,
 }
 
-class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
+class Player extends PositionComponent
+    with
+        HasGameRef<StarshipShooterGame>,
+        FlameBlocListenable<GameBloc, GameState> {
   Player({
     required this.id,
     required this.side,
@@ -54,17 +60,26 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
   SpriteAnimationTicker get animationTicker =>
       _animationComponent.animationTicker!;
 
-  int get health => _health;
+  int get health => game.playerBloc.state.players[id]!.health;
   set health(int value) {
-    final v = max(value, 0);
-    _health = v;
-
-    game.playerBloc.add(PlayerHealthUpdateEvent(playerId: id, health: v));
+    game.playerBloc.add(PlayerHealthUpdateEvent(playerId: id, health: value));
   }
 
   @override
   // TODO: implement debugMode
-  bool get debugMode => true;
+  bool get debugMode => false;
+
+  @override
+  void onNewState(GameState state) {
+    if (state.status == GameStatus.processTurn && state.lastPlayedId == id) {
+      startTurn();
+    }
+
+    if (state.status == GameStatus.drawingCards &&
+        game.playerBloc.state.players[id]!.health <= 0) {
+      game.gameBloc.add(const GameOverEvent());
+    }
+  }
 
   // Attempt to go through cards and use them if there is one
   Future<bool> useCard(int card) async {
@@ -75,33 +90,13 @@ class Player extends PositionComponent with HasGameRef<StarshipShooterGame> {
     return _health <= 0 || (stock.isLoaded && stock.cardCount() <= 0);
   }
 
-  double _calculateBaseWidthPosition(CameraComponent camera) {
-    if (side == SideView.left) {
-      return StarshipShooterGame.cardGap;
-    } else {
-      return camera.viewport.size.x -
-          StarshipShooterGame.cardWidth -
-          StarshipShooterGame.cardGap;
-    }
-  }
-
-  double _calculateUnicornWidthPosition(double baseWidth) {
-    if (side == SideView.left) {
-      return baseWidth +
-          StarshipShooterGame.cardWidth +
-          StarshipShooterGame.unicornGap;
-    } else {
-      return baseWidth -
-          StarshipShooterGame.cardWidth -
-          StarshipShooterGame.cardGap;
-    }
-  }
-
   bool ownsCard(Card card) {
     return _cards.contains(card);
   }
 
-  bool startTurn(Player enemy) {
+  bool startTurn() {
+    final enemy = gameRef.players.firstWhere((element) => element.id != id);
+
     for (final foundation in foundations) {
       if (foundation.isNotEmpty()) {
         // Retrieve the top card of the foundation

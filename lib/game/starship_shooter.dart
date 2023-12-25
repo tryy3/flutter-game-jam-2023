@@ -4,33 +4,63 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
+import 'package:starship_shooter/game/cubit/game/game_bloc.dart';
+import 'package:starship_shooter/game/cubit/game/game_events.dart';
+import 'package:starship_shooter/game/cubit/game/game_state.dart';
 import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
 import 'package:starship_shooter/game/cubit/player/player_state.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
-enum GameState {
-  drawingCards,
-  endDrawingTurn,
-  player1Draws,
-  player2Draws,
-  endPlayerTurn,
-}
+// enum GameState {
+//   drawingCards,
+//   endDrawingTurn,
+//   player1Draws,
+//   player2Draws,
+//   endPlayerTurn,
+// }
 
 class StarshipShooterGame extends FlameGame {
   StarshipShooterGame({
     required this.l10n,
     required this.effectPlayer,
     required this.textStyle,
-    required this.statsBloc,
+    required this.gameBloc,
     required this.playerBloc,
   }) {
     images.prefix = '';
+
+    gameBloc.on<StartTurnEvent>((event, emit) {
+      // Start with changing state to startTurn so that it's always correct
+      // status when we begin.
+      emit(gameBloc.state.copyWith(status: GameStatus.startTurn));
+
+      // Attempt to find a player starting with lastPlayerId
+      // doing it in this for loop allows more flexible of multiple players
+      var playerId = gameBloc.state.lastPlayedId;
+      for (var i = 0; i < players.length; i++) {
+        playerId++;
+        if (playerId >= players.length) playerId = 0;
+
+        for (final player in players) {
+          // If we found a player and the player can actually continue
+          // Then send a PlayerTurnEvent and add a 2 second delay for next turn
+          if (player.id == playerId && player.canContinue()) {
+            gameBloc.add(PlayerTurnEvent(playerId: player.id));
+            timerLimit = 2;
+            return;
+          }
+        }
+      }
+
+      // If we were unable to find any player, then end the turn by sending
+      // DrawingCards event
+      gameBloc.add(const DrawingCardsEvent());
+    });
   }
 
-  final GameStatsBloc statsBloc;
+  final GameBloc gameBloc;
   final PlayerBloc playerBloc;
   bool gameOver = false;
 
@@ -67,21 +97,18 @@ class StarshipShooterGame extends FlameGame {
   double timerLimit = 0;
 
   int counter = 0;
-  GameState gameState =
-      GameState.drawingCards; // 0 = placing cards, 1 = end turn
+  // GameState gameState =
+  //     GameState.drawingCards; // 0 = placing cards, 1 = end turn
   Timer countdown = Timer(.2);
 
-  final Player player1 =
-      Player(id: 0, side: SideView.left, playerType: PlayerType.hot);
-  final Player player2 =
-      Player(id: 1, side: SideView.right, playerType: PlayerType.cold);
+  List<Player> players = [
+    Player(id: 0, side: SideView.left, playerType: PlayerType.hot),
+    Player(id: 1, side: SideView.right, playerType: PlayerType.cold),
+  ];
+  int lastPlayedId = -1;
 
   @override
   Color backgroundColor() => Colors.grey[900]!;
-
-  void endTurn() {
-    gameState = GameState.endDrawingTurn;
-  }
 
   @override
   Future<void> onLoad() async {
@@ -107,11 +134,11 @@ class StarshipShooterGame extends FlameGame {
           FlameBlocProvider<PlayerBloc, PlayerState>.value(
             value: playerBloc,
           ),
+          FlameBlocProvider<GameBloc, GameState>.value(
+            value: gameBloc,
+          ),
         ],
-        children: [
-          player1,
-          player2,
-        ],
+        children: players,
       ),
     );
 
@@ -123,45 +150,12 @@ class StarshipShooterGame extends FlameGame {
   Future<void> update(double dt) async {
     super.update(dt);
 
-    if (gameState != GameState.drawingCards) timerCounter += dt;
-
-    if (gameState != GameState.drawingCards) {
+    final status = gameBloc.state.status;
+    if (status == GameStatus.startTurn || status == GameStatus.processTurn) {
+      timerCounter += dt;
       if (timerCounter >= timerLimit) {
+        gameBloc.add(const StartTurnEvent());
         timerCounter = 0;
-
-        // Check if neither player 1 or player 2 can continue
-        if (player1.canNotContinue() && player2.canNotContinue()) {
-          gameState = GameState.drawingCards;
-          return;
-        } else if (gameState == GameState.player1Draws &&
-            player1.canNotContinue()) {
-          gameState = GameState.player2Draws;
-        } else if (gameState == GameState.player2Draws &&
-            player2.canNotContinue()) {
-          gameState = GameState.player1Draws;
-        }
-
-        // Different game states of the current turn
-        if (gameState == GameState.endDrawingTurn) {
-          gameState = GameState.player1Draws;
-        } else if (gameState == GameState.player1Draws) {
-          player1.startTurn(player2);
-          gameState = GameState.player2Draws;
-          timerLimit = 2;
-        } else if (gameState == GameState.player2Draws) {
-          player2.startTurn(player1);
-          gameState = GameState.player1Draws;
-          timerLimit = 2;
-        } else if (gameState == GameState.endPlayerTurn) {
-          gameState = GameState.drawingCards;
-          timerLimit = 0;
-          return;
-        }
-      }
-    } else if (!gameOver) {
-      if (player1.isGameOver() || player2.isGameOver()) {
-        gameOver = true;
-        statsBloc.add(const GameOver());
       }
     }
   }
