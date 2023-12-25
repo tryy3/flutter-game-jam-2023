@@ -3,33 +3,38 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:starship_shooter/game/card.dart';
+import 'package:flame/sprite.dart';
+import 'package:flame_bloc/flame_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_events.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
+import 'package:starship_shooter/game/bloc/player/player_events.dart';
+import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
 import 'package:starship_shooter/game/components/dynamic_health_component.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
-import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/side_view.dart';
+import 'package:starship_shooter/game/entities/unicorn/unicorn.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 enum PlayerType {
   cold,
   hot,
 }
 
-class Player {
+class Player extends PositionComponent
+    with
+        HasGameRef<StarshipShooterGame>,
+        FlameBlocListenable<GameBloc, GameState> {
   Player({
     required this.id,
     required this.side,
     required this.playerType,
-    int health = 20,
-  }) {
-    _health = health;
-  }
+  }) : super(anchor: Anchor.center);
 
   SideView side;
-  late int _health;
 
   final int id;
   final PlayerType playerType;
@@ -37,15 +42,34 @@ class Player {
   late StockPile stock;
   late WastePile waste;
   late List<FoundationPile> foundations;
-  late Unicorn unicorn;
+  // late Unicorn unicorn;
   late List<Card> _cards;
   late DynamicHealthComponent healthComponent;
 
-  int get health => _health;
+  late SpriteAnimationComponent _animationComponent;
+
+  SpriteAnimationTicker get animationTicker =>
+      _animationComponent.animationTicker!;
+
+  int get health => game.playerBloc.state.players[id]!.health;
   set health(int value) {
-    final v = max(value, 0);
-    _health = v;
-    healthComponent.currentHealth = v;
+    game.playerBloc.add(PlayerHealthUpdateEvent(playerId: id, health: value));
+  }
+
+  @override
+  // TODO: implement debugMode
+  bool get debugMode => false;
+
+  @override
+  void onNewState(GameState state) {
+    if (state.status == GameStatus.processTurn && state.lastPlayedId == id) {
+      startTurn();
+    }
+
+    if (state.status == GameStatus.drawingCards &&
+        game.playerBloc.state.players[id]!.health <= 0) {
+      game.gameBloc.add(const GameOverEvent());
+    }
   }
 
   // Attempt to go through cards and use them if there is one
@@ -54,58 +78,16 @@ class Player {
   }
 
   bool isGameOver() {
-    return _health <= 0 || stock.cardCount() <= 0;
-  }
-
-  double _calculateBaseWidthPosition(CameraComponent camera) {
-    if (side == SideView.left) {
-      return StarshipShooterGame.cardGap;
-    } else {
-      return camera.viewport.size.x -
-          StarshipShooterGame.cardWidth -
-          StarshipShooterGame.cardGap;
-    }
-  }
-
-  double _calculateUnicornWidthPosition(double baseWidth) {
-    if (side == SideView.left) {
-      return baseWidth +
-          StarshipShooterGame.cardWidth +
-          StarshipShooterGame.unicornGap;
-    } else {
-      return baseWidth - StarshipShooterGame.cardWidth;
-    }
-  }
-
-  double _calculateHealthHeightPosition(CameraComponent camera) {
-    if (side == SideView.left) {
-      return camera.viewport.size.y -
-          StarshipShooterGame.heartHeight -
-          StarshipShooterGame.heartHeightGap;
-    } else {
-      return StarshipShooterGame.heartHeightGap;
-    }
-  }
-
-  double _calculateHealthWidthPosition(CameraComponent camera) {
-    if (side == SideView.left) {
-      return StarshipShooterGame.cardGap +
-          StarshipShooterGame.cardWidth +
-          StarshipShooterGame.heartGap;
-    } else {
-      return camera.viewport.size.x -
-          StarshipShooterGame.heartWidth -
-          StarshipShooterGame.heartGap -
-          StarshipShooterGame.cardWidth -
-          StarshipShooterGame.cardGap;
-    }
+    return health <= 0 || (stock.isLoaded && stock.cardCount() <= 0);
   }
 
   bool ownsCard(Card card) {
     return _cards.contains(card);
   }
 
-  bool startTurn(Player enemy) {
+  bool startTurn() {
+    final enemy = gameRef.players.firstWhere((element) => element.id != id);
+
     for (final foundation in foundations) {
       if (foundation.isNotEmpty()) {
         // Retrieve the top card of the foundation
@@ -144,53 +126,165 @@ class Player {
     return !canContinue();
   }
 
-  Future<void> generatePlayer(World world, CameraComponent camera) async {
-    final baseWidth = _calculateBaseWidthPosition(camera);
+  @override
+  Future<void> onLoad() async {
+    // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
+    // to the left
 
+    // Position the player
+    final viewportSize = gameRef.camera.viewport.size;
+
+    // Add Health HUD
+    healthComponent = DynamicHealthComponent(
+      side: side,
+      size: StarshipShooterGame.heartSize,
+    );
+
+    // Create the StockPile component
     stock = StockPile(
-      position: Vector2(
-        baseWidth,
-        StarshipShooterGame.cardGap,
-      ),
       player: this,
     );
+
+    // Create the waste pile component
     waste = WastePile(
-      position: Vector2(
-        baseWidth,
-        StarshipShooterGame.cardGap +
-            StarshipShooterGame.cardHeight +
-            StarshipShooterGame.cardGap,
-      ),
       side: side,
       player: this,
     );
+
     foundations = List.generate(
       4,
       (i) => FoundationPile(
         i,
-        position: Vector2(
-          baseWidth,
-          ((StarshipShooterGame.cardGap + StarshipShooterGame.cardHeight) * 2 +
-                  StarshipShooterGame.cardGap) +
-              (i *
-                  (StarshipShooterGame.cardHeight +
-                      StarshipShooterGame.cardGap)),
-        ),
         player: this,
       ),
     );
-    unicorn = Unicorn(
-      position: Vector2(
-        _calculateUnicornWidthPosition(baseWidth),
-        camera.viewport.size.y / 2,
-      ),
-      side: side,
-    );
 
-    world
-      ..add(stock)
-      ..add(waste)
-      ..add(unicorn);
+    // TODO(tryy3): Think about placing this in each component instead?
+    // Generating position based on side is so different it's better to simply
+    // make a switch case based on it and add them after initization
+    switch (side) {
+      case SideView.left:
+        // Player position
+        position = Vector2(
+          (StarshipShooterGame.unicornWidth / 2) +
+              StarshipShooterGame.cardGap +
+              StarshipShooterGame.cardWidth +
+              StarshipShooterGame.cardGap,
+          viewportSize.y / 2,
+        );
+
+        // Component positions
+        stock.position = Vector2(
+          -position.x + (stock.size.x / 2) + StarshipShooterGame.cardGap,
+          -position.y + (stock.size.y / 2) + StarshipShooterGame.cardGap,
+        );
+
+        healthComponent.position = Vector2(
+          -position.x +
+              (healthComponent.size.x / 2) +
+              StarshipShooterGame.heartWidthGap,
+          viewportSize.y -
+              position.y -
+              (healthComponent.size.y / 2) -
+              StarshipShooterGame.heartHeightGap,
+        );
+
+        waste.position = Vector2(
+          -position.x + (waste.size.x / 2) + StarshipShooterGame.cardGap,
+          -position.y +
+              (waste.size.y / 2) +
+              StarshipShooterGame.cardGap +
+              stock.size.y +
+              StarshipShooterGame.cardGap,
+        );
+
+        for (final (index, element) in foundations.indexed) {
+          element.position = Vector2(
+            -position.x + (waste.size.x / 2) + StarshipShooterGame.cardGap,
+            -position.y +
+                (element.size.y / 2) +
+                StarshipShooterGame.cardGap +
+                stock.size.y +
+                StarshipShooterGame.cardGap +
+                waste.size.y +
+                StarshipShooterGame.cardGap +
+                (index * (element.size.y + StarshipShooterGame.cardGap)),
+          );
+        }
+
+      case SideView.right:
+        // Player position
+        position = Vector2(
+          viewportSize.x -
+              (StarshipShooterGame.unicornWidth / 2) -
+              StarshipShooterGame.cardGap -
+              StarshipShooterGame.cardWidth -
+              StarshipShooterGame.cardGap,
+          viewportSize.y / 2,
+        );
+
+        // Component positions
+        stock.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (stock.size.x / 2) -
+              StarshipShooterGame.cardGap,
+          viewportSize.y -
+              position.y -
+              (stock.size.y / 2) -
+              StarshipShooterGame.cardGap,
+        );
+
+        healthComponent.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (healthComponent.size.x / 2) -
+              StarshipShooterGame.heartWidthGap,
+          -position.y +
+              (healthComponent.size.y / 2) +
+              StarshipShooterGame.heartHeightGap,
+        );
+
+        waste.position = Vector2(
+          viewportSize.x -
+              position.x -
+              (waste.size.x / 2) -
+              StarshipShooterGame.cardGap,
+          viewportSize.y -
+              position.y -
+              (waste.size.y / 2) -
+              StarshipShooterGame.cardGap -
+              stock.size.y -
+              StarshipShooterGame.cardGap,
+        );
+
+        for (final (index, element) in foundations.indexed) {
+          element.position = Vector2(
+            viewportSize.x -
+                position.x -
+                (element.size.x / 2) -
+                StarshipShooterGame.cardGap,
+            viewportSize.y -
+                position.y -
+                (element.size.y / 2) -
+                StarshipShooterGame.cardGap -
+                stock.size.y -
+                StarshipShooterGame.cardGap -
+                waste.size.y -
+                StarshipShooterGame.cardGap -
+                (index * (element.size.y + StarshipShooterGame.cardGap)),
+          );
+        }
+    }
+
+    // Add components to the world
+    await addAll([
+      Unicorn(),
+      healthComponent,
+      stock,
+      waste,
+    ]);
+    await addAll(foundations);
 
     // Generate a pile of random cards
     _cards = List.generate(20, (index) {
@@ -203,20 +297,25 @@ class Player {
     })
       ..shuffle();
 
-    await world.addAll(_cards.cast());
-    await world.addAll(foundations);
+    await addAll(_cards.cast());
 
+    // Add cards to the stock pile
     final cardToDeal = _cards.length - 1;
     for (var n = 0; n <= cardToDeal; n++) {
       stock.acquireCard(_cards[n]);
     }
-
-    // Add Health HUD
-    final healthStartPositionX = _calculateHealthWidthPosition(camera);
-    final healthStartPositionY = _calculateHealthHeightPosition(camera);
-
-    healthComponent = DynamicHealthComponent(startHealth: _health, side: side)
-      ..position = Vector2(healthStartPositionX, healthStartPositionY);
-    await world.add(healthComponent);
   }
+
+  void resetAnimation() {
+    animationTicker
+      ..currentIndex = animationTicker.spriteAnimation.frames.length - 1
+      ..update(0.1)
+      ..currentIndex = 0;
+  }
+
+  /// Plays the animation.
+  void playAnimation() => animationTicker.reset();
+
+  /// Returns whether the animation is playing or not.
+  bool isAnimationPlaying() => !animationTicker.done();
 }

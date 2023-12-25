@@ -1,1 +1,0 @@
-enum SideView { left, right }

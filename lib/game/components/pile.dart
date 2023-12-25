@@ -1,4 +1,4 @@
-import 'package:starship_shooter/game/card.dart';
+import 'package:starship_shooter/game/components/card.dart';
 
 abstract class Pile {
   /// Returns true if the [card] can be taken away from this pile and moved

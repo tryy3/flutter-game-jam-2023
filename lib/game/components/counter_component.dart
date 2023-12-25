@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:starship_shooter/game/game.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 class CounterComponent extends PositionComponent
     with HasGameRef<StarshipShooterGame> {

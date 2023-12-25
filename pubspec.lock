@@ -229,18 +229,18 @@ packages:
     dependency: "direct main"
     description:
       name: flame
-      sha256: "8703abbdb3aec264f91823f8af3de4f1a14656326aff0f344d90484be97ee8e7"
+      sha256: aa5aec029f5037e07b44b84df3f495ce159d078b528555470148582581e4915c
       url: "https://pub.dev"
     source: hosted
-    version: "1.12.0"
+    version: "1.13.1"
   flame_audio:
     dependency: "direct main"
     description:
       name: flame_audio
-      sha256: "193fdb56b4144c842839a3c3e70fb7867f78f7461b3716aa257c10742ad1dfd3"
+      sha256: f840c05d6a370f2f95296799fc184c9cc4130321e7b1548fd32bc3c4e4541886
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.1.6"
   flame_behaviors:
     dependency: "direct main"
     description:
@@ -253,18 +253,18 @@ packages:
     dependency: "direct main"
     description:
       name: flame_bloc
-      sha256: "149895ac400c5fc47884acfde5531bae5332196aa4d5cd31419c98cd4837931e"
+      sha256: "20cf708f78fd55908974c9036f0ee1edd2e0b732b07328072a17c2f6c57e86ad"
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.7"
+    version: "1.10.8"
   flame_test:
     dependency: "direct dev"
     description:
       name: flame_test
-      sha256: cdc64e72b65c8f372083808990d46cd1f6e4383f2d85a0d3cda68391d40dc373
+      sha256: "86a4dca759e02e26e96d47d9848152406f1788d1fd09e942d1e10e40ded431e3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.15.1"
+    version: "1.15.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -337,10 +337,10 @@ packages:
     dependency: transitive
     description:
       name: http
-      sha256: "759d1a329847dd0f39226c688d3e06a6b8679668e350e2891a6474f8b4bb8525"
+      sha256: d4872660c46d929f6b8a9ef4e7a7eff7e49bbf0c4ec3f385ee32df5119175139
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.2"
   http_multi_server:
     dependency: transitive
     description:

@@ -4,12 +4,14 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
 class Card extends PositionComponent
     with DragCallbacks
     implements OpacityProvider {
+  Card() : super(anchor: Anchor.center);
+
   bool _faceUp = false;
   Pile? pile;
 
@@ -86,7 +88,8 @@ class Card extends PositionComponent
     }
     _isDragging = false;
     final dropPiles = parent!
-        .componentsAtPoint(position + size / 2)
+        // .componentsAtPoint(position + size / 2)
+        .componentsAtPoint(position)
         .whereType<Pile>()
         .toList();
     if (dropPiles.isNotEmpty) {

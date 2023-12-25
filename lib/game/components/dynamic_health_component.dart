@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/side_view.dart';
+import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
+import 'package:starship_shooter/game/bloc/player/player_state.dart';
+import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 class HealthSprite extends OpacityProvider {
   HealthSprite({
@@ -26,18 +29,20 @@ class HealthSprite extends OpacityProvider {
 }
 
 class DynamicHealthComponent extends PositionComponent
-    with HasGameRef<StarshipShooterGame> {
+    with
+        HasGameRef<StarshipShooterGame>,
+        FlameBlocListenable<PlayerBloc, PlayerState> {
   DynamicHealthComponent({
-    required this.startHealth,
+    required super.size,
+    super.position,
     this.side = SideView.left,
-  }) {
-    currentHealth = startHealth;
-  }
+  }) : super(anchor: Anchor.center);
 
   SideView side;
 
-  int startHealth;
-  late int currentHealth;
+  int startHealth = 20; // Consider changing this to a const?
+  int get currentHealth =>
+      gameRef.playerBloc.state.players[(parent! as Player).id]!.health;
   List<HealthSprite> renderSprites = List.empty(growable: true);
 
   final availableSprite = spriteSheet(288, 4224, 32, 32);
@@ -45,16 +50,23 @@ class DynamicHealthComponent extends PositionComponent
   final extraHealthSprite = spriteSheet(320, 4224, 32, 32);
 
   @override
+  // TODO: implement debugMode
+  bool get debugMode => false;
+
+  @override
   void update(double dt) {
     super.update(dt);
 
-    if (renderSprites.length < currentHealth) {
-      for (var i = renderSprites.length; i < currentHealth; i++) {
+    final health = max(0, currentHealth);
+
+    if (renderSprites.length < health) {
+      for (var i = renderSprites.length; i < health; i++) {
         final column = i % startHealth;
         final row = (i / startHealth).floorToDouble();
 
         var x = 0 +
-            ((StarshipShooterGame.heartWidth + StarshipShooterGame.heartGap) *
+            ((StarshipShooterGame.heartWidth +
+                    StarshipShooterGame.heartWidthGap) *
                 column);
         if (side == SideView.right) x = -x;
 
@@ -78,8 +90,8 @@ class DynamicHealthComponent extends PositionComponent
 
         renderSprites.add(healthSprite);
       }
-    } else if (renderSprites.length > currentHealth) {
-      for (var i = renderSprites.length; i > currentHealth; i--) {
+    } else if (renderSprites.length > health) {
+      for (var i = renderSprites.length; i > health; i--) {
         final rSprite = renderSprites[i - 1];
         if (rSprite.removing) continue;
 
@@ -95,7 +107,8 @@ class DynamicHealthComponent extends PositionComponent
       }
     }
 
-    for (final rSprite in renderSprites) {
+    for (var i = 0; i < renderSprites.length; i++) {
+      final rSprite = renderSprites[i];
       rSprite.effect.update(dt);
     }
   }
@@ -105,40 +118,13 @@ class DynamicHealthComponent extends PositionComponent
     super.render(canvas);
 
     for (final rSprite in renderSprites) {
-      drawSprite(
+      rSprite.sprite.render(
         canvas,
-        rSprite.sprite,
-        rSprite.position.x,
-        rSprite.position.y,
-        opacity: rSprite.opacity,
+        size: size,
+        position: rSprite.position,
+        overridePaint: Paint()
+          ..color = Colors.white.withOpacity(rSprite.opacity),
       );
-    }
-  }
-
-  void drawSprite(
-    Canvas canvas,
-    Sprite sprite,
-    double positionX,
-    double positionY, {
-    double scale = 1,
-    bool rotate = false,
-    double opacity = 1,
-  }) {
-    if (rotate) {
-      canvas
-        ..save()
-        ..translate(size.x / 2, size.y / 2)
-        ..rotate(pi)
-        ..translate(-size.x / 2, -size.y / 2);
-    }
-    sprite.render(
-      canvas,
-      position: Vector2(positionX, positionY),
-      size: sprite.srcSize.scaled(scale),
-      overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
-    );
-    if (rotate) {
-      canvas.restore();
     }
   }
 }

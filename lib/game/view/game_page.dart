@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flame/game.dart' hide Route;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fullscreen_window/fullscreen_window.dart';
-import 'package:starship_shooter/game/cubit/audio/audio_cubit.dart';
-import 'package:starship_shooter/game/cubit/game/game_stats_bloc.dart';
+import 'package:starship_shooter/game/bloc/audio/audio_cubit.dart';
+import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/game/view/game_button.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -27,7 +29,8 @@ class GamePage extends StatelessWidget {
             create: (context) =>
                 AudioCubit(audioCache: context.read<PreloadCubit>().audio),
           ),
-          BlocProvider<GameStatsBloc>(create: (_) => GameStatsBloc()),
+          BlocProvider<GameBloc>(create: (_) => GameBloc()),
+          BlocProvider<PlayerBloc>(create: (_) => PlayerBloc()),
         ],
         child: const Scaffold(
           body: SafeArea(child: GameView()),
@@ -77,7 +80,8 @@ class _GameViewState extends State<GameView> {
           l10n: context.l10n,
           effectPlayer: context.read<AudioCubit>().effectPlayer,
           textStyle: textStyle,
-          statsBloc: context.read<GameStatsBloc>(),
+          gameBloc: context.read<GameBloc>(),
+          playerBloc: context.read<PlayerBloc>(),
         );
 
     return Stack(
@@ -96,43 +100,43 @@ class _GameViewState extends State<GameView> {
             },
           ),
         ),
+        Container(
+          margin: const EdgeInsets.only(left: 120, top: 20),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(
+                  Colors.white,
+                ),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                exit(0);
+              },
+              child: const Text(
+                'Quit',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
         Center(
           child: GameButton(
             game: _game,
           ),
         ),
-        // Center(
-        //   child: ElevatedButton(
-        //     style: ButtonStyle(
-        //       backgroundColor: MaterialStateProperty.all(
-        //         gameOver ? Colors.amber : Colors.blue,
-        //       ),
-        //     ),
-        //     onPressed: () async {
-        //       context.read<GameStatsBloc>().add(const GameOver());
-        //       // if (gameOver) {
-        //       //   final navigator = Navigator.of(context);
-        //       //   await navigator.pushReplacement<void, void>(GamePage.route());
-        //       //   return;
-        //       // }
-        //       // final fGame = _game! as StarshipShooterGame;
-
-        //       // // if (fGame.isOver()) {
-        //       // //   setState(() => gameOver = true);
-        //       // // } else {
-        //       // fGame.endTurn();
-        //       // }
-        //     },
-        //     child: const Text(
-        //       'End Turn',
-        //       style: TextStyle(
-        //         color: Colors.black,
-        //         fontSize: 18,
-        //         fontWeight: FontWeight.bold,
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
