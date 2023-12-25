@@ -3,7 +3,7 @@ import 'package:flame/cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
+import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/loading.dart';
 

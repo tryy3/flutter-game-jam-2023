@@ -3,10 +3,9 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:starship_shooter/game/cubit/game/game_bloc.dart';
-import 'package:starship_shooter/game/cubit/game/game_events.dart';
-import 'package:starship_shooter/game/cubit/game/game_state.dart';
-import 'package:starship_shooter/game/starship_shooter.dart';
+import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_events.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/view/game_page.dart';
 
 class GameButton extends StatelessWidget {

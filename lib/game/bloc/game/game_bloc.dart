@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:starship_shooter/game/cubit/game/game_events.dart';
-import 'package:starship_shooter/game/cubit/game/game_state.dart';
+import 'package:starship_shooter/game/bloc/game/game_events.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
   GameBloc()

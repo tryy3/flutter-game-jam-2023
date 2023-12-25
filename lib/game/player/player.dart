@@ -4,8 +4,11 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
-import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flame_bloc/flame_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_events.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
+import 'package:starship_shooter/game/bloc/player/player_events.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
@@ -13,16 +16,8 @@ import 'package:starship_shooter/game/components/dynamic_health_component.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
-import 'package:starship_shooter/game/cubit/game/game_bloc.dart';
-import 'package:starship_shooter/game/cubit/game/game_events.dart';
-import 'package:starship_shooter/game/cubit/game/game_state.dart';
-import 'package:starship_shooter/game/cubit/player/player_bloc.dart';
-import 'package:starship_shooter/game/cubit/player/player_events.dart';
-import 'package:starship_shooter/game/cubit/player/player_state.dart';
-import 'package:starship_shooter/game/entities/unicorn/behaviors/tapping_behavior.dart';
 import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/side_view.dart';
-import 'package:starship_shooter/gen/assets.gen.dart';
 
 enum PlayerType {
   cold,
