@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 
 class Card extends PositionComponent

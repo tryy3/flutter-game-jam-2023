@@ -36,6 +36,21 @@ class GameButton extends StatelessWidget {
                 ),
               ),
             );
+          case GameStatus.processTurn || GameStatus.startTurn:
+            return ElevatedButton(
+              onPressed: null,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.grey),
+              ),
+              child: const Text(
+                'Proccessing turn...',
+                style: TextStyle(
+                  color: Colors.black38,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
           default:
             return ElevatedButton(
               onPressed: () {

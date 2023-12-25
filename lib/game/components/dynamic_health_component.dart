@@ -36,26 +36,18 @@ class DynamicHealthComponent extends PositionComponent
     required super.size,
     super.position,
     this.side = SideView.left,
-  }) : super(anchor: Anchor.center) {
-    currentHealth = startHealth;
-    startHealth =
-        gameRef.playerBloc.state.players[(parent! as Player).id]!.health;
-  }
+  }) : super(anchor: Anchor.center);
 
   SideView side;
 
-  late int startHealth;
-  late int currentHealth;
+  int startHealth = 20; // Consider changing this to a const?
+  int get currentHealth =>
+      gameRef.playerBloc.state.players[(parent! as Player).id]!.health;
   List<HealthSprite> renderSprites = List.empty(growable: true);
 
   final availableSprite = spriteSheet(288, 4224, 32, 32);
   final unavailableSprite = spriteSheet(192, 4224, 32, 32);
   final extraHealthSprite = spriteSheet(320, 4224, 32, 32);
-
-  @override
-  void onNewState(PlayerState state) {
-    currentHealth = state.players[(parent! as Player).id]!.health;
-  }
 
   @override
   // TODO: implement debugMode
