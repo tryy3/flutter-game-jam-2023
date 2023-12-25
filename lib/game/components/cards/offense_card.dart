@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/widgets.dart';
 import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 class OffenseCard extends Card {
   OffenseCard({required this.playerType}) {

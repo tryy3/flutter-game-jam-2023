@@ -6,9 +6,8 @@ import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/bloc/player/player_state.dart';
-import 'package:starship_shooter/game/game.dart';
 import 'package:starship_shooter/game/player/player.dart';
-import 'package:starship_shooter/game/side_view.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 class HealthSprite extends OpacityProvider {
   HealthSprite({
@@ -35,16 +34,17 @@ class DynamicHealthComponent extends PositionComponent
         FlameBlocListenable<PlayerBloc, PlayerState> {
   DynamicHealthComponent({
     required super.size,
-    required this.startHealth,
     super.position,
     this.side = SideView.left,
   }) : super(anchor: Anchor.center) {
     currentHealth = startHealth;
+    startHealth =
+        gameRef.playerBloc.state.players[(parent! as Player).id]!.health;
   }
 
   SideView side;
 
-  int startHealth;
+  late int startHealth;
   late int currentHealth;
   List<HealthSprite> renderSprites = List.empty(growable: true);
 
@@ -65,7 +65,7 @@ class DynamicHealthComponent extends PositionComponent
   void update(double dt) {
     super.update(dt);
 
-    var health = max(0, currentHealth);
+    final health = max(0, currentHealth);
 
     if (renderSprites.length < health) {
       for (var i = renderSprites.length; i < health; i++) {
@@ -126,9 +126,6 @@ class DynamicHealthComponent extends PositionComponent
     super.render(canvas);
 
     for (final rSprite in renderSprites) {
-      // canvas
-      //   ..save()
-      //   ..translate(-)
       rSprite.sprite.render(
         canvas,
         size: size,
@@ -136,35 +133,6 @@ class DynamicHealthComponent extends PositionComponent
         overridePaint: Paint()
           ..color = Colors.white.withOpacity(rSprite.opacity),
       );
-      // drawSprite(
-      //   canvas,
-      //   rSprite.sprite,
-      //   rSprite.position.x,
-      //   rSprite.position.y,
-      //   opacity: rSprite.opacity,
-      // );
     }
-  }
-
-  void drawSprite(
-    Canvas canvas,
-    Sprite sprite,
-    double positionX,
-    double positionY, {
-    double scale = 1,
-    bool rotate = false,
-    double opacity = 1,
-  }) {
-    final spriteSize = sprite.srcSize.scaled(scale);
-    canvas
-      ..save()
-      ..translate(-spriteSize.x / 2, -spriteSize.y / 2);
-    sprite.render(
-      canvas,
-      position: Vector2(positionX, positionY),
-      size: spriteSize,
-      overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
-    );
-    canvas.restore();
   }
 }

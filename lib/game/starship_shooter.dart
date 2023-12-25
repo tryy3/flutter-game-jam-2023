@@ -10,16 +10,9 @@ import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/bloc/player/player_state.dart';
 import 'package:starship_shooter/game/player/player.dart';
-import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
-// enum GameState {
-//   drawingCards,
-//   endDrawingTurn,
-//   player1Draws,
-//   player2Draws,
-//   endPlayerTurn,
-// }
+enum SideView { left, right }
 
 class StarshipShooterGame extends FlameGame {
   StarshipShooterGame({

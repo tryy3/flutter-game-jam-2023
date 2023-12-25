@@ -1,8 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
-import 'package:starship_shooter/game/side_view.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class WastePile extends PositionComponent implements Pile {
@@ -15,7 +14,6 @@ class WastePile extends PositionComponent implements Pile {
   Player player;
 
   //#region Pile API
-
   @override
   // TODO: implement debugMode
   bool get debugMode => false;
@@ -50,7 +48,6 @@ class WastePile extends PositionComponent implements Pile {
     _cards.add(card);
     _fanOutTopCards();
   }
-
   //#endregion
 
   List<Card> removeAllCards() {

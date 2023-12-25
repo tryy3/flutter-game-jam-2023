@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 class FoundationPile extends PositionComponent implements Pile {
   FoundationPile(this.intSuit, {required this.player, super.position})
@@ -53,7 +53,6 @@ class FoundationPile extends PositionComponent implements Pile {
       ..priority = _cards.length;
     _cards.add(card);
   }
-
   //#endregion
 
   //#region Foundation Logic
@@ -71,7 +70,6 @@ class FoundationPile extends PositionComponent implements Pile {
   //#endregion
 
   //#region Rendering
-
   final _borderPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 3
@@ -81,6 +79,5 @@ class FoundationPile extends PositionComponent implements Pile {
   void render(Canvas canvas) {
     canvas.drawRRect(StarshipShooterGame.cardRRect, _borderPaint);
   }
-
   //#endregion
 }

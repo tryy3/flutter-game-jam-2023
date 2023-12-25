@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/painting.dart';
 import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/pile.dart';
+import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/player/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
@@ -16,7 +16,6 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
   final Player player;
 
   //#region Pile API
-
   @override
   bool canMoveCard(Card card) => false;
 
@@ -42,7 +41,6 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
   int cardCount() {
     return _cards.length;
   }
-
   //#endregion
 
   @override
@@ -64,7 +62,6 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
   }
 
   //#region Rendering
-
   final _borderPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 10
@@ -84,6 +81,5 @@ class StockPile extends PositionComponent with TapCallbacks implements Pile {
         _circlePaint,
       );
   }
-
   //#endregion
 }

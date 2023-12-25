@@ -16,8 +16,8 @@ import 'package:starship_shooter/game/components/dynamic_health_component.dart';
 import 'package:starship_shooter/game/components/foundation_pile.dart';
 import 'package:starship_shooter/game/components/stock_pile.dart';
 import 'package:starship_shooter/game/components/waste_pile.dart';
-import 'package:starship_shooter/game/game.dart';
-import 'package:starship_shooter/game/side_view.dart';
+import 'package:starship_shooter/game/entities/unicorn/unicorn.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 
 enum PlayerType {
   cold,
@@ -32,13 +32,9 @@ class Player extends PositionComponent
     required this.id,
     required this.side,
     required this.playerType,
-    int health = 20,
-  }) : super(anchor: Anchor.center) {
-    _health = health;
-  }
+  }) : super(anchor: Anchor.center);
 
   SideView side;
-  late int _health;
 
   final int id;
   final PlayerType playerType;
@@ -82,7 +78,7 @@ class Player extends PositionComponent
   }
 
   bool isGameOver() {
-    return _health <= 0 || (stock.isLoaded && stock.cardCount() <= 0);
+    return health <= 0 || (stock.isLoaded && stock.cardCount() <= 0);
   }
 
   bool ownsCard(Card card) {
@@ -140,7 +136,6 @@ class Player extends PositionComponent
 
     // Add Health HUD
     healthComponent = DynamicHealthComponent(
-      startHealth: _health,
       side: side,
       size: StarshipShooterGame.heartSize,
     );

@@ -3,7 +3,7 @@ import 'package:flame/sprite.dart';
 import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/entities/unicorn/behaviors/tapping_behavior.dart';
-import 'package:starship_shooter/game/game.dart';
+import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
 class Unicorn extends PositionedEntity with HasGameRef {
