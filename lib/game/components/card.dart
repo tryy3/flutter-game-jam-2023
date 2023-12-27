@@ -5,7 +5,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/components/pile.dart';
-import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/components/player.dart';
 
 class Card extends PositionComponent
     with DragCallbacks
@@ -25,6 +25,8 @@ class Card extends PositionComponent
   void useCard(Player player, Player enemy) {}
 
   double _opacity = 1;
+  @override
+  bool get debugMode => true;
 
   @override
   double get opacity => _opacity;

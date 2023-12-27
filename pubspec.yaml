@@ -43,6 +43,11 @@ flutter:
     - assets/images/klondike_sprites.png
     - assets/licenses/poppins/
 
+  fonts:
+    - family: "04B_03"
+      fonts:
+        - asset: assets/fonts/04B_03__.TTF
+
 msix_config:
   display_name: Starship Shooter
   publicer_display_name: Nexer AB

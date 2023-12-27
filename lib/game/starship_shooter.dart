@@ -9,7 +9,7 @@ import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/bloc/player/player_state.dart';
-import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
 enum SideView { left, right }
@@ -60,26 +60,43 @@ class StarshipShooterGame extends FlameGame {
   @override
   bool get debugMode => false;
 
+  // Card settings
   static const double cardGap = 30;
   static const double cardWidth = 63;
   static const double cardHeight = 105;
   static const double cardRadius = 5;
-  static final Vector2 cardSize = Vector2(cardWidth, cardHeight);
+  static final Vector2 cardSize = Vector2(cardHeight, cardWidth);
   static final cardRRect = RRect.fromRectAndRadius(
-    const Rect.fromLTWH(0, 0, cardWidth, cardHeight),
+    const Rect.fromLTWH(0, 0, cardHeight, cardWidth),
     const Radius.circular(cardRadius),
   );
 
+  // Unicorn settings
   static const double unicornGap = 100;
   static const double unicornWidth = 100;
   static const double unicornHeight = 100;
   static final Vector2 unicornSize = Vector2(unicornWidth, unicornHeight);
 
+  // Heart settings
   static const double heartWidthGap = 10;
   static const double heartHeightGap = 30;
   static const double heartWidth = 32;
   static const double heartHeight = 32;
   static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
+  static const double statsBarsWidth = 32;
+  static const double statsBarsLength = 400;
+
+  // Margin padding settings
+  static const double margin = 20;
+  static const double padding = 20;
+  static const double radius = 5;
+
+  static const Color lightBlack80 = Color(0x80000000);
+  static const Color lightGrey50 = Color(0x50ffffff);
+  static final borderPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 3
+    ..color = lightGrey50;
 
   final AppLocalizations l10n;
   final audio_player.AudioPlayer effectPlayer;

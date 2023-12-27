@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
@@ -6,7 +7,7 @@ import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/bloc/player/player_state.dart';
-import 'package:starship_shooter/game/player/player.dart';
+import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class HealthSprite extends OpacityProvider {
@@ -51,6 +52,31 @@ class DynamicHealthComponent extends PositionComponent
 
   @override
   bool get debugMode => false;
+
+  @override
+  Future<void> onLoad() async {
+    final parentPosition = (parent! as PositionComponent).position;
+    final viewportSize = gameRef.camera.viewport.size;
+
+    switch (side) {
+      case SideView.left:
+        position = Vector2(
+          -parentPosition.x + (size.x / 2) + StarshipShooterGame.heartWidthGap,
+          viewportSize.y -
+              parentPosition.y -
+              (size.y / 2) -
+              StarshipShooterGame.heartHeightGap,
+        );
+      case SideView.right:
+        position = Vector2(
+          viewportSize.x -
+              parentPosition.x -
+              (size.x / 2) -
+              StarshipShooterGame.heartWidthGap,
+          -parentPosition.y + (size.y / 2) + StarshipShooterGame.heartHeightGap,
+        );
+    }
+  }
 
   @override
   void update(double dt) {
