@@ -10,29 +10,18 @@ import 'package:starship_shooter/game/starship_shooter.dart';
 
 class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
   StatsBars({required this.side, required this.player, super.position})
-      : super(anchor: Anchor.center) {
-    size = Vector2(
-      StarshipShooterGame.padding +
-          StarshipShooterGame.statsBarsLength +
-          StarshipShooterGame.padding,
-      StarshipShooterGame.padding +
-          (StarshipShooterGame.statsBarsWidth + StarshipShooterGame.padding) *
-              3,
-    );
-
-    _rRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(
-        StarshipShooterGame.radius,
-      ),
-    );
-  }
+      : super(anchor: Anchor.center) {}
 
   // Configuration
   final int maxHeat = 20;
   final int maxCold = 20;
   final int maxHealth = 20;
+
+  // Rectangles
   late RRect _rRect;
+  late RRect _healthBarRRect;
+  late RRect _heatBarRRect;
+  late RRect _coldBarRRect;
 
   // Stats
   int currentHeat = 10;
@@ -64,6 +53,14 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
       ),
     );
     await add(title);
+
+    // Resize based on deck size which is the largest element so far
+    size = Vector2(
+      player.deck.size.x,
+      StarshipShooterGame.padding +
+          (StarshipShooterGame.statsBarsWidth + StarshipShooterGame.padding) *
+              3,
+    );
 
     switch (side) {
       case SideView.left:
@@ -105,47 +102,52 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
           size.y / 2,
         );
     }
+    _rRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      const Radius.circular(
+        StarshipShooterGame.radius,
+      ),
+    );
+    _healthBarRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        StarshipShooterGame.padding,
+        StarshipShooterGame.padding,
+        size.x - (StarshipShooterGame.padding * 2),
+        StarshipShooterGame.statsBarsWidth,
+      ),
+      const Radius.circular(
+        StarshipShooterGame.radius,
+      ),
+    );
+    _heatBarRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        StarshipShooterGame.padding,
+        StarshipShooterGame.padding +
+            StarshipShooterGame.statsBarsWidth +
+            StarshipShooterGame.padding,
+        size.x - (StarshipShooterGame.padding * 2),
+        StarshipShooterGame.statsBarsWidth,
+      ),
+      const Radius.circular(
+        StarshipShooterGame.radius,
+      ),
+    );
+    _coldBarRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        StarshipShooterGame.padding,
+        StarshipShooterGame.padding +
+            StarshipShooterGame.statsBarsWidth +
+            StarshipShooterGame.padding +
+            StarshipShooterGame.statsBarsWidth +
+            StarshipShooterGame.padding,
+        size.x - (StarshipShooterGame.padding * 2),
+        StarshipShooterGame.statsBarsWidth,
+      ),
+      const Radius.circular(
+        StarshipShooterGame.radius,
+      ),
+    );
   }
-
-  final healthBarRRect = RRect.fromRectAndRadius(
-    const Rect.fromLTWH(
-      StarshipShooterGame.padding,
-      StarshipShooterGame.padding,
-      StarshipShooterGame.statsBarsLength,
-      StarshipShooterGame.statsBarsWidth,
-    ),
-    const Radius.circular(
-      StarshipShooterGame.radius,
-    ),
-  );
-  final heatBarRRect = RRect.fromRectAndRadius(
-    const Rect.fromLTWH(
-      StarshipShooterGame.padding,
-      StarshipShooterGame.padding +
-          StarshipShooterGame.statsBarsWidth +
-          StarshipShooterGame.padding,
-      StarshipShooterGame.statsBarsLength,
-      StarshipShooterGame.statsBarsWidth,
-    ),
-    const Radius.circular(
-      StarshipShooterGame.radius,
-    ),
-  );
-  final coldBarRRect = RRect.fromRectAndRadius(
-    const Rect.fromLTWH(
-      StarshipShooterGame.padding,
-      StarshipShooterGame.padding +
-          StarshipShooterGame.statsBarsWidth +
-          StarshipShooterGame.padding +
-          StarshipShooterGame.statsBarsWidth +
-          StarshipShooterGame.padding,
-      StarshipShooterGame.statsBarsLength,
-      StarshipShooterGame.statsBarsWidth,
-    ),
-    const Radius.circular(
-      StarshipShooterGame.radius,
-    ),
-  );
 
   final statsBarBorder = Paint()
     ..style = PaintingStyle.stroke
@@ -181,14 +183,14 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
       ..drawRRect(_rRect, StarshipShooterGame.borderPaint)
 
       // Render the health bar
-      ..drawRRect(healthBarRRect, statsBarBorder)
+      ..drawRRect(_healthBarRRect, statsBarBorder)
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(
-            healthBarRRect.left,
-            healthBarRRect.top,
-            (healthBarRRect.width / maxHealth) * currentHealth,
-            healthBarRRect.height,
+            _healthBarRRect.left,
+            _healthBarRRect.top,
+            (_healthBarRRect.width / maxHealth) * currentHealth,
+            _healthBarRRect.height,
           ),
           const Radius.circular(
             StarshipShooterGame.radius,
@@ -198,14 +200,14 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
       )
 
       // Render the heat bar
-      ..drawRRect(heatBarRRect, statsBarBorder)
+      ..drawRRect(_heatBarRRect, statsBarBorder)
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(
-            heatBarRRect.left,
-            heatBarRRect.top,
-            (heatBarRRect.width / maxHeat) * currentHeat,
-            heatBarRRect.height,
+            _heatBarRRect.left,
+            _heatBarRRect.top,
+            (_heatBarRRect.width / maxHeat) * currentHeat,
+            _heatBarRRect.height,
           ),
           const Radius.circular(
             StarshipShooterGame.radius,
@@ -215,14 +217,14 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
       )
 
       // Render the cold bar
-      ..drawRRect(coldBarRRect, statsBarBorder)
+      ..drawRRect(_coldBarRRect, statsBarBorder)
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(
-            coldBarRRect.left,
-            coldBarRRect.top,
-            (coldBarRRect.width / maxCold) * currentCold,
-            coldBarRRect.height,
+            _coldBarRRect.left,
+            _coldBarRRect.top,
+            (_coldBarRRect.width / maxCold) * currentCold,
+            _coldBarRRect.height,
           ),
           const Radius.circular(
             StarshipShooterGame.radius,

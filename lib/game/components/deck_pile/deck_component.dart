@@ -6,12 +6,13 @@ import 'package:flame/extensions.dart';
 import 'package:flame/text.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/card_slots/card_slots_unit.dart';
-import 'package:starship_shooter/game/components/deck_pile/deck_unit.dart';
+import 'package:starship_shooter/game/components/deck_pile/deck_pile_unit.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
-class DeckPile extends PositionComponent with HasGameRef<StarshipShooterGame> {
-  DeckPile({required this.side, required this.player, super.position})
+class DeckComponent extends PositionComponent
+    with HasGameRef<StarshipShooterGame> {
+  DeckComponent({required this.side, required this.player, super.position})
       : super(
           anchor: Anchor.center,
         ) {
@@ -51,6 +52,18 @@ class DeckPile extends PositionComponent with HasGameRef<StarshipShooterGame> {
 
   void addCard(int index, Card card) => _units[index].acquireCard(card);
 
+  final title = TextComponent(
+    text: 'DECK',
+    anchor: Anchor.center,
+    textRenderer: TextPaint(
+      style: const TextStyle(
+        fontSize: 24,
+        color: StarshipShooterGame.lightGrey50,
+        fontFamily: '04B_03',
+      ),
+    ),
+  );
+
   @override
   bool get debugMode => false;
 
@@ -59,18 +72,6 @@ class DeckPile extends PositionComponent with HasGameRef<StarshipShooterGame> {
   Future<void> onLoad() async {
     final viewportSize = gameRef.camera.viewport.size;
     final parentPosition = (parent! as PositionComponent).position;
-
-    final title = TextComponent(
-      text: 'DECK',
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 24,
-          color: StarshipShooterGame.lightGrey50,
-          fontFamily: '04B_03',
-        ),
-      ),
-    );
     await add(title);
 
     switch (side) {

@@ -26,7 +26,7 @@ class Card extends PositionComponent
 
   double _opacity = 1;
   @override
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   double get opacity => _opacity;
@@ -115,6 +115,5 @@ class Card extends PositionComponent
       attachedCards.clear();
     }
   }
-
   //#endregion
 }

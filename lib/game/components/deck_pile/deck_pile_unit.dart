@@ -40,16 +40,27 @@ class DeckPileUnit extends PositionComponent
   }
 
   @override
-  bool canAcceptCard(Card card) => _card == null;
+  bool canAcceptCard(Card card) {
+    if (!player.ownsCard(card)) return false;
+    if (_card != null) return false;
+    return true;
+  }
 
   @override
   bool canMoveCard(Card card) => _card != null;
 
   @override
-  void removeCard(Card card) => _card = null;
+  void removeCard(Card card) {
+    if (!canMoveCard(card)) return;
+    _card = null;
+  }
 
   @override
-  void returnCard(Card card) => card.priority = 0;
+  void returnCard(Card card) {
+    card
+      ..position = absolutePosition
+      ..priority = 0;
+  }
   //#endregion
 
   //#region Rendering logic

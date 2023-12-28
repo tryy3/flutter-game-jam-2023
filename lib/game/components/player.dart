@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
@@ -14,7 +13,7 @@ import 'package:starship_shooter/game/components/card_slots/card_slots_component
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
 import 'package:starship_shooter/game/components/deck_pile/deck_component.dart';
-import 'package:starship_shooter/game/components/dynamic_health_component.dart';
+import 'package:starship_shooter/game/components/information_section.dart';
 import 'package:starship_shooter/game/components/stats_bars.dart';
 import 'package:starship_shooter/game/entities/unicorn/unicorn.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
@@ -39,11 +38,11 @@ class Player extends PositionComponent
   final int id;
   final PlayerType playerType;
 
-  late DeckPile deck;
+  late DeckComponent deck;
   late CardSlotsComponent cardSlots;
   late StatsBars statsBars;
+  late InformationSection informationSection;
   late List<Card> _cards;
-  // late DynamicHealthComponent healthComponent;
   late SpriteAnimationComponent _animationComponent;
 
   SpriteAnimationTicker get animationTicker =>
@@ -111,9 +110,10 @@ class Player extends PositionComponent
     // );
 
     // Create player related components
-    deck = DeckPile(side: side, player: this);
+    deck = DeckComponent(side: side, player: this);
     cardSlots = CardSlotsComponent(side: side, player: this);
     statsBars = StatsBars(side: side, player: this);
+    informationSection = InformationSection(side: side, player: this);
 
     // Set Player position based on SideView
     switch (side) {
@@ -144,8 +144,9 @@ class Player extends PositionComponent
       Unicorn(),
       deck,
       cardSlots,
-      statsBars,
     ]);
+    await add(statsBars);
+    await add(informationSection);
 
     // Generate a pile of random cards
     _cards = List.generate(10, (index) {
