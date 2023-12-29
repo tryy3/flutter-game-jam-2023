@@ -29,6 +29,10 @@ class DeckPileUnit extends PositionComponent
   @override
   bool get debugMode => false;
 
+  bool hasActiveCard() {
+    return _card != null;
+  }
+
   //#region Pile API
   @override
   void acquireCard(Card card) {
@@ -60,6 +64,11 @@ class DeckPileUnit extends PositionComponent
     card
       ..position = absolutePosition
       ..priority = 0;
+  }
+
+  @override
+  Card? getFirstCard() {
+    return _card;
   }
   //#endregion
 

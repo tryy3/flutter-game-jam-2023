@@ -30,6 +30,10 @@ class CardSlotsUnit extends PositionComponent
   // TODO: implement debugMode
   bool get debugMode => false;
 
+  bool hasActiveCard() {
+    return _card != null;
+  }
+
   //#region Pile API
   @override
   void acquireCard(Card card) {
@@ -61,6 +65,11 @@ class CardSlotsUnit extends PositionComponent
     card
       ..position = absolutePosition
       ..priority = 0;
+  }
+
+  @override
+  Card? getFirstCard() {
+    return _card;
   }
   //#endregion
 

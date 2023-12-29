@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_behaviors/flame_behaviors.dart';
@@ -7,7 +9,7 @@ import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
 class Unicorn extends PositionedEntity with HasGameRef {
-  Unicorn()
+  Unicorn({required this.side})
       : super(
           anchor: Anchor.center,
           size: StarshipShooterGame.unicornSize,
@@ -16,13 +18,11 @@ class Unicorn extends PositionedEntity with HasGameRef {
           ],
         );
 
-  @visibleForTesting
-  Unicorn.test({
-    required super.position,
-    super.behaviors,
-  }) : super(size: Vector2.all(32));
-
+  SideView side;
   late SpriteAnimationComponent _animationComponent;
+
+  @override
+  bool get debugMode => false;
 
   @visibleForTesting
   SpriteAnimationTicker get animationTicker =>
@@ -48,6 +48,17 @@ class Unicorn extends PositionedEntity with HasGameRef {
         size: size,
       ),
     );
+
+    switch (side) {
+      case SideView.left:
+        _animationComponent
+          ..angle = pi / 2
+          ..position = Vector2(_animationComponent.size.x, y);
+      case SideView.right:
+        _animationComponent
+          ..angle = -pi / 2
+          ..position = Vector2(x, _animationComponent.size.y);
+    }
 
     resetAnimation();
   }

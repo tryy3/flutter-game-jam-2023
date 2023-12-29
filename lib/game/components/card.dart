@@ -22,7 +22,7 @@ class Card extends PositionComponent
   bool _isDragging = false;
   final List<Card> attachedCards = [];
 
-  void useCard(Player player, Player enemy) {}
+  void useCard(Player player) {}
 
   double _opacity = 1;
   @override

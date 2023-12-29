@@ -6,7 +6,7 @@ class PlayerBloc extends Bloc<PlayerEvents, PlayerState> {
   PlayerBloc() : super(const PlayerState.initial()) {
     on<PlayerHealthUpdateEvent>(
       (event, emit) => emit(
-        state.copyWith(playerId: event.playerId, health: event.health),
+        state.copyWith(entity: event.player, health: event.health),
       ),
     );
   }

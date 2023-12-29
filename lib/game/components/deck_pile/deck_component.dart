@@ -50,8 +50,42 @@ class DeckComponent extends PositionComponent
   SideView side;
   Player player;
 
+  @override
+  bool get debugMode => false;
+
+  //#region Deck Component API
   void addCard(int index, Card card) => _units[index].acquireCard(card);
 
+  bool hasActiveCards() {
+    for (final unit in _units) {
+      if (unit.hasActiveCard()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // sortCards will go through all the cards and sort them by order
+  void sortCards() {
+    // Create a temporary list of cards to store
+    final cards = <Card>[];
+
+    for (final unit in _units) {
+      if (unit.hasActiveCard()) {
+        final card = unit.getFirstCard()!; // Retrieve the card
+        unit.removeCard(card); // Remove the card from the current unit
+        cards.add(card);
+      }
+    }
+
+    // Add them back to the units based on order
+    for (var i = 0; i < cards.length; i++) {
+      _units[i].acquireCard(cards[i]);
+    }
+  }
+  //#endRegion
+
+  //#region Rendering logic
   final title = TextComponent(
     text: 'DECK',
     anchor: Anchor.center,
@@ -64,10 +98,6 @@ class DeckComponent extends PositionComponent
     ),
   );
 
-  @override
-  bool get debugMode => false;
-
-  //#region Rendering logic
   @override
   Future<void> onLoad() async {
     final viewportSize = gameRef.camera.viewport.size;

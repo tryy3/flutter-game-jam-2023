@@ -20,9 +20,9 @@ class OffenseCard extends Card {
   }
 
   @override
-  void useCard(Player player, Player enemy) {
-    super.useCard(player, enemy);
-    enemy.health -= damage;
+  void useCard(Player player) {
+    super.useCard(player);
+    // enemy.health -= damage;
   }
 
   //#region Rendering

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
@@ -28,14 +29,14 @@ class Player extends PositionComponent
         HasGameRef<StarshipShooterGame>,
         FlameBlocListenable<GameBloc, GameState> {
   Player({
-    required this.id,
+    required this.entity,
     required this.side,
     required this.playerType,
   }) : super(anchor: Anchor.center);
 
   // Properties
   SideView side;
-  final int id;
+  final Entity entity;
   final PlayerType playerType;
 
   late DeckComponent deck;
@@ -48,9 +49,9 @@ class Player extends PositionComponent
   SpriteAnimationTicker get animationTicker =>
       _animationComponent.animationTicker!;
 
-  int get health => game.playerBloc.state.players[id]!.health;
+  int get health => game.playerBloc.state.players[entity]!.health;
   set health(int value) {
-    game.playerBloc.add(PlayerHealthUpdateEvent(playerId: id, health: value));
+    game.playerBloc.add(PlayerHealthUpdateEvent(player: entity, health: value));
   }
 
   @override
@@ -58,13 +59,19 @@ class Player extends PositionComponent
 
   @override
   void onNewState(GameState state) {
-    if (state.status == GameStatus.processTurn && state.lastPlayedId == id) {
+    if (state.status == GameStatus.turnProcess &&
+        state.currentEntity == entity) {
       startTurn();
     }
 
-    if (state.status == GameStatus.drawingCards &&
-        game.playerBloc.state.players[id]!.health <= 0) {
+    if (state.status == GameStatus.waitingForRoundStart &&
+        game.playerBloc.state.players[entity]!.health <= 0) {
       game.gameBloc.add(const GameOverEvent());
+    }
+
+    if (state.status == GameStatus.roundEnds) {
+      // Shuffle the cards and add 2 new cards to the pile
+      deck.sortCards();
     }
   }
 
@@ -81,14 +88,29 @@ class Player extends PositionComponent
     return _cards.contains(card);
   }
 
-  bool startTurn() {
-    final enemy = gameRef.players.firstWhere((element) => element.id != id);
-    return false;
+  void startTurn() {
+    final unit = cardSlots.firstActiveUnit();
+    final card = unit.getFirstCard()!
+      // Use the card's ability
+      ..useCard(this);
+
+    // Discard the card
+    unit.removeCard(card);
+    card.add(
+      OpacityEffect.fadeOut(
+        EffectController(duration: .4),
+        target: card,
+        onComplete: () {
+          card.removeFromParent();
+          _cards.remove(card);
+        },
+      ),
+    );
   }
 
   // Check if there is any foundation cards left to draw
   bool canContinue() {
-    return false;
+    return cardSlots.hasActiveCards();
   }
 
   bool canNotContinue() {
@@ -141,7 +163,7 @@ class Player extends PositionComponent
 
     // Add components to the world
     await addAll([
-      Unicorn(),
+      Unicorn(side: side),
       deck,
       cardSlots,
     ]);

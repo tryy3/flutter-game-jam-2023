@@ -48,6 +48,19 @@ class CardSlotsComponent extends PositionComponent
   SideView side;
   Player player;
 
+  bool hasActiveCards() {
+    for (final unit in _units) {
+      if (unit.hasActiveCard()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  CardSlotsUnit firstActiveUnit() {
+    return _units.firstWhere((element) => element.hasActiveCard());
+  }
+
   @override
   bool get debugMode => false;
 

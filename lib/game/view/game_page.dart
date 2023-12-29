@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/bloc/audio/audio_cubit.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/game/view/game_button.dart';
@@ -101,9 +102,9 @@ class _GameViewState extends State<GameView> {
           ),
         ),
         Container(
-          margin: const EdgeInsets.only(left: 120, top: 20),
+          margin: const EdgeInsets.only(top: 20),
           child: Align(
-            alignment: Alignment.topLeft,
+            alignment: Alignment.topCenter,
             child: ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(
@@ -111,10 +112,10 @@ class _GameViewState extends State<GameView> {
                 ),
                 padding: MaterialStateProperty.all(
                   const EdgeInsets.only(
-                    left: 30,
-                    right: 30,
-                    top: 15,
-                    bottom: 15,
+                    left: 20,
+                    right: 20,
+                    top: 10,
+                    bottom: 10,
                   ),
                 ),
               ),
@@ -126,15 +127,33 @@ class _GameViewState extends State<GameView> {
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 18,
                 ),
               ),
             ),
           ),
         ),
-        Center(
-          child: GameButton(
-            game: _game,
+        Container(
+          margin: const EdgeInsets.only(top: 70),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: GameButton(
+              game: _game,
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              return Text(
+                'Status: ${state.status}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              );
+            },
           ),
         ),
       ],

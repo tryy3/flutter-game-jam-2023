@@ -20,8 +20,8 @@ class HealCard extends Card {
   }
 
   @override
-  void useCard(Player player, Player enemy) {
-    super.useCard(player, enemy);
+  void useCard(Player player) {
+    super.useCard(player);
     player.health += health;
   }
 

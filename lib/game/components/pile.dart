@@ -20,4 +20,7 @@ abstract class Pile {
   /// Returns the [card] (which already belongs to this pile) in its proper
   /// place.
   void returnCard(Card card);
+
+  /// Returns the first card if there is any
+  Card? getFirstCard();
 }
