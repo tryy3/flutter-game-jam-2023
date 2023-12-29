@@ -54,7 +54,17 @@ class DeckComponent extends PositionComponent
   bool get debugMode => false;
 
   //#region Deck Component API
-  void addCard(int index, Card card) => _units[index].acquireCard(card);
+  // Attempt to add card to next unit that dont have active card
+  // if unable to add to any (no empty units) then it will return false
+  bool addCard(Card card) {
+    for (final unit in _units) {
+      if (!unit.hasActiveCard()) {
+        unit.acquireCard(card);
+        return true;
+      }
+    }
+    return false;
+  }
 
   bool hasActiveCards() {
     for (final unit in _units) {

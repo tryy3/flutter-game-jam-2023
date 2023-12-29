@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flutter/widgets.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
-class HealCard extends Card {
+class HealCard extends Card with HasGameRef<StarshipShooterGame> {
   HealCard({required this.playerType}) {
     super.size = StarshipShooterGame.cardSize;
   }
@@ -22,7 +23,7 @@ class HealCard extends Card {
   @override
   void useCard(Player player) {
     super.useCard(player);
-    player.health += health;
+    gameRef.entityBloc.add(HealingEvent(entity: player.entity, health: health));
   }
 
   //#region Rendering

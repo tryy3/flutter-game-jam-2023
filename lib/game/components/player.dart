@@ -8,7 +8,7 @@ import 'package:flame_bloc/flame_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
-import 'package:starship_shooter/game/bloc/player/player_events.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/card_slots/card_slots_component.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';
@@ -49,14 +49,12 @@ class Player extends PositionComponent
   SpriteAnimationTicker get animationTicker =>
       _animationComponent.animationTicker!;
 
-  int get health => game.playerBloc.state.players[entity]!.health;
-  set health(int value) {
-    game.playerBloc.add(PlayerHealthUpdateEvent(player: entity, health: value));
-  }
+  int get health => game.entityBloc.state.entities[entity]!.health;
 
   @override
   bool get debugMode => false;
 
+  // #region State changes
   @override
   void onNewState(GameState state) {
     if (state.status == GameStatus.turnProcess &&
@@ -65,14 +63,37 @@ class Player extends PositionComponent
     }
 
     if (state.status == GameStatus.waitingForRoundStart &&
-        game.playerBloc.state.players[entity]!.health <= 0) {
+        game.entityBloc.state.entities[entity]!.health <= 0) {
       game.gameBloc.add(const GameOverEvent());
     }
 
     if (state.status == GameStatus.roundEnds) {
       // Shuffle the cards and add 2 new cards to the pile
       deck.sortCards();
+
+      // Generate new random cards
+      final newCards = generateNewCards(2)..shuffle();
+      for (final card in newCards) {
+        // Only add card to the player if the deck can accept it
+        if (deck.addCard(card)) {
+          card.flip();
+          gameRef.add(card);
+          _cards.add(card);
+        }
+      }
     }
+  }
+  // #endregion
+
+  List<Card> generateNewCards(int count) {
+    return List.generate(count, (index) {
+      final cardType = Random().nextInt(100);
+      if (cardType < 50) {
+        return OffenseCard(playerType: playerType);
+      } else {
+        return HealCard(playerType: playerType);
+      }
+    });
   }
 
   // Attempt to go through cards and use them if there is one
@@ -119,17 +140,8 @@ class Player extends PositionComponent
 
   @override
   Future<void> onLoad() async {
-    // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
-    // to the left
-
     // Position the player
     final viewportSize = gameRef.camera.viewport.size;
-
-    // Add Health HUD
-    // healthComponent = DynamicHealthComponent(
-    //   side: side,
-    //   size: StarshipShooterGame.heartSize,
-    // );
 
     // Create player related components
     deck = DeckComponent(side: side, player: this);
@@ -171,22 +183,12 @@ class Player extends PositionComponent
     await add(informationSection);
 
     // Generate a pile of random cards
-    _cards = List.generate(10, (index) {
-      final cardType = Random().nextInt(100);
-      if (cardType < 50) {
-        return OffenseCard(playerType: playerType);
-      } else {
-        return HealCard(playerType: playerType);
-      }
-    })
-      ..shuffle();
+    _cards = generateNewCards(10)..shuffle();
 
     await gameRef.addAll(_cards.cast());
-    var i = 0;
     for (final card in _cards) {
       card.flip();
-      deck.addCard(i, card);
-      i++;
+      deck.addCard(card);
     }
   }
 

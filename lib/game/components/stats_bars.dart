@@ -10,7 +10,7 @@ import 'package:starship_shooter/game/starship_shooter.dart';
 
 class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
   StatsBars({required this.side, required this.player, super.position})
-      : super(anchor: Anchor.center) {}
+      : super(anchor: Anchor.center);
 
   // Configuration
   final int maxHeat = 20;
@@ -24,9 +24,9 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
   late RRect _coldBarRRect;
 
   // Stats
-  int currentHeat = 10;
-  int currentCold = 15;
-  int currentHealth = 20;
+  int get health => game.entityBloc.state.entities[player.entity]!.health;
+  int get cold => game.entityBloc.state.entities[player.entity]!.cold;
+  int get heat => game.entityBloc.state.entities[player.entity]!.heat;
 
   // Properties
   SideView side;
@@ -189,7 +189,7 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
           Rect.fromLTWH(
             _healthBarRRect.left,
             _healthBarRRect.top,
-            (_healthBarRRect.width / maxHealth) * currentHealth,
+            (_healthBarRRect.width / maxHealth) * health,
             _healthBarRRect.height,
           ),
           const Radius.circular(
@@ -206,7 +206,7 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
           Rect.fromLTWH(
             _heatBarRRect.left,
             _heatBarRRect.top,
-            (_heatBarRRect.width / maxHeat) * currentHeat,
+            (_heatBarRRect.width / maxHeat) * heat,
             _heatBarRRect.height,
           ),
           const Radius.circular(
@@ -223,7 +223,7 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
           Rect.fromLTWH(
             _coldBarRRect.left,
             _coldBarRRect.top,
-            (_coldBarRRect.width / maxCold) * currentCold,
+            (_coldBarRRect.width / maxCold) * cold,
             _coldBarRRect.height,
           ),
           const Radius.circular(

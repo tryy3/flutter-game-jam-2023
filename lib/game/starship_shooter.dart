@@ -1,14 +1,17 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart' as audio_player;
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
-import 'package:starship_shooter/game/bloc/player/player_bloc.dart';
-import 'package:starship_shooter/game/bloc/player/player_state.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
@@ -20,7 +23,7 @@ class StarshipShooterGame extends FlameGame {
     required this.effectPlayer,
     required this.textStyle,
     required this.gameBloc,
-    required this.playerBloc,
+    required this.entityBloc,
   }) {
     images.prefix = '';
 
@@ -34,82 +37,35 @@ class StarshipShooterGame extends FlameGame {
       }
     });
 
-    // gameBloc.on<BeginRoundEvent>((event, emit) {
-    //   // TODO(tryy3): Move this to wiki
-    //   // Event logic works like this:
-    //   // 1. Check if any player can continue
-    //   // 2. If they can start sending events
-    //   // 2-1. Change state to Round starts
-    //   // 3. Start processing the turn
-    //   // 3-1. Find which player or enemy should begin this turn
-    //   // 3-2. Update state to turnStarts and the entity who's turn it is
-    //   // 3-3. Update state to turnProcess.
-    //   // 3-4. Update state to turnEnds.
-    //   // 4. Check if any player can continue
-    //   // 4.1 If none can and state is not waitingForRoundStart then update state
-    //   // to RoundEnds
+    entityBloc
+      ..on<DamageEvent>((event, emit) {
+        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+          Entity enemy;
+          if (event.entity == Entity.player1) {
+            enemy = Entity.player2;
+          } else {
+            enemy = Entity.player1;
+          }
 
-    //   // End if none can start
-    //   if (!player1.canContinue() && player2.canContinue()) return;
+          final newHealth =
+              entityBloc.state.entities[event.entity]!.health - event.damage;
 
-    //   // Begin the round
-    //   emit(gameBloc.state.copyWith(status: GameStatus.roundStarts));
-
-    //   // Find out which player or enemy should begin based on GameMode
-    //   if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-    //     var nextEntity = gameBloc.state.currentEntity;
-    //     if (gameBloc.state.currentEntity == Entity.player1 &&
-    //         player2.canContinue()) {
-    //       nextEntity = Entity.player2;
-    //     } else if (gameBloc.state.currentEntity == Entity.player2 &&
-    //         player1.canContinue()) {
-    //       nextEntity = Entity.player1;
-    //     }
-
-    //     // TODO(tryy3): Check if we can actually do this many changes...
-    //     // maybe move them into sequential events?
-    //     emit(gameBloc.state.copyWith(
-    //         status: GameStatus.turnStarts, currentEntity: nextEntity));
-    //     emit(gameBloc.state.copyWith(
-    //         status: GameStatus.turnProcess, currentEntity: nextEntity));
-    //     emit(gameBloc.state
-    //         .copyWith(status: GameStatus.turnEnds, currentEntity: nextEntity));
-    //   } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-    //     // TODO(tryy3): Implement this...
-    //   }
-    // });
-
-    // gameBloc.on<StartTurnEvent>((event, emit) {
-    //   // Start with changing state to startTurn so that it's always correct
-    //   // status when we begin.
-    //   emit(gameBloc.state.copyWith(status: GameStatus.startTurn));
-
-    //   // Attempt to find a player starting with lastPlayerId
-    //   // doing it in this for loop allows more flexible of multiple players
-    //   var playerId = gameBloc.state.lastPlayedId;
-    //   for (var i = 0; i < players.length; i++) {
-    //     playerId++;
-    //     if (playerId >= players.length) playerId = 0;
-
-    //     for (final player in players) {
-    //       // If we found a player and the player can actually continue
-    //       // Then send a PlayerTurnEvent and add a 2 second delay for next turn
-    //       if (player.entity == playerId && player.canContinue()) {
-    //         gameBloc.add(PlayerTurnEvent(playerId: player.entity));
-    //         timerLimit = 2;
-    //         return;
-    //       }
-    //     }
-    //   }
-
-    //     // If we were unable to find any player, then end the turn by sending
-    //     // DrawingCards event
-    //     gameBloc.add(const DrawingCardsEvent());
-    //   });
+          emit(entityBloc.state.copyWith(entity: enemy, health: newHealth));
+        }
+      })
+      ..on<HealingEvent>((event, emit) {
+        const maxHealth = 20; // TODO(tryy3): Change this to const/player object
+        final newHealth =
+            entityBloc.state.entities[event.entity]!.health + event.health;
+        emit(entityBloc.state.copyWith(
+          entity: event.entity,
+          health: min(maxHealth, newHealth),
+        ));
+      });
   }
 
   final GameBloc gameBloc;
-  final PlayerBloc playerBloc;
+  final EntityBloc entityBloc;
   bool gameOver = false;
 
   @override
@@ -196,8 +152,8 @@ class StarshipShooterGame extends FlameGame {
     await add(
       FlameMultiBlocProvider(
         providers: [
-          FlameBlocProvider<PlayerBloc, PlayerState>.value(
-            value: playerBloc,
+          FlameBlocProvider<EntityBloc, EntityState>.value(
+            value: entityBloc,
           ),
           FlameBlocProvider<GameBloc, GameState>.value(
             value: gameBloc,
