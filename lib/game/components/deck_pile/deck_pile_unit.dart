@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:math';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flame/text.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/components/player.dart';
@@ -12,9 +9,12 @@ import 'package:starship_shooter/game/starship_shooter.dart';
 class DeckPileUnit extends PositionComponent
     with HasGameRef<StarshipShooterGame>
     implements Pile {
-  DeckPileUnit(this.unitSlot,
-      {required this.side, required this.player, super.position})
-      : super(
+  DeckPileUnit(
+    this.unitSlot, {
+    required this.side,
+    required this.player,
+    super.position,
+  }) : super(
           anchor: Anchor.center,
         ) {
     size = StarshipShooterGame.cardSize;

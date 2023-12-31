@@ -5,7 +5,6 @@ import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame/text.dart';
 import 'package:starship_shooter/game/components/card.dart';
-import 'package:starship_shooter/game/components/card_slots/card_slots_unit.dart';
 import 'package:starship_shooter/game/components/deck_pile/deck_pile_unit.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
@@ -161,15 +160,18 @@ class DeckComponent extends PositionComponent
       final row = (i / maxColumns).floorToDouble();
 
       canvas.drawRRect(
-        StarshipShooterGame.cardRRect.shift(Offset(
-          StarshipShooterGame.padding +
-              row *
-                  (StarshipShooterGame.cardHeight +
-                      StarshipShooterGame.padding),
-          StarshipShooterGame.padding +
-              column *
-                  (StarshipShooterGame.cardWidth + StarshipShooterGame.padding),
-        )),
+        StarshipShooterGame.cardRRect.shift(
+          Offset(
+            StarshipShooterGame.padding +
+                row *
+                    (StarshipShooterGame.cardHeight +
+                        StarshipShooterGame.padding),
+            StarshipShooterGame.padding +
+                column *
+                    (StarshipShooterGame.cardWidth +
+                        StarshipShooterGame.padding),
+          ),
+        ),
         StarshipShooterGame.borderPaint,
       );
     }

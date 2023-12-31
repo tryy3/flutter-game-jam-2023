@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
 
 class EntityState extends Equatable {
   const EntityState({required this.entities});

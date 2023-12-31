@@ -18,7 +18,6 @@ class InformationSection extends PositionComponent
   late RRect _rRect;
 
   @override
-  // TODO: implement debugMode
   bool get debugMode => false;
 
   final title = TextComponent(

@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/player.dart';

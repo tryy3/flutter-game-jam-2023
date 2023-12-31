@@ -6,12 +6,12 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 

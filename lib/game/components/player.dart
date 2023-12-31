@@ -8,7 +8,6 @@ import 'package:flame_bloc/flame_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/card_slots/card_slots_component.dart';
 import 'package:starship_shooter/game/components/cards/heal_card.dart';

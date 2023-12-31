@@ -192,7 +192,11 @@ class Card extends PositionComponent
     }
 
     return spriteSheet(
-        spritePositionX.toDouble(), startPositionY, size.x, size.y);
+      spritePositionX.toDouble(),
+      startPositionY,
+      size.x,
+      size.y,
+    );
   }
 
   static final RRect cardRRect = RRect.fromRectAndRadius(
