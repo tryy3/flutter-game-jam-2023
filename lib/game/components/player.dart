@@ -76,7 +76,7 @@ class Player extends PositionComponent
       for (final card in newCards) {
         // Only add card to the player if the deck can accept it
         if (deck.addCard(card)) {
-          card.flip();
+          // card.flip();
           gameRef.add(card);
           _cards.add(card);
         }
@@ -89,9 +89,9 @@ class Player extends PositionComponent
     return List.generate(count, (index) {
       final cardType = Random().nextInt(100);
       if (cardType < 50) {
-        return OffenseCard(playerType: playerType);
+        return OffenseCard(side: side);
       } else {
-        return HealCard(playerType: playerType);
+        return HealCard(side: side);
       }
     });
   }
@@ -187,7 +187,7 @@ class Player extends PositionComponent
 
     await gameRef.addAll(_cards.cast());
     for (final card in _cards) {
-      card.flip();
+      // card.flip();
       deck.addCard(card);
     }
   }

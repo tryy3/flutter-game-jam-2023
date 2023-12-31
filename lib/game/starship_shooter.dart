@@ -50,17 +50,47 @@ class StarshipShooterGame extends FlameGame {
           final newHealth =
               entityBloc.state.entities[event.entity]!.health - event.damage;
 
-          emit(entityBloc.state.copyWith(entity: enemy, health: newHealth));
+          /// If heat/cold was used in the event than subtract current value
+          /// with the one from event
+          final heat = event.heat == null
+              ? entityBloc.state.entities[event.entity]!.health - event.heat!
+              : null;
+          final cold = event.heat == null
+              ? entityBloc.state.entities[event.entity]!.health - event.heat!
+              : null;
+
+          emit(
+            entityBloc.state.copyWith(
+              entity: enemy,
+              health: newHealth,
+              heat: heat,
+              cold: cold,
+            ),
+          );
         }
       })
       ..on<HealingEvent>((event, emit) {
         const maxHealth = 20; // TODO(tryy3): Change this to const/player object
         final newHealth =
             entityBloc.state.entities[event.entity]!.health + event.health;
-        emit(entityBloc.state.copyWith(
-          entity: event.entity,
-          health: min(maxHealth, newHealth),
-        ));
+
+        /// If heat/cold was used in the event than subtract current value
+        /// with the one from event
+        final heat = event.heat == null
+            ? entityBloc.state.entities[event.entity]!.health - event.heat!
+            : null;
+        final cold = event.heat == null
+            ? entityBloc.state.entities[event.entity]!.health - event.heat!
+            : null;
+
+        emit(
+          entityBloc.state.copyWith(
+            entity: event.entity,
+            health: min(maxHealth, newHealth),
+            heat: heat,
+            cold: cold,
+          ),
+        );
       });
   }
 
