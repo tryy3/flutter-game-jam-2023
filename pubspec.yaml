@@ -17,6 +17,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.3
+  flutter_launcher_icons: ^0.13.1
   flutter_localizations:
     sdk: flutter
   fullscreen_window: ^1.0.4
@@ -54,3 +55,15 @@ msix_config:
   identity_name: com.nexergroup.starship-shooter
   msix_version: 1.0.0.0
   languages: en-us
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/AI-Logo.png"
+  web:
+    generate: true
+    image_path: "assets/images/AI-Logo.png"
+  windows:
+    generate: true
+    image_path: "assets/images/AI-Logo.png"
+    icon_size: 256

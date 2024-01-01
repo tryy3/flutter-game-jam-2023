@@ -16,7 +16,7 @@ class DeckPileUnit extends PositionComponent
     super.position,
   }) : super(
           anchor: Anchor.center,
-        ) {}
+        );
 
   // Properties
   Card? _card;
