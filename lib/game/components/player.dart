@@ -5,8 +5,8 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_bloc/flame_bloc.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
-import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/card_slots/card_slots_component.dart';
@@ -38,6 +38,7 @@ class Player extends PositionComponent
   final Entity entity;
   final PlayerType playerType;
 
+  late Unicorn unicorn;
   late DeckComponent deck;
   late CardSlotsComponent cardSlots;
   late StatsBars statsBars;
@@ -48,10 +49,13 @@ class Player extends PositionComponent
   SpriteAnimationTicker get animationTicker =>
       _animationComponent.animationTicker!;
 
-  int get health => game.entityBloc.state.entities[entity]!.health;
-
   @override
   bool get debugMode => false;
+
+  // Helper get for player stats
+  int get health => gameRef.entityBloc.state.entities[entity]!.health;
+  int get heat => gameRef.entityBloc.state.entities[entity]!.heat;
+  int get cold => gameRef.entityBloc.state.entities[entity]!.cold;
 
   // #region State changes
   @override
@@ -59,11 +63,6 @@ class Player extends PositionComponent
     if (state.status == GameStatus.turnProcess &&
         state.currentEntity == entity) {
       startTurn();
-    }
-
-    if (state.status == GameStatus.waitingForRoundStart &&
-        game.entityBloc.state.entities[entity]!.health <= 0) {
-      game.gameBloc.add(const GameOverEvent());
     }
 
     if (state.status == GameStatus.roundEnds) {
@@ -80,6 +79,15 @@ class Player extends PositionComponent
           _cards.add(card);
         }
       }
+
+      // Add back 2 cold/heat status to the player
+      gameRef.entityBloc.add(
+        BoostAttributeEvent(
+          entity: entity,
+          heat: 2,
+          cold: 2,
+        ),
+      );
     }
   }
   // #endregion
@@ -100,16 +108,14 @@ class Player extends PositionComponent
     return true;
   }
 
-  bool isGameOver() {
-    return health <= 0;
-  }
-
   bool ownsCard(Card card) {
     return _cards.contains(card);
   }
 
   void startTurn() {
-    final unit = cardSlots.firstActiveUnit();
+    final unit = cardSlots.firstPlayableCardSlot();
+    if (unit == null) return;
+
     final card = unit.getFirstCard()!
       // Use the card's ability
       ..useCard(this);
@@ -130,7 +136,7 @@ class Player extends PositionComponent
 
   // Check if there is any foundation cards left to draw
   bool canContinue() {
-    return cardSlots.hasActiveCards();
+    return cardSlots.hasPlayableCards();
   }
 
   bool canNotContinue() {
@@ -147,34 +153,28 @@ class Player extends PositionComponent
     cardSlots = CardSlotsComponent(side: side, player: this);
     statsBars = StatsBars(side: side, player: this);
     informationSection = InformationSection(side: side, player: this);
+    unicorn = Unicorn(side: side, player: this);
 
     // Set Player position based on SideView
     switch (side) {
       case SideView.left:
         // Player position
         position = Vector2(
-          (StarshipShooterGame.unicornWidth / 2) +
-              StarshipShooterGame.padding +
-              deck.size.x +
-              StarshipShooterGame.padding,
+          0,
           viewportSize.y / 2,
         );
 
       case SideView.right:
         // Player position
         position = Vector2(
-          viewportSize.x -
-              (StarshipShooterGame.unicornWidth / 2) -
-              StarshipShooterGame.padding -
-              deck.size.x -
-              StarshipShooterGame.padding,
+          viewportSize.x,
           viewportSize.y / 2,
         );
     }
 
     // Add components to the world
     await addAll([
-      Unicorn(side: side),
+      unicorn,
       deck,
       cardSlots,
     ]);

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart' as audio_player;
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
-import 'package:flame/game.dart';
+import 'package:flame/game.dart' hide OverlayRoute;
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
@@ -13,6 +13,7 @@ import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
+import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
 enum SideView { left, right }
@@ -26,111 +27,15 @@ class StarshipShooterGame extends FlameGame {
     required this.entityBloc,
   }) {
     images.prefix = '';
-
-    gameBloc.on<RoundStartsEvent>((event, emit) {
-      if (player1.canContinue() || player2.canContinue()) {
-        emit(
-          gameBloc.state.copyWith(
-            status: GameStatus.roundStarts,
-          ),
-        );
-      }
-    });
-
-    entityBloc
-      ..on<DamageEvent>((event, emit) {
-        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-          Entity enemy;
-          if (event.entity == Entity.player1) {
-            enemy = Entity.player2;
-          } else {
-            enemy = Entity.player1;
-          }
-
-          final newHealth =
-              entityBloc.state.entities[event.entity]!.health - event.damage;
-
-          /// If heat/cold was used in the event than subtract current value
-          /// with the one from event
-          final heat = event.heat == null
-              ? entityBloc.state.entities[event.entity]!.health - event.heat!
-              : null;
-          final cold = event.heat == null
-              ? entityBloc.state.entities[event.entity]!.health - event.heat!
-              : null;
-
-          emit(
-            entityBloc.state.copyWith(
-              entity: enemy,
-              health: newHealth,
-              heat: heat,
-              cold: cold,
-            ),
-          );
-        }
-      })
-      ..on<HealingEvent>((event, emit) {
-        const maxHealth = 20; // TODO(tryy3): Change this to const/player object
-        final newHealth =
-            entityBloc.state.entities[event.entity]!.health + event.health;
-
-        /// If heat/cold was used in the event than subtract current value
-        /// with the one from event
-        final heat = event.heat == null
-            ? entityBloc.state.entities[event.entity]!.health - event.heat!
-            : null;
-        final cold = event.heat == null
-            ? entityBloc.state.entities[event.entity]!.health - event.heat!
-            : null;
-
-        emit(
-          entityBloc.state.copyWith(
-            entity: event.entity,
-            health: min(maxHealth, newHealth),
-            heat: heat,
-            cold: cold,
-          ),
-        );
-      });
   }
 
   final GameBloc gameBloc;
   final EntityBloc entityBloc;
-  bool gameOver = false;
+  late RouterComponent router;
+  late GameConfig config;
 
   @override
   bool get debugMode => false;
-
-  // Card settings
-  static const double cardGap = 30;
-  static const double cardWidth = 63;
-  static const double cardHeight = 105;
-  static const double cardRadius = 5;
-  static final Vector2 cardSize = Vector2(cardHeight, cardWidth);
-  static final cardRRect = RRect.fromRectAndRadius(
-    const Rect.fromLTWH(0, 0, cardHeight, cardWidth),
-    const Radius.circular(cardRadius),
-  );
-
-  // Unicorn settings
-  static const double unicornGap = 100;
-  static const double unicornWidth = 100;
-  static const double unicornHeight = 100;
-  static final Vector2 unicornSize = Vector2(unicornWidth, unicornHeight);
-
-  // Heart settings
-  static const double heartWidthGap = 10;
-  static const double heartHeightGap = 30;
-  static const double heartWidth = 32;
-  static const double heartHeight = 32;
-  static final Vector2 heartSize = Vector2(heartWidth, heartHeight);
-  static const double statsBarsWidth = 32;
-  static const double statsBarsLength = 400;
-
-  // Margin padding settings
-  static const double margin = 20;
-  static const double padding = 20;
-  static const double radius = 5;
 
   static const Color lightBlack80 = Color(0x80000000);
   static const Color lightGrey50 = Color(0x50ffffff);
@@ -177,6 +82,9 @@ class StarshipShooterGame extends FlameGame {
       world,
       camera,
     ]);
+
+    config = GameConfig(camera: camera);
+
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 
     await add(
@@ -195,6 +103,90 @@ class StarshipShooterGame extends FlameGame {
 
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;
+
+    // When a round start (someone clicks on button) check if any
+    // player can actually continue before continuing changing state
+    gameBloc
+      ..on<RoundStartsEvent>((event, emit) {
+        if (player1.canContinue() || player2.canContinue()) {
+          emit(
+            gameBloc.state.copyWith(
+              status: GameStatus.roundStarts,
+            ),
+          );
+        }
+      })
+      ..on<GameOverEvent>((event, emit) async {
+        emit(
+          gameBloc.state.copyWith(
+            status: GameStatus.gameOver,
+          ),
+        );
+
+        overlays.add('PauseMenu');
+        pauseEngine();
+      });
+
+    entityBloc
+      ..on<CardUsedEvent>((event, emit) {
+        // Get the heat/cold and subtract by the event depending on which one
+        // was used at the time
+        final heat = event.heat != null
+            ? entityBloc.state.entities[event.entity]!.heat - event.heat!
+            : null;
+        final cold = event.cold != null
+            ? entityBloc.state.entities[event.entity]!.cold - event.cold!
+            : null;
+        emit(
+          entityBloc.state.copyWith(
+            entity: event.entity,
+            heat: heat,
+            cold: cold,
+          ),
+        );
+      })
+      ..on<DamageEvent>((event, emit) {
+        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+          Entity enemy;
+          if (event.entity == Entity.player1) {
+            enemy = Entity.player2;
+          } else {
+            enemy = Entity.player1;
+          }
+
+          final newHealth =
+              entityBloc.state.entities[enemy]!.health - event.damage;
+
+          emit(
+            entityBloc.state.copyWith(
+              entity: enemy,
+              health: newHealth,
+            ),
+          );
+        }
+      })
+      ..on<HealingEvent>((event, emit) {
+        const maxHealth = 20; // TODO(tryy3): Change this to const/player object
+        final newHealth =
+            entityBloc.state.entities[event.entity]!.health + event.health;
+
+        emit(
+          entityBloc.state.copyWith(
+            entity: event.entity,
+            health: min(maxHealth, newHealth),
+          ),
+        );
+      })
+      ..on<EntityDeath>((event, emit) {
+        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+          // When it's PvP we can simply end the game if anyone dies
+          gameBloc.add(const GameOverEvent());
+        } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
+          // In PvE mode it will be a bit different because we might have
+          // different levels and it might be possible to continue
+          // playing even if 1 player dies
+        }
+      });
   }
 
   @override
@@ -215,14 +207,6 @@ class StarshipShooterGame extends FlameGame {
     // to RoundEnds
 
     final status = gameBloc.state.status;
-    // if (status == GameStatus.waitForTurn) {
-    //   timerCounter += dt;
-    //   if (timerCounter >= timerLimit) {
-    //     gameBloc.add(const BeginRoundEvent());
-    //     timerCounter = 0;
-    //   }
-    // }
-
     if (status == GameStatus.inBetweenTurns || status == GameStatus.roundEnds) {
       timerCounter += dt;
     }
@@ -278,9 +262,6 @@ class StarshipShooterGame extends FlameGame {
     } else if (status == GameStatus.roundEnds && timerCounter >= timerLimit) {
       gameBloc.add(const WaitingForRoundStartsEvent());
     }
-
-    // TODO(tryy3): Implement here to reset "round", if no player can continue
-    // then reset status to waitForTurn
   }
 
   final TextPaint textPaint = TextPaint(

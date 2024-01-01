@@ -6,12 +6,13 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class Card extends PositionComponent
-    with DragCallbacks
+    with DragCallbacks, HasGameRef<StarshipShooterGame>
     implements OpacityProvider {
   Card({
     required this.side,
@@ -37,7 +38,16 @@ class Card extends PositionComponent
   set opacity(double value) => _opacity = value;
 
   // #region Card API
-  void useCard(Player player) {}
+  @mustCallSuper
+  void useCard(Player player) {
+    gameRef.entityBloc.add(
+      CardUsedEvent(
+        entity: player.entity,
+        heat: (heat > 0) ? heat : null,
+        cold: (cold > 0) ? cold : null,
+      ),
+    );
+  }
   // #endregion
 
   //#region Dragging
@@ -109,13 +119,13 @@ class Card extends PositionComponent
       header3: BlockStyle(
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
         text: InlineTextStyle(
-          fontScale: 1,
+          fontScale: 0.9,
         ),
       ),
       header4: BlockStyle(
-        padding: const EdgeInsets.fromLTRB(22, 8, 22, 0),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
         text: InlineTextStyle(
-          fontScale: 1.7,
+          fontScale: 1.5,
         ),
       ),
     );
@@ -199,11 +209,6 @@ class Card extends PositionComponent
     );
   }
 
-  static final RRect cardRRect = RRect.fromRectAndRadius(
-    StarshipShooterGame.cardSize.toRect(),
-    const Radius.circular(StarshipShooterGame.cardRadius),
-  );
-
   Paint frontBackgroundPaint = Paint()
     ..color = const Color.fromARGB(255, 53, 21, 21)
     ..style = PaintingStyle.fill;
@@ -218,9 +223,9 @@ class Card extends PositionComponent
     redBorderPaint.color = redBorderPaint.color.withOpacity(opacity);
 
     canvas
-      ..drawRRect(cardRRect, frontBackgroundPaint)
+      ..drawRRect(gameRef.config.cardRRect, frontBackgroundPaint)
       ..drawRRect(
-        cardRRect,
+        gameRef.config.cardRRect,
         redBorderPaint,
       );
 
@@ -236,14 +241,14 @@ class Card extends PositionComponent
           Vector2(32, 32),
         );
         final topLeftPosition = Vector2(
-          26 / 2,
-          -size.x + (26 / 2),
+          gameRef.config.cardStatsIconWidth / 2,
+          -size.x + (gameRef.config.cardStatsIconHeight / 2),
         );
         coldSpriteNumber.render(
           canvas,
           position: topLeftPosition,
           anchor: Anchor.center,
-          size: Vector2(24, 24),
+          size: gameRef.config.cardStatsIconSize,
           overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
         );
       }
@@ -255,14 +260,14 @@ class Card extends PositionComponent
           Vector2(32, 32),
         );
         final topLeftPosition = Vector2(
-          size.y - (26 / 2),
-          -size.x + (26 / 2),
+          size.y - (gameRef.config.cardStatsIconWidth / 2),
+          -size.x + (gameRef.config.cardStatsIconHeight / 2),
         );
         heatSpriteNumber.render(
           canvas,
           position: topLeftPosition,
           anchor: Anchor.center,
-          size: Vector2(24, 24),
+          size: gameRef.config.cardStatsIconSize,
           overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
         );
       }
@@ -270,9 +275,10 @@ class Card extends PositionComponent
       if (logoSprite != null) {
         logoSprite!.render(
           canvas,
+          size: gameRef.config.cardIconSize,
           position: Vector2(
-            (size.y / 2) - (logoSprite!.srcSize.x / 2),
-            (-size.x / 2) - 26,
+            (size.y / 2) - (gameRef.config.cardIconSize.y / 2),
+            -size.x + gameRef.config.cardStatsIconSize.x,
           ),
         );
       }
@@ -290,14 +296,14 @@ class Card extends PositionComponent
           Vector2(32, 32),
         );
         final topLeftPosition = Vector2(
-          -size.y + 26 / 2,
-          26 / 2,
+          -size.y + gameRef.config.cardStatsIconWidth / 2,
+          gameRef.config.cardStatsIconHeight / 2,
         );
         coldSpriteNumber.render(
           canvas,
           position: topLeftPosition,
           anchor: Anchor.center,
-          size: Vector2(24, 24),
+          size: gameRef.config.cardStatsIconSize,
           overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
         );
       }
@@ -309,14 +315,14 @@ class Card extends PositionComponent
           Vector2(32, 32),
         );
         final topLeftPosition = Vector2(
-          -(26 / 2),
-          26 / 2,
+          -(gameRef.config.cardStatsIconWidth / 2),
+          gameRef.config.cardStatsIconHeight / 2,
         );
         heatSpriteNumber.render(
           canvas,
           position: topLeftPosition,
           anchor: Anchor.center,
-          size: Vector2(24, 24),
+          size: gameRef.config.cardStatsIconSize,
           overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
         );
       }
@@ -324,9 +330,10 @@ class Card extends PositionComponent
       if (logoSprite != null) {
         logoSprite!.render(
           canvas,
+          size: gameRef.config.cardIconSize,
           position: Vector2(
-            (-size.y / 2) - (logoSprite!.srcSize.x / 2),
-            (size.x / 2) - 26,
+            (-size.y / 2) - (gameRef.config.cardIconSize.y / 2),
+            gameRef.config.cardStatsIconSize.x,
           ),
         );
       }

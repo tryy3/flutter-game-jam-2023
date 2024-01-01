@@ -16,9 +16,7 @@ class DeckPileUnit extends PositionComponent
     super.position,
   }) : super(
           anchor: Anchor.center,
-        ) {
-    size = StarshipShooterGame.cardSize;
-  }
+        ) {}
 
   // Properties
   Card? _card;
@@ -75,6 +73,8 @@ class DeckPileUnit extends PositionComponent
   //#region Rendering logic
   @override
   Future<void> onLoad() async {
+    size = gameRef.config.cardSize;
+
     // Set positions based on the side view
     final column = unitSlot % player.deck.maxColumns;
     final row = (unitSlot / player.deck.maxColumns).floorToDouble();
@@ -83,31 +83,23 @@ class DeckPileUnit extends PositionComponent
       case SideView.left:
         position = Vector2(
           (size.x / 2) +
-              StarshipShooterGame.padding +
-              (row *
-                  (StarshipShooterGame.cardHeight +
-                      StarshipShooterGame.padding)),
+              gameRef.config.padding +
+              (row * (gameRef.config.cardHeight + gameRef.config.padding)),
           (size.y / 2) +
-              StarshipShooterGame.padding +
-              (column *
-                  (StarshipShooterGame.padding +
-                      StarshipShooterGame.cardWidth)),
+              gameRef.config.padding +
+              (column * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
       case SideView.right:
         final parentSize = (parent! as PositionComponent).size;
         position = Vector2(
           parentSize.x -
               (size.x / 2) -
-              StarshipShooterGame.padding -
-              (row *
-                  (StarshipShooterGame.cardHeight +
-                      StarshipShooterGame.padding)),
+              gameRef.config.padding -
+              (row * (gameRef.config.cardHeight + gameRef.config.padding)),
           parentSize.y -
               (size.y / 2) -
-              StarshipShooterGame.padding -
-              (column *
-                  (StarshipShooterGame.padding +
-                      StarshipShooterGame.cardWidth)),
+              gameRef.config.padding -
+              (column * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
     }
   }

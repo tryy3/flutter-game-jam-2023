@@ -16,9 +16,7 @@ class CardSlotsUnit extends PositionComponent
     super.position,
   }) : super(
           anchor: Anchor.center,
-        ) {
-    size = StarshipShooterGame.cardSize;
-  }
+        ) {}
 
   // Properties
   Card? _card;
@@ -75,27 +73,25 @@ class CardSlotsUnit extends PositionComponent
   //#region Rendering logic
   @override
   Future<void> onLoad() async {
+    size = gameRef.config.cardSize;
+
     // Set positions based on the side view
     switch (side) {
       case SideView.left:
         position = Vector2(
-          (size.x / 2) + StarshipShooterGame.padding,
+          (size.x / 2) + gameRef.config.padding,
           (size.y / 2) +
-              StarshipShooterGame.padding +
-              (unitSlot *
-                  (StarshipShooterGame.padding +
-                      StarshipShooterGame.cardWidth)),
+              gameRef.config.padding +
+              (unitSlot * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
       case SideView.right:
         final parentSize = (parent! as PositionComponent).size;
         position = Vector2(
-          parentSize.x - (size.x / 2) - StarshipShooterGame.padding,
+          parentSize.x - (size.x / 2) - gameRef.config.padding,
           parentSize.y -
               (size.y / 2) -
-              StarshipShooterGame.padding -
-              (unitSlot *
-                  (StarshipShooterGame.padding +
-                      StarshipShooterGame.cardWidth)),
+              gameRef.config.padding -
+              (unitSlot * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
     }
   }

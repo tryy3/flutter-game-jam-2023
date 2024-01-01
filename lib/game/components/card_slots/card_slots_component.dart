@@ -13,22 +13,6 @@ class CardSlotsComponent extends PositionComponent
       : super(
           anchor: Anchor.center,
         ) {
-    size = Vector2(
-      StarshipShooterGame.padding +
-          StarshipShooterGame.cardHeight +
-          StarshipShooterGame.padding,
-      StarshipShooterGame.padding +
-          ((StarshipShooterGame.cardWidth + StarshipShooterGame.padding) *
-              maxCards),
-    );
-
-    _rRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(
-        StarshipShooterGame.radius,
-      ),
-    );
-
     _units = List.generate(
       maxCards,
       (i) => CardSlotsUnit(
@@ -48,22 +32,34 @@ class CardSlotsComponent extends PositionComponent
   SideView side;
   Player player;
 
-  bool hasActiveCards() {
-    for (final unit in _units) {
-      if (unit.hasActiveCard()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  CardSlotsUnit firstActiveUnit() {
-    return _units.firstWhere((element) => element.hasActiveCard());
-  }
-
   @override
   bool get debugMode => false;
 
+  //#region Card Slot API
+  /// Tries to find the first playable card slot.
+  ///
+  /// It will be based on the players heat/cold source to check for
+  /// any cards that can be used with current value
+  CardSlotsUnit? firstPlayableCardSlot() {
+    for (final unit in _units) {
+      final card = unit.getFirstCard();
+
+      // Check if player stats source is enough to use this card
+      if (card != null &&
+          (card.heat <= 0 || player.heat >= card.heat) &&
+          (card.cold <= 0 || player.cold >= card.cold)) {
+        return unit;
+      }
+    }
+    return null;
+  }
+
+  bool hasPlayableCards() {
+    return firstPlayableCardSlot() != null;
+  }
+  //#endregion
+
+  //#region Rendering logic
   final title = TextComponent(
     text: 'CARD SLOTS',
     anchor: Anchor.center,
@@ -76,9 +72,23 @@ class CardSlotsComponent extends PositionComponent
     ),
   );
 
-  //#region Rendering logic
   @override
   Future<void> onLoad() async {
+    size = Vector2(
+      gameRef.config.padding +
+          gameRef.config.cardHeight +
+          gameRef.config.padding,
+      gameRef.config.padding +
+          ((gameRef.config.cardWidth + gameRef.config.padding) * maxCards),
+    );
+
+    _rRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Radius.circular(
+        gameRef.config.radius,
+      ),
+    );
+
     final parentPosition = (parent! as PositionComponent).position;
     final viewportSize = gameRef.camera.viewport.size;
 
@@ -90,18 +100,18 @@ class CardSlotsComponent extends PositionComponent
       case SideView.left:
         final deckPileSize = player.deck.size;
         position = Vector2(
-          -parentPosition.x + (size.x / 2) + StarshipShooterGame.margin,
+          -parentPosition.x + (size.x / 2) + gameRef.config.margin,
           -parentPosition.y +
               (size.y / 2) +
-              StarshipShooterGame.margin +
+              gameRef.config.margin +
               deckPileSize.y +
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
         );
 
         title
           ..angle = pi / 2
           ..position = Vector2(
-            size.x + StarshipShooterGame.margin,
+            size.x + gameRef.config.margin,
             size.y / 2,
           );
       case SideView.right:
@@ -110,19 +120,19 @@ class CardSlotsComponent extends PositionComponent
           viewportSize.x -
               parentPosition.x -
               (size.x / 2) -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
           viewportSize.y -
               parentPosition.y -
               (size.y / 2) -
-              StarshipShooterGame.margin -
+              gameRef.config.margin -
               deckPileSize.y -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
         );
 
         title
           ..angle = (pi / 2) * 3
           ..position = Vector2(
-            -StarshipShooterGame.margin,
+            -gameRef.config.margin,
             size.y / 2,
           );
     }
@@ -141,13 +151,11 @@ class CardSlotsComponent extends PositionComponent
     // Draw border around each playable card area
     for (var i = 0; i < maxCards; i++) {
       canvas.drawRRect(
-        StarshipShooterGame.cardRRect.shift(
+        gameRef.config.cardRRect.shift(
           Offset(
-            StarshipShooterGame.padding,
-            StarshipShooterGame.padding +
-                i *
-                    (StarshipShooterGame.cardWidth +
-                        StarshipShooterGame.padding),
+            gameRef.config.padding,
+            gameRef.config.padding +
+                i * (gameRef.config.cardWidth + gameRef.config.padding),
           ),
         ),
         StarshipShooterGame.borderPaint,

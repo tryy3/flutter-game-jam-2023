@@ -60,12 +60,5 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         ),
       ),
     );
-    on<GameOverEvent>(
-      (event, emit) => emit(
-        state.copyWith(
-          status: GameStatus.gameOver,
-        ),
-      ),
-    );
   }
 }

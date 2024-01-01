@@ -4,21 +4,22 @@ import 'package:flame/components.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/entities/unicorn/behaviors/tapping_behavior.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/gen/assets.gen.dart';
 
-class Unicorn extends PositionedEntity with HasGameRef {
-  Unicorn({required this.side})
+class Unicorn extends PositionedEntity with HasGameRef<StarshipShooterGame> {
+  Unicorn({required this.side, required this.player})
       : super(
           anchor: Anchor.center,
-          size: StarshipShooterGame.unicornSize,
           behaviors: [
             TappingBehavior(),
           ],
         );
 
   SideView side;
+  Player player;
   late SpriteAnimationComponent _animationComponent;
 
   @override
@@ -30,8 +31,8 @@ class Unicorn extends PositionedEntity with HasGameRef {
 
   @override
   Future<void> onLoad() async {
-    // TODO(tryy3): Add a check for SideView so that unicorn sprite looks
-    // to the left
+    size = gameRef.config.unicornSize;
+
     final animation = await gameRef.loadSpriteAnimation(
       Assets.images.unicornAnimation.path,
       SpriteAnimationData.sequenced(
@@ -51,13 +52,27 @@ class Unicorn extends PositionedEntity with HasGameRef {
 
     switch (side) {
       case SideView.left:
+        position = Vector2(
+          (size.x / 2) +
+              gameRef.config.padding +
+              player.deck.size.x +
+              gameRef.config.padding,
+          0,
+        );
         _animationComponent
           ..angle = pi / 2
           ..position = Vector2(_animationComponent.size.x, y);
       case SideView.right:
+        position = Vector2(
+          -(size.x / 2) -
+              gameRef.config.padding -
+              player.deck.size.x -
+              gameRef.config.padding,
+          0,
+        );
         _animationComponent
           ..angle = -pi / 2
-          ..position = Vector2(x, _animationComponent.size.y);
+          ..position = Vector2(0, _animationComponent.size.y);
     }
 
     resetAnimation();

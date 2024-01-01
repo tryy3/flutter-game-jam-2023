@@ -15,24 +15,6 @@ class DeckComponent extends PositionComponent
       : super(
           anchor: Anchor.center,
         ) {
-    final columns = maxColumns;
-    final rows = (maxCards / maxColumns).floorToDouble();
-
-    size = Vector2(
-      StarshipShooterGame.padding +
-          rows * (StarshipShooterGame.cardHeight + StarshipShooterGame.padding),
-      StarshipShooterGame.padding +
-          columns *
-              (StarshipShooterGame.cardWidth + StarshipShooterGame.padding),
-    );
-
-    _rRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(
-        StarshipShooterGame.radius,
-      ),
-    );
-
     _units = List.generate(
       maxCards,
       (index) => DeckPileUnit(index, side: side, player: player),
@@ -109,6 +91,23 @@ class DeckComponent extends PositionComponent
 
   @override
   Future<void> onLoad() async {
+    final columns = maxColumns;
+    final rows = (maxCards / maxColumns).floorToDouble();
+
+    size = Vector2(
+      gameRef.config.padding +
+          rows * (gameRef.config.cardHeight + gameRef.config.padding),
+      gameRef.config.padding +
+          columns * (gameRef.config.cardWidth + gameRef.config.padding),
+    );
+
+    _rRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Radius.circular(
+        gameRef.config.radius,
+      ),
+    );
+
     final viewportSize = gameRef.camera.viewport.size;
     final parentPosition = (parent! as PositionComponent).position;
     await add(title);
@@ -116,13 +115,13 @@ class DeckComponent extends PositionComponent
     switch (side) {
       case SideView.left:
         position = Vector2(
-          -parentPosition.x + (size.x / 2) + StarshipShooterGame.margin,
-          -parentPosition.y + (size.y / 2) + StarshipShooterGame.margin,
+          -parentPosition.x + (size.x / 2) + gameRef.config.margin,
+          -parentPosition.y + (size.y / 2) + gameRef.config.margin,
         );
 
         title.angle = pi / 2;
         title.position = Vector2(
-          size.x + StarshipShooterGame.margin,
+          size.x + gameRef.config.margin,
           size.y / 2,
         );
       case SideView.right:
@@ -130,16 +129,16 @@ class DeckComponent extends PositionComponent
           viewportSize.x -
               parentPosition.x -
               (size.x / 2) -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
           viewportSize.y -
               parentPosition.y -
               (size.y / 2) -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
         );
 
         title.angle = (pi / 2) * 3;
         title.position = Vector2(
-          -StarshipShooterGame.margin,
+          -gameRef.config.margin,
           size.y / 2,
         );
     }
@@ -160,16 +159,12 @@ class DeckComponent extends PositionComponent
       final row = (i / maxColumns).floorToDouble();
 
       canvas.drawRRect(
-        StarshipShooterGame.cardRRect.shift(
+        gameRef.config.cardRRect.shift(
           Offset(
-            StarshipShooterGame.padding +
-                row *
-                    (StarshipShooterGame.cardHeight +
-                        StarshipShooterGame.padding),
-            StarshipShooterGame.padding +
-                column *
-                    (StarshipShooterGame.cardWidth +
-                        StarshipShooterGame.padding),
+            gameRef.config.padding +
+                row * (gameRef.config.cardHeight + gameRef.config.padding),
+            gameRef.config.padding +
+                column * (gameRef.config.cardWidth + gameRef.config.padding),
           ),
         ),
         StarshipShooterGame.borderPaint,

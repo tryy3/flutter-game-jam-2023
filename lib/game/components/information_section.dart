@@ -46,17 +46,17 @@ class InformationSection extends PositionComponent
         size = Vector2(
           player.deck.absolutePositionOfAnchor(Anchor.centerRight).x -
               player.cardSlots.absolutePositionOfAnchor(Anchor.centerRight).x -
-              (StarshipShooterGame.margin * 2),
+              (gameRef.config.margin * 2),
           player.statsBars.absolutePositionOfAnchor(Anchor.topCenter).y -
               player.deck.absolutePositionOfAnchor(Anchor.bottomCenter).y -
-              (StarshipShooterGame.margin * 2),
+              (gameRef.config.margin * 2),
         );
 
         position = absoluteToLocal(
           player.cardSlots.absolutePositionOfAnchor(Anchor.topRight),
         )..add(
             Vector2(
-              StarshipShooterGame.margin * 2,
+              gameRef.config.margin * 2,
               0,
             ),
           );
@@ -64,7 +64,7 @@ class InformationSection extends PositionComponent
         title
           ..angle = pi / 2
           ..position = Vector2(
-            size.x + StarshipShooterGame.margin,
+            size.x + gameRef.config.margin,
             size.y / 2,
           );
       case SideView.right:
@@ -73,17 +73,17 @@ class InformationSection extends PositionComponent
         size = Vector2(
           player.cardSlots.absolutePositionOfAnchor(Anchor.centerLeft).x -
               player.deck.absolutePositionOfAnchor(Anchor.centerLeft).x -
-              (StarshipShooterGame.margin * 2),
+              (gameRef.config.margin * 2),
           player.deck.absolutePositionOfAnchor(Anchor.topCenter).y -
               player.statsBars.absolutePositionOfAnchor(Anchor.bottomCenter).y -
-              (StarshipShooterGame.margin * 2),
+              (gameRef.config.margin * 2),
         );
 
         position = absoluteToLocal(
           player.cardSlots.absolutePositionOfAnchor(Anchor.topLeft),
         )..add(
             Vector2(
-              -size.x - (StarshipShooterGame.margin * 2),
+              -size.x - (gameRef.config.margin * 2),
               0,
             ),
           );
@@ -91,15 +91,15 @@ class InformationSection extends PositionComponent
         title
           ..angle = (pi / 2) * 3
           ..position = Vector2(
-            -StarshipShooterGame.margin,
+            -gameRef.config.margin,
             size.y / 2,
           );
     }
 
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(
-        StarshipShooterGame.radius,
+      Radius.circular(
+        gameRef.config.radius,
       ),
     );
   }

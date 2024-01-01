@@ -51,7 +51,7 @@ class GameView extends StatefulWidget {
 }
 
 class _GameViewState extends State<GameView> {
-  FlameGame? _game;
+  StarshipShooterGame? _game;
   bool gameOver = false;
 
   // late final Bgm bgm;
@@ -76,18 +76,24 @@ class _GameViewState extends State<GameView> {
           fontSize: 4,
         );
 
-    _game ??= widget.game ??
-        StarshipShooterGame(
-          l10n: context.l10n,
-          effectPlayer: context.read<AudioCubit>().effectPlayer,
-          textStyle: textStyle,
-          gameBloc: context.read<GameBloc>(),
-          entityBloc: context.read<EntityBloc>(),
-        );
+    _game = StarshipShooterGame(
+      l10n: context.l10n,
+      effectPlayer: context.read<AudioCubit>().effectPlayer,
+      textStyle: textStyle,
+      gameBloc: context.read<GameBloc>(),
+      entityBloc: context.read<EntityBloc>(),
+    );
 
     return Stack(
       children: [
-        Positioned.fill(child: GameWidget(game: _game!)),
+        Positioned.fill(
+          child: GameWidget<StarshipShooterGame>(
+            game: _game!,
+            overlayBuilderMap: const {
+              'PauseMenu': _pauseMenuBuilder,
+            },
+          ),
+        ),
         Align(
           alignment: Alignment.topRight,
           child: BlocBuilder<AudioCubit, AudioState>(
@@ -142,21 +148,38 @@ class _GameViewState extends State<GameView> {
             ),
           ),
         ),
-        Align(
-          alignment: Alignment.topRight,
-          child: BlocBuilder<GameBloc, GameState>(
-            builder: (context, state) {
-              return Text(
-                'Status: ${state.status}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
-              );
-            },
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.topRight,
+        //   child: BlocBuilder<GameBloc, GameState>(
+        //     builder: (context, state) {
+        //       return Text(
+        //         'Status: ${state.status}',
+        //         style: const TextStyle(
+        //           fontSize: 18,
+        //           color: Colors.white,
+        //         ),
+        //       );
+        //     },
+        //   ),
+        // ),
       ],
     );
   }
+}
+
+Widget _pauseMenuBuilder(BuildContext buildContext, StarshipShooterGame game) {
+  return Container(
+    width: game.camera.viewport.size.x,
+    height: game.camera.viewport.size.y,
+    color: Colors.black.withOpacity(0.6),
+    child: Center(
+      child: Text(
+        'Game Over',
+        style: TextStyle(
+          fontSize: 32,
+          color: Colors.white.withOpacity(1),
+        ),
+      ),
+    ),
+  );
 }

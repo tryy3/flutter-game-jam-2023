@@ -3,11 +3,18 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
+import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
-class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
+class StatsBars extends PositionComponent
+    with
+        HasGameRef<StarshipShooterGame>,
+        FlameBlocListenable<EntityBloc, EntityState> {
   StatsBars({required this.side, required this.player, super.position})
       : super(anchor: Anchor.center);
 
@@ -23,9 +30,10 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
   late RRect _coldBarRRect;
 
   // Stats
-  int get health => game.entityBloc.state.entities[player.entity]!.health;
-  int get cold => game.entityBloc.state.entities[player.entity]!.cold;
-  int get heat => game.entityBloc.state.entities[player.entity]!.heat;
+  int get health =>
+      max(game.entityBloc.state.entities[player.entity]!.health, 0);
+  int get cold => max(game.entityBloc.state.entities[player.entity]!.cold, 0);
+  int get heat => max(game.entityBloc.state.entities[player.entity]!.heat, 0);
 
   // Properties
   SideView side;
@@ -33,6 +41,16 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
 
   @override
   bool get debugMode => false;
+
+  //#region State Changes
+  @override
+  void onNewState(EntityState state) {
+    // Check if player is dead
+    if (state.entities[player.entity]!.health <= 0) {
+      gameRef.entityBloc.add(EntityDeath(entity: player.entity));
+    }
+  }
+  //#endregion
 
   //#region Rendering
   @override
@@ -56,27 +74,26 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
     // Resize based on deck size which is the largest element so far
     size = Vector2(
       player.deck.size.x,
-      StarshipShooterGame.padding +
-          (StarshipShooterGame.statsBarsWidth + StarshipShooterGame.padding) *
-              3,
+      gameRef.config.padding +
+          (gameRef.config.statsBarsWidth + gameRef.config.padding) * 3,
     );
 
     switch (side) {
       case SideView.left:
         position = Vector2(
-          -parentPosition.x + (size.x / 2) + StarshipShooterGame.margin,
+          -parentPosition.x + (size.x / 2) + gameRef.config.margin,
           -parentPosition.y +
               (size.y / 2) +
-              StarshipShooterGame.margin +
+              gameRef.config.margin +
               player.deck.size.y +
-              StarshipShooterGame.margin +
+              gameRef.config.margin +
               player.cardSlots.size.y +
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
         );
 
         title.angle = pi / 2;
         title.position = Vector2(
-          size.x + StarshipShooterGame.margin,
+          size.x + gameRef.config.margin,
           size.y / 2,
         );
       case SideView.right:
@@ -84,66 +101,66 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
           viewportSize.x -
               parentPosition.x -
               (size.x / 2) -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
           viewportSize.y -
               parentPosition.y -
               (size.y / 2) -
-              StarshipShooterGame.margin -
+              gameRef.config.margin -
               player.deck.size.y -
-              StarshipShooterGame.margin -
+              gameRef.config.margin -
               player.cardSlots.size.y -
-              StarshipShooterGame.margin,
+              gameRef.config.margin,
         );
 
         title.angle = (pi / 2) * 3;
         title.position = Vector2(
-          -StarshipShooterGame.margin,
+          -gameRef.config.margin,
           size.y / 2,
         );
     }
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(
-        StarshipShooterGame.radius,
+      Radius.circular(
+        gameRef.config.radius,
       ),
     );
     _healthBarRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        StarshipShooterGame.padding,
-        StarshipShooterGame.padding,
-        size.x - (StarshipShooterGame.padding * 2),
-        StarshipShooterGame.statsBarsWidth,
+        gameRef.config.padding,
+        gameRef.config.padding,
+        size.x - (gameRef.config.padding * 2),
+        gameRef.config.statsBarsWidth,
       ),
-      const Radius.circular(
-        StarshipShooterGame.radius,
+      Radius.circular(
+        gameRef.config.radius,
       ),
     );
     _heatBarRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        StarshipShooterGame.padding,
-        StarshipShooterGame.padding +
-            StarshipShooterGame.statsBarsWidth +
-            StarshipShooterGame.padding,
-        size.x - (StarshipShooterGame.padding * 2),
-        StarshipShooterGame.statsBarsWidth,
+        gameRef.config.padding,
+        gameRef.config.padding +
+            gameRef.config.statsBarsWidth +
+            gameRef.config.padding,
+        size.x - (gameRef.config.padding * 2),
+        gameRef.config.statsBarsWidth,
       ),
-      const Radius.circular(
-        StarshipShooterGame.radius,
+      Radius.circular(
+        gameRef.config.radius,
       ),
     );
     _coldBarRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        StarshipShooterGame.padding,
-        StarshipShooterGame.padding +
-            StarshipShooterGame.statsBarsWidth +
-            StarshipShooterGame.padding +
-            StarshipShooterGame.statsBarsWidth +
-            StarshipShooterGame.padding,
-        size.x - (StarshipShooterGame.padding * 2),
-        StarshipShooterGame.statsBarsWidth,
+        gameRef.config.padding,
+        gameRef.config.padding +
+            gameRef.config.statsBarsWidth +
+            gameRef.config.padding +
+            gameRef.config.statsBarsWidth +
+            gameRef.config.padding,
+        size.x - (gameRef.config.padding * 2),
+        gameRef.config.statsBarsWidth,
       ),
-      const Radius.circular(
-        StarshipShooterGame.radius,
+      Radius.circular(
+        gameRef.config.radius,
       ),
     );
   }
@@ -191,8 +208,8 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
             (_healthBarRRect.width / maxHealth) * health,
             _healthBarRRect.height,
           ),
-          const Radius.circular(
-            StarshipShooterGame.radius,
+          Radius.circular(
+            gameRef.config.radius,
           ),
         ),
         healthBarPaint,
@@ -208,8 +225,8 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
             (_heatBarRRect.width / maxHeat) * heat,
             _heatBarRRect.height,
           ),
-          const Radius.circular(
-            StarshipShooterGame.radius,
+          Radius.circular(
+            gameRef.config.radius,
           ),
         ),
         heatBarPaint,
@@ -225,8 +242,8 @@ class StatsBars extends PositionComponent with HasGameRef<StarshipShooterGame> {
             (_coldBarRRect.width / maxCold) * cold,
             _coldBarRRect.height,
           ),
-          const Radius.circular(
-            StarshipShooterGame.radius,
+          Radius.circular(
+            gameRef.config.radius,
           ),
         ),
         coldBarPaint,
