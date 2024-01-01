@@ -7,32 +7,56 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       : super(
           const GameState.empty(),
         ) {
-    on<GameStartEvent>(
+    on<GameStartsEvent>(
       (event, emit) => emit(
         state.copyWith(
-          status: GameStatus.gameStart,
+          status: GameStatus.gameStarts,
         ),
       ),
     );
-    on<GameOverEvent>(
+    on<WaitingForRoundStartsEvent>(
       (event, emit) => emit(
         state.copyWith(
-          status: GameStatus.gameOver,
+          status: GameStatus.waitingForRoundStart,
         ),
       ),
     );
-    on<DrawingCardsEvent>(
+    on<InBetweenTurnsEvent>(
       (event, emit) => emit(
         state.copyWith(
-          status: GameStatus.drawingCards,
+          status: GameStatus.inBetweenTurns,
         ),
       ),
     );
-    on<PlayerTurnEvent>(
+    on<TurnStartsEvent>(
       (event, emit) => emit(
         state.copyWith(
-          status: GameStatus.processTurn,
-          lastPlayedId: event.playerId,
+          status: GameStatus.turnStarts,
+          currentEntity: event.currentEntity,
+        ),
+      ),
+    );
+    on<TurnProcessEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.turnProcess,
+          currentEntity: event.currentEntity,
+        ),
+      ),
+    );
+    on<TurnEndsEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.turnEnds,
+          currentEntity: event.currentEntity,
+        ),
+      ),
+    );
+    on<RoundEndsEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.roundEnds,
+          currentEntity: Entity.none,
         ),
       ),
     );

@@ -1,5 +1,3 @@
-// ignore_for_file: no_default_cases
-
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,45 +24,73 @@ class GameButton extends StatelessWidget {
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.blue),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                ),
               ),
               child: const Text(
                 'Restart Game',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             );
-          case GameStatus.processTurn || GameStatus.startTurn:
+          case GameStatus.roundStarts ||
+                GameStatus.turnStarts ||
+                GameStatus.turnProcess ||
+                GameStatus.turnEnds ||
+                GameStatus.roundEnds ||
+                GameStatus.inBetweenTurns:
             return ElevatedButton(
               onPressed: null,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.grey),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                ),
               ),
               child: const Text(
-                'Proccessing turn...',
+                'Waiting for round to end...',
                 style: TextStyle(
                   color: Colors.black38,
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             );
-          default:
+          case GameStatus.waitingForRoundStart || GameStatus.gameStarts:
             return ElevatedButton(
               onPressed: () {
-                context.read<GameBloc>().add(const StartTurnEvent());
-                // (game! as StarshipShooterGame).endTurn();
+                context.read<GameBloc>().add(const RoundStartsEvent());
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.amber),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.only(
+                    left: 30,
+                    right: 30,
+                    top: 15,
+                    bottom: 15,
+                  ),
+                ),
               ),
               child: const Text(
-                'End Turn',
+                'Start Round',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
