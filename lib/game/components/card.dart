@@ -37,7 +37,7 @@ class Card extends PositionComponent
   @override
   set opacity(double value) => _opacity = value;
 
-  // #region Card API
+  //#region Card API
   @mustCallSuper
   void useCard(Player player) {
     gameRef.entityBloc.add(
@@ -107,7 +107,7 @@ class Card extends PositionComponent
   }
   // #endregion
 
-  // #region Component API
+  //#region Component API
   @override
   Future<void> onLoad() async {
     final style = DocumentStyle(
@@ -115,6 +115,7 @@ class Card extends PositionComponent
       text: InlineTextStyle(
         fontSize: 8,
         fontFamily: '04B_03',
+        color: Colors.white,
       ),
       header3: BlockStyle(
         padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
@@ -149,7 +150,7 @@ class Card extends PositionComponent
   }
   // #endregion
 
-  // #region Rendering
+  //#region Rendering
   @override
   void render(Canvas canvas) {
     _renderFront(canvas);
