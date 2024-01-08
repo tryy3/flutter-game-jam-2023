@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 enum GameStatus {
+  gameLoading, // Whenever the game loads for first time
   gameStarts, // Game begins
   waitingForRoundStart, // Players draw cards
   roundStarts, // Player clicked Button and round starts
@@ -10,6 +11,7 @@ enum GameStatus {
   turnEnds, // Event for when a turn ends
   roundEnds, // Event for when a full round ends
   gameOver, // Game is over, someone lost
+  gameRestarts, // The game restarts
 }
 
 enum GameMode {
@@ -22,24 +24,17 @@ enum PlayerMode {
   twoPlayers,
 }
 
-enum Entity {
-  player1,
-  player2,
-  environment,
-  none,
-}
-
 class GameState extends Equatable {
   const GameState({
     required this.status,
-    required this.currentEntity,
+    required this.currentEntityID,
     required this.gameMode,
     required this.playerMode,
   });
   const GameState.empty()
       : this(
-          status: GameStatus.gameStarts,
-          currentEntity: Entity.none,
+          status: GameStatus.gameLoading,
+          currentEntityID: -1,
           playerMode: PlayerMode.twoPlayers,
           gameMode: GameMode.playerVSPlayer,
         );
@@ -47,22 +42,22 @@ class GameState extends Equatable {
   final GameStatus status;
   final GameMode gameMode;
   final PlayerMode playerMode;
-  final Entity currentEntity;
+  final int currentEntityID;
 
   GameState copyWith({
-    Entity? currentEntity,
+    int? currentEntityID,
     GameStatus? status,
     GameMode? gameMode,
     PlayerMode? playerMode,
   }) {
     return GameState(
       status: status ?? this.status,
-      currentEntity: currentEntity ?? this.currentEntity,
+      currentEntityID: currentEntityID ?? this.currentEntityID,
       gameMode: gameMode ?? this.gameMode,
       playerMode: playerMode ?? this.playerMode,
     );
   }
 
   @override
-  List<Object?> get props => [status, currentEntity, gameMode, playerMode];
+  List<Object?> get props => [status, currentEntityID, gameMode, playerMode];
 }

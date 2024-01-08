@@ -1,44 +1,52 @@
 import 'package:equatable/equatable.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
-import 'package:starship_shooter/game/bloc/game/game_state.dart';
 
 class EntityState extends Equatable {
   const EntityState({required this.entities});
 
   const EntityState.initial()
       : this(
-          entities: const {
-            Entity.player1: EntityAttributes(
-              health: 20,
-              heat: 20,
-              cold: 20,
-            ),
-            Entity.player2: EntityAttributes(
-              health: 20,
-              heat: 20,
-              cold: 20,
-            ),
-          },
+          entities: const {},
         );
 
-  final Map<Entity, EntityAttributes> entities;
+  final Map<int, EntityAttributes> entities;
 
   @override
   List<Object?> get props => [entities];
 
-  EntityState copyWith({
-    required Entity entity,
-    int? health,
-    int? cold,
-    int? heat,
+  EntityState addNewEntity({
+    required int id,
+    required int health,
+    required int cold,
+    required int heat,
   }) {
     return EntityState(
       entities: {
         ...entities,
-        entity: entities[entity]!.copyWith(
+        id: EntityAttributes(
           health: health,
           cold: cold,
           heat: heat,
+        ),
+      },
+    );
+  }
+
+  EntityState copyWith({
+    required int id,
+    int? health,
+    int? cold,
+    int? heat,
+    EntityStatus? status,
+  }) {
+    return EntityState(
+      entities: {
+        ...entities,
+        id: entities[id]!.copyWith(
+          health: health,
+          cold: cold,
+          heat: heat,
+          status: status,
         ),
       },
     );

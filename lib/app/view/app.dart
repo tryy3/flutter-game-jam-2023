@@ -3,7 +3,9 @@ import 'package:flame/cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:starship_shooter/game/bloc/audio/audio_cubit.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/loading.dart';
 
@@ -21,6 +23,7 @@ class App extends StatelessWidget {
           )..loadSequentially(),
         ),
         BlocProvider<EntityBloc>(create: (_) => EntityBloc()),
+        BlocProvider<GameBloc>(create: (_) => GameBloc()),
       ],
       child: const AppView(),
     );
@@ -40,7 +43,7 @@ class AppView extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(
           accentColor: Colors.grey[600],
         ),
-        scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+        scaffoldBackgroundColor: Colors.grey[900],
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(Colors.grey[700]),

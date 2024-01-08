@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:starship_shooter/game/view/game_page.dart';
+import 'package:starship_shooter/title/view/title_page.dart';
 import 'package:starship_shooter/loading/loading.dart';
 
 class LoadingPage extends StatefulWidget {
@@ -23,7 +23,8 @@ class _LoadingPageState extends State<LoadingPage> {
     if (!mounted) {
       return;
     }
-    await navigator.pushReplacement<void, void>(GamePage.route());
+    // await navigator.pushReplacement<void, void>(GamePage.route());
+    await navigator.pushReplacement<void, void>(TitlePage.route());
   }
 
   @override

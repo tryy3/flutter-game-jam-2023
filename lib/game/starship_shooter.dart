@@ -6,6 +6,7 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart' hide OverlayRoute;
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
@@ -13,10 +14,11 @@ import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
+import 'package:starship_shooter/game/entity_component_manager.dart';
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
-enum SideView { left, right }
+enum SideView { left, right, bottom }
 
 class StarshipShooterGame extends FlameGame {
   StarshipShooterGame({
@@ -25,7 +27,8 @@ class StarshipShooterGame extends FlameGame {
     required this.textStyle,
     required this.gameBloc,
     required this.entityBloc,
-  }) {
+  }) : _entityComponentManager =
+            EntityComponentManager(entityBloc: entityBloc) {
     images.prefix = '';
   }
 
@@ -33,6 +36,7 @@ class StarshipShooterGame extends FlameGame {
   final EntityBloc entityBloc;
   late RouterComponent router;
   late GameConfig config;
+  final EntityComponentManager _entityComponentManager;
 
   @override
   bool get debugMode => false;
@@ -52,32 +56,21 @@ class StarshipShooterGame extends FlameGame {
   double timerLimit = 0;
   int counter = 0;
 
-  final player1 = Player(
-    entity: Entity.player1,
-    side: SideView.left,
-    playerType: PlayerType.hot,
-  );
-  final player2 = Player(
-    entity: Entity.player2,
-    side: SideView.right,
-    playerType: PlayerType.cold,
-  );
-
   @override
   Color backgroundColor() => Colors.grey[900]!;
 
   @override
   Future<void> onLoad() async {
+    // Pre load the sprite sheet
     await images.load('assets/images/sprite_sheet.png');
 
+    // Create the world and camera object
     final world = World(
       children: [],
     );
-
     final camera = CameraComponent(
       world: world,
     );
-
     await addAll([
       world,
       camera,
@@ -85,8 +78,24 @@ class StarshipShooterGame extends FlameGame {
 
     config = GameConfig(camera: camera);
 
+    // FPS component for debug
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 
+    // Add players to the game
+    final players = <Component>[];
+    switch (gameBloc.state.playerMode) {
+      case PlayerMode.onePlayer:
+        final player = Player(side: SideView.bottom);
+        _entityComponentManager.addEntity(player);
+        players.add(player);
+      case PlayerMode.twoPlayers:
+        final player1 = Player(side: SideView.left);
+        final player2 = Player(side: SideView.right);
+        _entityComponentManager.addEntity(player1);
+        _entityComponentManager.addEntity(player2);
+        players.add(player1);
+        players.add(player2);
+    }
     await add(
       FlameMultiBlocProvider(
         providers: [
@@ -97,10 +106,11 @@ class StarshipShooterGame extends FlameGame {
             value: gameBloc,
           ),
         ],
-        children: [player1, player2],
+        children: players,
       ),
     );
 
+    // Center the viewfinder
     camera.viewfinder.position = size / 2;
     camera.viewfinder.zoom = 1;
 
@@ -108,7 +118,7 @@ class StarshipShooterGame extends FlameGame {
     // player can actually continue before continuing changing state
     gameBloc
       ..on<RoundStartsEvent>((event, emit) {
-        if (player1.canContinue() || player2.canContinue()) {
+        if (_entityComponentManager.playersCanContinue()) {
           emit(
             gameBloc.state.copyWith(
               status: GameStatus.roundStarts,
@@ -125,6 +135,16 @@ class StarshipShooterGame extends FlameGame {
 
         overlays.add('PauseMenu');
         pauseEngine();
+      })
+      ..on<GameRestartEvent>((event, emit) {
+        emit(
+          gameBloc.state.copyWith(
+            status: GameStatus.gameRestarts,
+          ),
+        );
+
+        overlays.remove('PauseMenu');
+        resumeEngine();
       });
 
     entityBloc
@@ -132,14 +152,14 @@ class StarshipShooterGame extends FlameGame {
         // Get the heat/cold and subtract by the event depending on which one
         // was used at the time
         final heat = event.heat != null
-            ? entityBloc.state.entities[event.entity]!.heat - event.heat!
+            ? entityBloc.state.entities[event.id]!.heat - event.heat!
             : null;
         final cold = event.cold != null
-            ? entityBloc.state.entities[event.entity]!.cold - event.cold!
+            ? entityBloc.state.entities[event.id]!.cold - event.cold!
             : null;
         emit(
           entityBloc.state.copyWith(
-            entity: event.entity,
+            id: event.id,
             heat: heat,
             cold: cold,
           ),
@@ -147,37 +167,38 @@ class StarshipShooterGame extends FlameGame {
       })
       ..on<DamageEvent>((event, emit) {
         if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-          Entity enemy;
-          if (event.entity == Entity.player1) {
-            enemy = Entity.player2;
-          } else {
-            enemy = Entity.player1;
-          }
-
+          final enemyID = _entityComponentManager.nextPlayerID(event.id);
           final newHealth =
-              entityBloc.state.entities[enemy]!.health - event.damage;
+              entityBloc.state.entities[enemyID]!.health - event.damage;
 
           emit(
             entityBloc.state.copyWith(
-              entity: enemy,
+              id: enemyID,
               health: newHealth,
             ),
           );
         }
       })
       ..on<HealingEvent>((event, emit) {
-        const maxHealth = 20; // TODO(tryy3): Change this to const/player object
         final newHealth =
-            entityBloc.state.entities[event.entity]!.health + event.health;
+            entityBloc.state.entities[event.id]!.health + event.health;
 
         emit(
           entityBloc.state.copyWith(
-            entity: event.entity,
-            health: min(maxHealth, newHealth),
+            id: event.id,
+            health: newHealth,
           ),
         );
       })
       ..on<EntityDeath>((event, emit) {
+        // Update the entity's ID to dead
+        emit(
+          entityBloc.state.copyWith(
+            id: event.id,
+            status: EntityStatus.dead,
+          ),
+        );
+
         if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
           // When it's PvP we can simply end the game if anyone dies
           gameBloc.add(const GameOverEvent());
@@ -187,6 +208,9 @@ class StarshipShooterGame extends FlameGame {
           // playing even if 1 player dies
         }
       });
+
+    // Last thing we do in onLoad is change game state to starting the game
+    gameBloc.add(const GameStartsEvent());
   }
 
   @override
@@ -213,35 +237,29 @@ class StarshipShooterGame extends FlameGame {
 
     if (status == GameStatus.gameStarts) {
       // TODO(tryy3): Maybe check if game is fully loaded at this point?
+      // TODO(Tryy3): Move the card spawning logic to here too
+      _entityComponentManager.initializePlayerAttributes();
       gameBloc.add(const WaitingForRoundStartsEvent());
+    } else if (status == GameStatus.gameRestarts) {
+      for (final player in _entityComponentManager.players) {
+        await player.clearCards();
+      }
+      gameBloc.add(const GameStartsEvent());
     } else if (status == GameStatus.roundStarts ||
         (status == GameStatus.inBetweenTurns && timerCounter >= timerLimit)) {
       // Check for next entity to play, by checking current player against who
       // is next and if they are actually able to play again if next player is
       // unable to continue we'll automatically continue with same entity
       // The player order might differ depending on gameMode
-      var nextEntity = gameBloc.state.currentEntity;
-
-      if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-        if (nextEntity == Entity.none && player1.canContinue()) {
-          nextEntity = Entity.player1;
-        } else if (nextEntity == Entity.none && player2.canContinue()) {
-          nextEntity = Entity.player2;
-        } else if (nextEntity == Entity.player1 && player2.canContinue()) {
-          nextEntity = Entity.player2;
-        } else if (nextEntity == Entity.player2 && player1.canContinue()) {
-          nextEntity = Entity.player1;
-        }
-      } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-        // TODO(tryy3): Implement this... requires an actualy enemy object
-        // to continue, could make a 'fake' one
-      }
-      gameBloc.add(TurnStartsEvent(currentEntity: nextEntity));
+      final nextEntityID = _entityComponentManager
+          .nextPlayableEntityID(gameBloc.state.currentEntityID);
+      gameBloc.add(TurnStartsEvent(currentEntityID: nextEntityID));
     } else if (status == GameStatus.turnStarts) {
-      gameBloc
-          .add(TurnProcessEvent(currentEntity: gameBloc.state.currentEntity));
+      gameBloc.add(
+          TurnProcessEvent(currentEntityID: gameBloc.state.currentEntityID));
     } else if (status == GameStatus.turnProcess) {
-      gameBloc.add(TurnEndsEvent(currentEntity: gameBloc.state.currentEntity));
+      gameBloc
+          .add(TurnEndsEvent(currentEntityID: gameBloc.state.currentEntityID));
     } else if (status == GameStatus.turnEnds) {
       // Reset the counter everytime
       timerCounter = 0; // Reset counter
@@ -249,7 +267,7 @@ class StarshipShooterGame extends FlameGame {
 
       // Check if there is still anyone that can play
       if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-        if (!player1.canContinue() && !player2.canContinue()) {
+        if (!_entityComponentManager.playersCanContinue()) {
           gameBloc.add(const RoundEndsEvent());
         } else {
           // Someone can continue, go to inBetweenTurns and reset timerCounter

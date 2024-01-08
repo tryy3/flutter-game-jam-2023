@@ -25,7 +25,7 @@ class HealCard extends Card {
     super.useCard(player);
     gameRef.entityBloc.add(
       HealingEvent(
-        entity: player.entity,
+        id: player.id,
         health: health,
       ),
     );

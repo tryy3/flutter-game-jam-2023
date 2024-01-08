@@ -16,6 +16,7 @@ import 'package:starship_shooter/game/components/deck_pile/deck_component.dart';
 import 'package:starship_shooter/game/components/information_section.dart';
 import 'package:starship_shooter/game/components/stats_bars.dart';
 import 'package:starship_shooter/game/entities/unicorn/unicorn.dart';
+import 'package:starship_shooter/game/entity_component.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 enum PlayerType {
@@ -26,17 +27,17 @@ enum PlayerType {
 class Player extends PositionComponent
     with
         HasGameRef<StarshipShooterGame>,
-        FlameBlocListenable<GameBloc, GameState> {
+        FlameBlocListenable<GameBloc, GameState>
+    implements EntityComponent {
   Player({
-    required this.entity,
     required this.side,
-    required this.playerType,
+    this.id = -1,
   }) : super(anchor: Anchor.center);
 
   // Properties
   SideView side;
-  final Entity entity;
-  final PlayerType playerType;
+  @override
+  int id;
 
   late Unicorn unicorn;
   late DeckComponent deck;
@@ -53,15 +54,17 @@ class Player extends PositionComponent
   bool get debugMode => false;
 
   // Helper get for player stats
-  int get health => gameRef.entityBloc.state.entities[entity]!.health;
-  int get heat => gameRef.entityBloc.state.entities[entity]!.heat;
-  int get cold => gameRef.entityBloc.state.entities[entity]!.cold;
+  @override
+  int get health => gameRef.entityBloc.state.entities[id]!.health;
+  @override
+  int get heat => gameRef.entityBloc.state.entities[id]!.heat;
+  @override
+  int get cold => gameRef.entityBloc.state.entities[id]!.cold;
 
   // #region State changes
   @override
   void onNewState(GameState state) {
-    if (state.status == GameStatus.turnProcess &&
-        state.currentEntity == entity) {
+    if (state.status == GameStatus.turnProcess && state.currentEntityID == id) {
       startTurn();
     }
 
@@ -83,7 +86,7 @@ class Player extends PositionComponent
       // Add back 2 cold/heat status to the player
       gameRef.entityBloc.add(
         BoostAttributeEvent(
-          entity: entity,
+          id: id,
           heat: 2,
           cold: 2,
         ),
@@ -121,20 +124,16 @@ class Player extends PositionComponent
       ..useCard(this);
 
     // Discard the card
-    unit.removeCard(card);
-    card.add(
-      OpacityEffect.fadeOut(
-        EffectController(duration: .4),
-        target: card,
-        onComplete: () {
-          card.removeFromParent();
-          _cards.remove(card);
-        },
-      ),
+    card.deleteCard(
+      opacityDuration: .4,
+      onComplete: () {
+        _cards.remove(card);
+      },
     );
   }
 
   // Check if there is any foundation cards left to draw
+  @override
   bool canContinue() {
     return cardSlots.hasPlayableCards();
   }
@@ -170,6 +169,8 @@ class Player extends PositionComponent
           viewportSize.x,
           viewportSize.y / 2,
         );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
 
     // Add components to the world
@@ -180,7 +181,9 @@ class Player extends PositionComponent
     ]);
     await add(statsBars);
     await add(informationSection);
+  }
 
+  Future<void> createCards() async {
     // Generate a pile of random cards
     _cards = generateNewCards(10)..shuffle();
 
@@ -189,6 +192,13 @@ class Player extends PositionComponent
       // card.flip();
       deck.addCard(card);
     }
+  }
+
+  Future<void> clearCards() async {
+    for (final card in _cards) {
+      card.deleteCard();
+    }
+    _cards.clear();
   }
 
   void resetAnimation() {

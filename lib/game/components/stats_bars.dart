@@ -5,6 +5,7 @@ import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
@@ -30,10 +31,9 @@ class StatsBars extends PositionComponent
   late RRect _coldBarRRect;
 
   // Stats
-  int get health =>
-      max(game.entityBloc.state.entities[player.entity]!.health, 0);
-  int get cold => max(game.entityBloc.state.entities[player.entity]!.cold, 0);
-  int get heat => max(game.entityBloc.state.entities[player.entity]!.heat, 0);
+  int get health => max(game.entityBloc.state.entities[player.id]!.health, 0);
+  int get cold => max(game.entityBloc.state.entities[player.id]!.cold, 0);
+  int get heat => max(game.entityBloc.state.entities[player.id]!.heat, 0);
 
   // Properties
   SideView side;
@@ -46,8 +46,9 @@ class StatsBars extends PositionComponent
   @override
   void onNewState(EntityState state) {
     // Check if player is dead
-    if (state.entities[player.entity]!.health <= 0) {
-      gameRef.entityBloc.add(EntityDeath(entity: player.entity));
+    var entity = state.entities[player.id]!;
+    if (entity.status == EntityStatus.alive && entity.health <= 0) {
+      gameRef.entityBloc.add(EntityDeath(id: player.id));
     }
   }
   //#endregion
@@ -117,6 +118,8 @@ class StatsBars extends PositionComponent
           -gameRef.config.margin,
           size.y / 2,
         );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),

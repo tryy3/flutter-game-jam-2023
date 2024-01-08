@@ -18,9 +18,8 @@ class GameButton extends StatelessWidget {
         switch (state.status) {
           case GameStatus.gameOver:
             return ElevatedButton(
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                await navigator.pushReplacement<void, void>(GamePage.route());
+              onPressed: () {
+                context.read<GameBloc>().add(const GameRestartEvent());
               },
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -70,7 +69,10 @@ class GameButton extends StatelessWidget {
                 ),
               ),
             );
-          case GameStatus.waitingForRoundStart || GameStatus.gameStarts:
+          case GameStatus.waitingForRoundStart ||
+                GameStatus.gameStarts ||
+                GameStatus.gameRestarts ||
+                GameStatus.gameLoading:
             return ElevatedButton(
               onPressed: () {
                 context.read<GameBloc>().add(const RoundStartsEvent());

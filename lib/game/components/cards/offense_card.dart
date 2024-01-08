@@ -25,7 +25,7 @@ class OffenseCard extends Card {
     super.useCard(player);
     gameRef.entityBloc.add(
       DamageEvent(
-        entity: player.entity,
+        id: player.id,
         damage: damage,
       ),
     );
@@ -43,6 +43,9 @@ class OffenseCard extends Card {
       maxRandomValue = 5;
     } else if (gameRef.gameBloc.state.gameMode == GameMode.playerVSPlayer) {
       maxRandomValue = 3;
+
+      // Debug mode
+      maxRandomValue = 20;
     }
 
     // Randomize if it's gonna be cold or heat card

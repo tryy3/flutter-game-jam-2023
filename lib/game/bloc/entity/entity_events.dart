@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:starship_shooter/game/bloc/game/game_state.dart';
 
 abstract class EntityEvent extends Equatable {
   const EntityEvent();
@@ -10,20 +9,20 @@ abstract class EntityEvent extends Equatable {
 /// Mainly used to subtract heat/cold for the card that has been used
 class CardUsedEvent extends EntityEvent {
   const CardUsedEvent({
-    required this.entity,
+    required this.id,
     this.heat,
     this.cold,
   });
 
   // Entity that used the card
-  final Entity entity;
+  final int id;
 
   /// The cost of the damage
   final int? heat;
   final int? cold;
 
   @override
-  List<Object?> get props => [entity, heat, cold];
+  List<Object?> get props => [id, heat, cold];
 }
 
 /// Event whenever someone deal damage.
@@ -31,15 +30,15 @@ class CardUsedEvent extends EntityEvent {
 /// The entity in this case will be the initiator.
 class DamageEvent extends EntityEvent {
   const DamageEvent({
-    required this.entity,
+    required this.id,
     required this.damage,
   });
 
   final int damage;
-  final Entity entity;
+  final int id;
 
   @override
-  List<Object?> get props => [entity, damage];
+  List<Object?> get props => [id, damage];
 }
 
 /// Event whenever someone deal damage.
@@ -47,15 +46,15 @@ class DamageEvent extends EntityEvent {
 /// The entity in this case will be the initiator.
 class HealingEvent extends EntityEvent {
   const HealingEvent({
-    required this.entity,
+    required this.id,
     required this.health,
   });
 
   final int health;
-  final Entity entity;
+  final int id;
 
   @override
-  List<Object?> get props => [entity, health];
+  List<Object?> get props => [id, health];
 }
 
 /// Event to give an entity more heat/cold stats.
@@ -63,27 +62,66 @@ class HealingEvent extends EntityEvent {
 /// Used in situations like at the end of a round to give player extra heat/cold
 class BoostAttributeEvent extends EntityEvent {
   const BoostAttributeEvent({
-    required this.entity,
+    required this.id,
+    this.health,
     this.cold,
     this.heat,
   });
 
-  final Entity entity;
+  final int id;
+  final int? health;
   final int? cold;
   final int? heat;
 
   @override
-  List<Object?> get props => [entity, cold, heat];
+  List<Object?> get props => [id, health, cold, heat];
 }
 
 /// Whenever an entity dies. Could be a player, mob or a boss.
 class EntityDeath extends EntityEvent {
   const EntityDeath({
-    required this.entity,
+    required this.id,
   });
 
-  final Entity entity;
+  final int id;
 
   @override
-  List<Object?> get props => [entity];
+  List<Object?> get props => [id];
+}
+
+/// Whenever an entity is spawned.
+class EntitySpawn extends EntityEvent {
+  const EntitySpawn({
+    required this.id,
+    this.health,
+    this.cold,
+    this.heat,
+  });
+
+  final int id;
+  final int? health;
+  final int? cold;
+  final int? heat;
+
+  @override
+  List<Object?> get props => [id, health, cold, heat];
+}
+
+/// Whenever an entity is respawned. It will change the entity status to alive
+/// and also add attributes if provided.
+class RespawnEntity extends EntityEvent {
+  const RespawnEntity({
+    required this.id,
+    this.health,
+    this.cold,
+    this.heat,
+  });
+
+  final int id;
+  final int? health;
+  final int? cold;
+  final int? heat;
+
+  @override
+  List<Object?> get props => [id, health, cold, heat];
 }

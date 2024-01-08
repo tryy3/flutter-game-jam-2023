@@ -35,4 +35,12 @@ class GameConfig {
   double get margin => (camera.viewport.size.x * 1.04) / 100;
   double get padding => (camera.viewport.size.x * 1.04) / 100;
   double get radius => 5;
+
+  // Attribute values
+  static const int maxHealth = 20;
+  static const int maxCold = 20;
+  static const int maxHeat = 20;
+  static const int minHealth = 0;
+  static const int minCold = 0;
+  static const int minHeat = 0;
 }

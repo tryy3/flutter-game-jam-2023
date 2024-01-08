@@ -141,6 +141,8 @@ class DeckComponent extends PositionComponent
           -gameRef.config.margin,
           size.y / 2,
         );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
 
     // Add the unit slots at the end of rendering for the logic above

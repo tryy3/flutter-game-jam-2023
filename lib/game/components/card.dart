@@ -42,11 +42,31 @@ class Card extends PositionComponent
   void useCard(Player player) {
     gameRef.entityBloc.add(
       CardUsedEvent(
-        entity: player.entity,
+        id: player.id,
         heat: (heat > 0) ? heat : null,
         cold: (cold > 0) ? cold : null,
       ),
     );
+  }
+
+  // Attempts to delete itself
+  void deleteCard({double? opacityDuration, void Function()? onComplete}) {
+    pile?.removeCard(this);
+
+    if (opacityDuration != null) {
+      add(
+        OpacityEffect.fadeOut(
+          EffectController(duration: .4),
+          target: this,
+          onComplete: () {
+            removeFromParent();
+            onComplete?.call();
+          },
+        ),
+      );
+    } else {
+      removeFromParent();
+    }
   }
   // #endregion
 

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/bloc/audio/audio_cubit.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/game/view/game_button.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -29,8 +30,6 @@ class GamePage extends StatelessWidget {
             create: (context) =>
                 AudioCubit(audioCache: context.read<PreloadCubit>().audio),
           ),
-          BlocProvider<GameBloc>(create: (_) => GameBloc()),
-          BlocProvider<EntityBloc>(create: (_) => EntityBloc()),
         ],
         child: const Scaffold(
           body: SafeArea(child: GameView()),
@@ -51,7 +50,6 @@ class GameView extends StatefulWidget {
 
 class _GameViewState extends State<GameView> {
   StarshipShooterGame? _game;
-  bool gameOver = false;
 
   // late final Bgm bgm;
 
@@ -128,7 +126,7 @@ class _GameViewState extends State<GameView> {
                 exit(0);
               },
               child: const Text(
-                'Quit',
+                'Quit Game',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -147,20 +145,23 @@ class _GameViewState extends State<GameView> {
             ),
           ),
         ),
-        // Align(
-        //   alignment: Alignment.topRight,
-        //   child: BlocBuilder<GameBloc, GameState>(
-        //     builder: (context, state) {
-        //       return Text(
-        //         'Status: ${state.status}',
-        //         style: const TextStyle(
-        //           fontSize: 18,
-        //           color: Colors.white,
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
+        Align(
+          alignment: Alignment.topRight,
+          child: BlocBuilder<GameBloc, GameState>(
+            builder: (context, state) {
+              return Text(
+                '''
+                GameMode: ${state.gameMode}
+                PlayerMode: ${state.playerMode}
+                ''',
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }

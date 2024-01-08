@@ -32,7 +32,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (event, emit) => emit(
         state.copyWith(
           status: GameStatus.turnStarts,
-          currentEntity: event.currentEntity,
+          currentEntityID: event.currentEntityID,
         ),
       ),
     );
@@ -40,7 +40,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (event, emit) => emit(
         state.copyWith(
           status: GameStatus.turnProcess,
-          currentEntity: event.currentEntity,
+          currentEntityID: event.currentEntityID,
         ),
       ),
     );
@@ -48,7 +48,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (event, emit) => emit(
         state.copyWith(
           status: GameStatus.turnEnds,
-          currentEntity: event.currentEntity,
+          currentEntityID: event.currentEntityID,
         ),
       ),
     );
@@ -56,7 +56,15 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       (event, emit) => emit(
         state.copyWith(
           status: GameStatus.roundEnds,
-          currentEntity: Entity.none,
+          currentEntityID: -1,
+        ),
+      ),
+    );
+    on<ChangeGameSettings>(
+      (event, emit) => emit(
+        state.copyWith(
+          gameMode: event.gameMode ?? state.gameMode,
+          playerMode: event.playerMode ?? state.playerMode,
         ),
       ),
     );

@@ -94,6 +94,8 @@ class InformationSection extends PositionComponent
             -gameRef.config.margin,
             size.y / 2,
           );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
 
     _rRect = RRect.fromRectAndRadius(

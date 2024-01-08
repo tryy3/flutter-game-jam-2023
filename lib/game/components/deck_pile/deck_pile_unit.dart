@@ -101,6 +101,8 @@ class DeckPileUnit extends PositionComponent
               gameRef.config.padding -
               (column * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
   }
   //#endregion

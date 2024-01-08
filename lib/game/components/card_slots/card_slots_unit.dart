@@ -93,6 +93,8 @@ class CardSlotsUnit extends PositionComponent
               gameRef.config.padding -
               (unitSlot * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
+      case SideView.bottom:
+      // TODO: Handle this case.
     }
   }
   //#endregion
