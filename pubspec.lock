@@ -253,10 +253,10 @@ packages:
     dependency: "direct main"
     description:
       name: flame_behaviors
-      sha256: e6a7429ed5f16efe7683a63d42f18d6e2c68d6ac3ff0e17f4f62bb224fd294b8
+      sha256: "177aa671df88ecdaf01c28e8f6fbdb83a69ce923dc7c1b551cfc1b34df0386c7"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   flame_bloc:
     dependency: "direct main"
     description:
