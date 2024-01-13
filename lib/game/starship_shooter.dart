@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart' as audio_player;
@@ -6,6 +7,7 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart' hide OverlayRoute;
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
@@ -27,16 +29,16 @@ class StarshipShooterGame extends FlameGame {
     required this.textStyle,
     required this.gameBloc,
     required this.entityBloc,
-  }) : _entityComponentManager =
-            EntityComponentManager(entityBloc: entityBloc) {
+  }) {
     images.prefix = '';
+    entityComponentManager = EntityComponentManager(entityBloc: entityBloc);
   }
 
   final GameBloc gameBloc;
   final EntityBloc entityBloc;
   late RouterComponent router;
   late GameConfig config;
-  final EntityComponentManager _entityComponentManager;
+  late EntityComponentManager entityComponentManager;
 
   @override
   bool get debugMode => false;
@@ -52,12 +54,23 @@ class StarshipShooterGame extends FlameGame {
   final audio_player.AudioPlayer effectPlayer;
   final TextStyle textStyle;
 
+  StreamSubscription<GameState>? gameBlocStream;
+  StreamSubscription<EntityState>? entityBlocStream;
+
   double timerCounter = 0;
   double timerLimit = 0;
   int counter = 0;
 
   @override
   Color backgroundColor() => Colors.grey[900]!;
+
+  @override
+  void onDispose() {
+    // TODO: implement onDispose
+    super.onDispose();
+    gameBlocStream?.cancel();
+    entityBlocStream?.cancel();
+  }
 
   @override
   Future<void> onLoad() async {
@@ -86,13 +99,13 @@ class StarshipShooterGame extends FlameGame {
     switch (gameBloc.state.playerMode) {
       case PlayerMode.onePlayer:
         final player = Player(side: SideView.bottom);
-        _entityComponentManager.addEntity(player);
+        entityComponentManager.addEntity(player);
         players.add(player);
       case PlayerMode.twoPlayers:
         final player1 = Player(side: SideView.left);
         final player2 = Player(side: SideView.right);
-        _entityComponentManager.addEntity(player1);
-        _entityComponentManager.addEntity(player2);
+        entityComponentManager.addEntity(player1);
+        entityComponentManager.addEntity(player2);
         players.add(player1);
         players.add(player2);
     }
@@ -116,98 +129,40 @@ class StarshipShooterGame extends FlameGame {
 
     // When a round start (someone clicks on button) check if any
     // player can actually continue before continuing changing state
-    gameBloc
-      ..on<RoundStartsEvent>((event, emit) {
-        if (_entityComponentManager.playersCanContinue()) {
-          emit(
-            gameBloc.state.copyWith(
-              status: GameStatus.roundStarts,
-            ),
-          );
-        }
-      })
-      ..on<GameOverEvent>((event, emit) async {
-        emit(
-          gameBloc.state.copyWith(
-            status: GameStatus.gameOver,
-          ),
-        );
-
-        overlays.add('PauseMenu');
-        pauseEngine();
-      })
-      ..on<GameRestartEvent>((event, emit) {
-        emit(
-          gameBloc.state.copyWith(
-            status: GameStatus.gameRestarts,
-          ),
-        );
-
+    gameBlocStream = gameBloc.stream.listen((event) {
+      if (event.status == GameStatus.roundStarts &&
+          !entityComponentManager.playersCanContinue()) {
+        gameBloc.add(const WaitingForRoundStartsEvent());
+      }
+      if (event.status == GameStatus.gameOver ||
+          event.status == GameStatus.turnEnds) {
+        // Reset the counter everytime
+        timerCounter = 0; // Reset counter
+        timerLimit = GameConfig.delayBetweenRounds; // Set timerLimit
+      }
+      if (event.status == GameStatus.gameRestarts) {
         overlays.remove('PauseMenu');
         resumeEngine();
-      });
+      }
+    });
 
-    entityBloc
-      ..on<CardUsedEvent>((event, emit) {
-        // Get the heat/cold and subtract by the event depending on which one
-        // was used at the time
-        final heat = event.heat != null
-            ? entityBloc.state.entities[event.id]!.heat - event.heat!
-            : null;
-        final cold = event.cold != null
-            ? entityBloc.state.entities[event.id]!.cold - event.cold!
-            : null;
-        emit(
-          entityBloc.state.copyWith(
-            id: event.id,
-            heat: heat,
-            cold: cold,
-          ),
-        );
-      })
-      ..on<DamageEvent>((event, emit) {
-        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-          final enemyID = _entityComponentManager.nextPlayerID(event.id);
-          final newHealth =
-              entityBloc.state.entities[enemyID]!.health - event.damage;
-
-          emit(
-            entityBloc.state.copyWith(
-              id: enemyID,
-              health: newHealth,
-            ),
-          );
+    entityBlocStream = entityBloc.stream.listen((state) {
+      if (gameBloc.state.status != GameStatus.gameOver) {
+        for (final entityAttr in state.entities.values) {
+          if (entityAttr.status == EntityStatus.dead) {
+            if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+              // When it's PvP we can simply end the game if anyone dies
+              gameBloc.add(const GameOverEvent());
+            } else if (gameBloc.state.gameMode ==
+                GameMode.playerVSEnvironment) {
+              // In PvE mode it will be a bit different because we might have
+              // different levels and it might be possible to continue
+              // playing even if 1 player dies
+            }
+          }
         }
-      })
-      ..on<HealingEvent>((event, emit) {
-        final newHealth =
-            entityBloc.state.entities[event.id]!.health + event.health;
-
-        emit(
-          entityBloc.state.copyWith(
-            id: event.id,
-            health: newHealth,
-          ),
-        );
-      })
-      ..on<EntityDeath>((event, emit) {
-        // Update the entity's ID to dead
-        emit(
-          entityBloc.state.copyWith(
-            id: event.id,
-            status: EntityStatus.dead,
-          ),
-        );
-
-        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-          // When it's PvP we can simply end the game if anyone dies
-          gameBloc.add(const GameOverEvent());
-        } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-          // In PvE mode it will be a bit different because we might have
-          // different levels and it might be possible to continue
-          // playing even if 1 player dies
-        }
-      });
+      }
+    });
 
     // Last thing we do in onLoad is change game state to starting the game
     gameBloc.add(const GameStartsEvent());
@@ -231,27 +186,32 @@ class StarshipShooterGame extends FlameGame {
     // to RoundEnds
 
     final status = gameBloc.state.status;
-    if (status == GameStatus.inBetweenTurns || status == GameStatus.roundEnds) {
+    if (status == GameStatus.inBetweenTurns ||
+        status == GameStatus.roundEnds ||
+        status == GameStatus.gameOver) {
       timerCounter += dt;
     }
 
     if (status == GameStatus.gameStarts) {
       // TODO(tryy3): Maybe check if game is fully loaded at this point?
       // TODO(Tryy3): Move the card spawning logic to here too
-      _entityComponentManager.initializePlayerAttributes();
+      entityComponentManager.initializePlayerAttributes();
       gameBloc.add(const WaitingForRoundStartsEvent());
     } else if (status == GameStatus.gameRestarts) {
-      for (final player in _entityComponentManager.players) {
+      for (final player in entityComponentManager.players) {
         await player.clearCards();
       }
       gameBloc.add(const GameStartsEvent());
+    } else if (status == GameStatus.gameOver && timerCounter >= timerLimit) {
+      overlays.add('PauseMenu');
+      pauseEngine();
     } else if (status == GameStatus.roundStarts ||
         (status == GameStatus.inBetweenTurns && timerCounter >= timerLimit)) {
       // Check for next entity to play, by checking current player against who
       // is next and if they are actually able to play again if next player is
       // unable to continue we'll automatically continue with same entity
       // The player order might differ depending on gameMode
-      final nextEntityID = _entityComponentManager
+      final nextEntityID = entityComponentManager
           .nextPlayableEntityID(gameBloc.state.currentEntityID);
       gameBloc.add(TurnStartsEvent(currentEntityID: nextEntityID));
     } else if (status == GameStatus.turnStarts) {
@@ -261,13 +221,9 @@ class StarshipShooterGame extends FlameGame {
       gameBloc
           .add(TurnEndsEvent(currentEntityID: gameBloc.state.currentEntityID));
     } else if (status == GameStatus.turnEnds) {
-      // Reset the counter everytime
-      timerCounter = 0; // Reset counter
-      timerLimit = 2; // Set timerLimit
-
       // Check if there is still anyone that can play
       if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-        if (!_entityComponentManager.playersCanContinue()) {
+        if (!entityComponentManager.playersCanContinue()) {
           gameBloc.add(const RoundEndsEvent());
         } else {
           // Someone can continue, go to inBetweenTurns and reset timerCounter
@@ -281,10 +237,6 @@ class StarshipShooterGame extends FlameGame {
       gameBloc.add(const WaitingForRoundStartsEvent());
     }
   }
-
-  final TextPaint textPaint = TextPaint(
-    style: const TextStyle(color: Colors.white, fontSize: 20),
-  );
 }
 
 Sprite spriteSheet(double x, double y, double width, double height) {

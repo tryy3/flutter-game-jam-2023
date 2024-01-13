@@ -50,6 +50,7 @@ class StatsBars extends PositionComponent
     if (entity.status == EntityStatus.alive && entity.health <= 0) {
       gameRef.entityBloc.add(EntityDeath(id: player.id));
     }
+    if (entity.status == EntityStatus.dead) {}
   }
   //#endregion
 

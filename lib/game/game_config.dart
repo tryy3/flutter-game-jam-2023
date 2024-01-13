@@ -43,4 +43,7 @@ class GameConfig {
   static const int minHealth = 0;
   static const int minCold = 0;
   static const int minHeat = 0;
+
+  // Game static configs
+  static const double delayBetweenRounds = 1;
 }

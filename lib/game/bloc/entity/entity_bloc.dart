@@ -42,5 +42,50 @@ class EntityBloc extends Bloc<EntityEvent, EntityState> {
         ),
       ),
     );
+    on<EntityDeath>(
+      (event, emit) => emit(
+        state.copyWith(
+          id: event.id,
+          status: EntityStatus.dead,
+        ),
+      ),
+    );
+    on<CardUsedEvent>((event, emit) {
+      // Get the heat/cold and subtract by the event depending on which one
+      // was used at the time
+      final heat = event.heat != null
+          ? state.entities[event.id]!.heat - event.heat!
+          : null;
+      final cold = event.cold != null
+          ? state.entities[event.id]!.cold - event.cold!
+          : null;
+      emit(
+        state.copyWith(
+          id: event.id,
+          heat: heat,
+          cold: cold,
+        ),
+      );
+    });
+    on<HealingEvent>((event, emit) {
+      final newHealth = state.entities[event.id]!.health + event.health;
+
+      emit(
+        state.copyWith(
+          id: event.id,
+          health: newHealth,
+        ),
+      );
+    });
+    on<DamageEvent>((event, emit) {
+      final newHealth = state.entities[event.id]!.health - event.damage;
+
+      emit(
+        state.copyWith(
+          id: event.id,
+          health: newHealth,
+        ),
+      );
+    });
   }
 }

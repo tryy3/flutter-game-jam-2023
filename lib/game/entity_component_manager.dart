@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/player.dart';
@@ -17,9 +19,11 @@ class EntityComponentManager {
   /// Add a new entity and also set it's id
   void addEntity(EntityComponent entity) {
     _lastID++;
-    entity.id = _lastID;
+    // final id = _lastID;
+    final id = Random().nextInt(1000000);
+    entity.id = id;
     _entities.add(entity);
-    _entityBloc.add(EntitySpawn(id: _lastID));
+    _entityBloc.add(EntitySpawn(id: id));
   }
 
   /// Will return next ID of the entity that is able to play
@@ -40,7 +44,9 @@ class EntityComponentManager {
   /// Checks if any player is able to continue
   bool playersCanContinue() {
     for (final entity in _entities) {
-      if (entity is Player && entity.canContinue()) return true;
+      if (entity is Player && entity.canContinue()) {
+        return true;
+      }
     }
     return false;
   }

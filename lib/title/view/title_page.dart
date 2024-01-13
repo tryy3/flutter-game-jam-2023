@@ -13,6 +13,7 @@ class TitlePage extends StatelessWidget {
 
   static Route<void> route() {
     return MaterialPageRoute<void>(
+      maintainState: false,
       builder: (_) => const TitlePage(),
     );
   }

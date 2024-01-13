@@ -23,9 +23,13 @@ class OffenseCard extends Card {
   @override
   void useCard(Player player) {
     super.useCard(player);
+
+    final enemyID =
+        player.gameRef.entityComponentManager.nextPlayerID(player.id);
+
     gameRef.entityBloc.add(
       DamageEvent(
-        id: player.id,
+        id: enemyID,
         damage: damage,
       ),
     );

@@ -11,6 +11,7 @@ import 'package:starship_shooter/game/starship_shooter.dart';
 import 'package:starship_shooter/game/view/game_button.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 import 'package:starship_shooter/loading/cubit/cubit.dart';
+import 'package:starship_shooter/title/view/title_page.dart';
 
 class GamePage extends StatelessWidget {
   const GamePage({super.key});
@@ -18,6 +19,7 @@ class GamePage extends StatelessWidget {
   static Route<void> route() {
     return MaterialPageRoute<void>(
       builder: (_) => const GamePage(),
+      maintainState: false,
     );
   }
 
@@ -40,17 +42,13 @@ class GamePage extends StatelessWidget {
 }
 
 class GameView extends StatefulWidget {
-  const GameView({super.key, this.game});
-
-  final FlameGame? game;
+  const GameView({super.key});
 
   @override
   State<GameView> createState() => _GameViewState();
 }
 
 class _GameViewState extends State<GameView> {
-  StarshipShooterGame? _game;
-
   // late final Bgm bgm;
 
   @override
@@ -73,7 +71,7 @@ class _GameViewState extends State<GameView> {
           fontSize: 4,
         );
 
-    _game = StarshipShooterGame(
+    final game = StarshipShooterGame(
       l10n: context.l10n,
       effectPlayer: context.read<AudioCubit>().effectPlayer,
       textStyle: textStyle,
@@ -85,7 +83,7 @@ class _GameViewState extends State<GameView> {
       children: [
         Positioned.fill(
           child: GameWidget<StarshipShooterGame>(
-            game: _game!,
+            game: game,
             overlayBuilderMap: const {
               'PauseMenu': _pauseMenuBuilder,
             },
@@ -123,10 +121,11 @@ class _GameViewState extends State<GameView> {
                 ),
               ),
               onPressed: () {
-                exit(0);
+                Navigator.of(context)
+                    .pushReplacement<void, void>(TitlePage.route());
               },
               child: const Text(
-                'Quit Game',
+                'Game Menu',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -141,7 +140,7 @@ class _GameViewState extends State<GameView> {
           child: Align(
             alignment: Alignment.topCenter,
             child: GameButton(
-              game: _game,
+              game: game,
             ),
           ),
         ),

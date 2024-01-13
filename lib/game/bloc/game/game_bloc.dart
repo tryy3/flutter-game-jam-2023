@@ -21,6 +21,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         ),
       ),
     );
+    on<RoundStartsEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.roundStarts,
+        ),
+      ),
+    );
     on<InBetweenTurnsEvent>(
       (event, emit) => emit(
         state.copyWith(
@@ -65,6 +72,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         state.copyWith(
           gameMode: event.gameMode ?? state.gameMode,
           playerMode: event.playerMode ?? state.playerMode,
+        ),
+      ),
+    );
+    on<GameOverEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.gameOver,
+        ),
+      ),
+    );
+    on<GameRestartEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          status: GameStatus.gameRestarts,
         ),
       ),
     );
