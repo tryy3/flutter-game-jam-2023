@@ -35,34 +35,13 @@ class Player extends PositionComponent
     implements EntityComponent {
   Player({
     required this.side,
-    required this.entityBloc,
     this.id = -1,
-  }) : super(anchor: Anchor.center) {
-    entityBloc.stream.listen((event) {
-      // Check health change for this player entity to make sure health
-      // is within the max and min limit
-      final playerEntity =
-          event.entities.entries.firstWhere((element) => element.key == id);
-      final checkNewHealth = max(
-        min(
-          playerEntity.value.health,
-          GameConfig.maxHealth,
-        ),
-        GameConfig.minHealth,
-      );
-      if (checkNewHealth != playerEntity.value.health) {
-        entityBloc
-            .add(CorrectEntityAttributeEvent(id: id, health: checkNewHealth));
-        return;
-      }
-    });
-  }
+  }) : super(anchor: Anchor.center);
 
   // Properties
   SideView side;
   @override
   int id;
-  EntityBloc entityBloc;
 
   late Unicorn unicorn;
   late DeckComponent deck;
@@ -85,6 +64,8 @@ class Player extends PositionComponent
   int get heat => gameRef.entityBloc.state.entities[id]!.heat;
   @override
   int get cold => gameRef.entityBloc.state.entities[id]!.cold;
+  @override
+  EntityStatus get status => gameRef.entityBloc.state.entities[id]!.status;
 
   // #region State changes
   @override
@@ -93,29 +74,34 @@ class Player extends PositionComponent
       startTurn();
     }
 
+    // At the end of the round, buff player and give them cards
+    // only if they are still alive
     if (state.status == GameStatus.roundEnds) {
-      // Shuffle the cards and add 2 new cards to the pile
-      deck.sortCards();
+      final playerEntity = gameRef.entityBloc.state.entities[id]!;
+      if (playerEntity.status != EntityStatus.dead) {
+        // Shuffle the cards and add 2 new cards to the pile
+        deck.sortCards();
 
-      // Generate new random cards
-      final newCards = generateNewCards(2)..shuffle();
-      for (final card in newCards) {
-        // Only add card to the player if the deck can accept it
-        if (deck.addCard(card)) {
-          // card.flip();
-          gameRef.add(card);
-          _cards.add(card);
+        // Generate new random cards
+        final newCards = generateNewCards(2)..shuffle();
+        for (final card in newCards) {
+          // Only add card to the player if the deck can accept it
+          if (deck.addCard(card)) {
+            // card.flip();
+            gameRef.add(card);
+            _cards.add(card);
+          }
         }
-      }
 
-      // Add back 2 cold/heat status to the player
-      gameRef.entityBloc.add(
-        BoostAttributeEvent(
-          id: id,
-          heat: 2,
-          cold: 2,
-        ),
-      );
+        // Add back 2 cold/heat status to the player
+        gameRef.entityBloc.add(
+          BoostAttributeEvent(
+            id: id,
+            heat: 2,
+            cold: 2,
+          ),
+        );
+      }
     }
   }
   // #endregion
@@ -212,11 +198,56 @@ class Player extends PositionComponent
       FlameBlocListener<EntityBloc, EntityState>(
         onNewState: (EntityState state) {
           // Check if player is dead
-          var entity = state.entities[id]!;
-          if (entity.status == EntityStatus.alive && entity.health <= 0) {
-            gameRef.entityBloc.add(EntityDeathEvent(id: id));
+          final playerEntity = state.entities[id]!;
+
+          // Check health change for this player entity to make sure health
+          // is within the max and min limit
+          final checkNewHealth = max(
+            min(
+              playerEntity.health,
+              GameConfig.maxHealth,
+            ),
+            GameConfig.minHealth,
+          );
+          if (checkNewHealth != playerEntity.health) {
+            gameRef.entityBloc.add(
+                CorrectEntityAttributeEvent(id: id, health: checkNewHealth));
+            return;
           }
-          if (entity.status == EntityStatus.dead) {}
+
+          // Check if we should send EntityDeathEvent on this player
+          if (playerEntity.status == EntityStatus.alive &&
+              playerEntity.health <= 0) {
+            gameRef.entityBloc.add(EntityDeathEvent(id: id));
+            return;
+          }
+
+          // If this player is dead we should remove remaining cards and set
+          // reamining stats to 0
+          if (playerEntity.status == EntityStatus.dead) {
+            if (_cards.isNotEmpty) {
+              for (var i = _cards.length - 1; i >= 0; i--) {
+                final card = _cards[i];
+                // Discard the card
+                card.deleteCard(
+                  opacityDuration: .4,
+                  onComplete: () {
+                    _cards.remove(card);
+                  },
+                );
+              }
+            }
+            if (playerEntity.cold != GameConfig.minCold ||
+                playerEntity.heat != GameConfig.minHeat) {
+              gameRef.entityBloc.add(
+                CorrectEntityAttributeEvent(
+                  id: id,
+                  cold: GameConfig.minCold,
+                  heat: GameConfig.minHeat,
+                ),
+              );
+            }
+          }
         },
       ),
     );

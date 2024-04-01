@@ -75,6 +75,7 @@ class StarshipShooterGame extends FlameGame {
     super.onDispose();
     gameBlocStream?.cancel();
     entityBlocStream?.cancel();
+    entityComponentManager.onDispose();
   }
 
   @override
@@ -105,18 +106,15 @@ class StarshipShooterGame extends FlameGame {
       case PlayerMode.onePlayer:
         final player = Player(
           side: SideView.bottom,
-          entityBloc: entityBloc,
         );
         entityComponentManager.addEntity(player);
         entities.add(player);
       case PlayerMode.twoPlayers:
         final player1 = Player(
           side: SideView.left,
-          entityBloc: entityBloc,
         );
         final player2 = Player(
           side: SideView.right,
-          entityBloc: entityBloc,
         );
         entityComponentManager.addEntity(player1);
         entityComponentManager.addEntity(player2);
@@ -167,17 +165,14 @@ class StarshipShooterGame extends FlameGame {
 
     entityBlocStream = entityBloc.stream.listen((state) {
       if (gameBloc.state.status != GameStatus.gameOver) {
-        for (final entityAttr in state.entities.values) {
-          if (entityAttr.status == EntityStatus.dead) {
-            if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-              // When it's PvP we can simply end the game if anyone dies
-              gameBloc.add(const GameOverEvent());
-            } else if (gameBloc.state.gameMode ==
-                GameMode.playerVSEnvironment) {
-              // In PvE mode it will be a bit different because we might have
-              // different levels and it might be possible to continue
-              // playing even if 1 player dies
-            }
+        // Check for game over state, in PvP mode this will be if anyone dies
+        // in PvE mode it will be when either the boss is dead or when all
+        // players are dead
+        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+          final deadPlayers = state.entities.entries
+              .where((element) => element.value.status == EntityStatus.dead);
+          if (deadPlayers.isNotEmpty) {
+            gameBloc.add(const GameOverEvent());
           }
         }
       }

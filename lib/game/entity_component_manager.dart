@@ -1,22 +1,62 @@
+import 'dart:async';
+
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
+import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/entity_component.dart';
+import 'package:starship_shooter/game/game_config.dart';
 
 class EntityComponentManager {
   EntityComponentManager({
     required EntityBloc entityBloc,
     required GameBloc gameBloc,
   })  : _entityBloc = entityBloc,
-        _gameBloc = gameBloc;
+        _gameBloc = gameBloc {
+    entityBlocStream = entityBloc.stream.listen((state) {
+      if (gameBloc.state.status != GameStatus.gameOver &&
+          gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
+        // First check if boss is dead
+        final deadBoss = _entities.where(
+          (element) =>
+              (element is BossEnemy) && element.status == EntityStatus.dead,
+        );
+        if (deadBoss.isNotEmpty) {
+          gameBloc.add(const GameOverEvent());
+          return;
+        }
+
+        // Next check if there is still any players alive
+        // TODO: Can we do anything about the none status?
+        final alivePlayers = _entities.where(
+          (element) =>
+              (element is Player) &&
+              (element.status == EntityStatus.alive ||
+                  element.status == EntityStatus.none),
+        );
+        if (alivePlayers.isEmpty) {
+          gameBloc.add(const GameOverEvent());
+          return;
+        }
+      }
+    });
+  }
 
   // Internal usage
   int _lastID = -1;
   final EntityBloc _entityBloc;
   final GameBloc _gameBloc;
+
+  StreamSubscription<EntityState>? entityBlocStream;
+
+  void onDispose() {
+    entityBlocStream?.cancel();
+  }
 
   final List<EntityComponent> _entities = [];
   Iterable<Player> get players => _entities.whereType<Player>();
@@ -67,8 +107,13 @@ class EntityComponentManager {
     return false;
   }
 
-  List<EntityComponent> getPlayerEntities() {
-    return _entities.whereType<Player>().toList();
+  List<EntityComponent> findAlivePlayerEntities() {
+    return _entities
+        .where(
+          (element) =>
+              (element is Player) && (element.health > GameConfig.minHealth),
+        )
+        .toList();
   }
 
   /// Tries to find the ID of a enemy, if it's PvP it will go based on

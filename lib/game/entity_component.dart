@@ -1,3 +1,4 @@
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 
 abstract class EntityComponent {
@@ -10,6 +11,7 @@ abstract class EntityComponent {
   int get health;
   int get heat;
   int get cold;
+  EntityStatus get status;
 
   /// Checks if the entity can continue playing or not
   ///

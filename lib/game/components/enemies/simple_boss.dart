@@ -15,8 +15,8 @@ import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 const simpleBossMaxHealth = 200;
-const minDamageDone = 5;
-const maxDamageDone = 15;
+const minDamageDone = 25;
+const maxDamageDone = 55;
 
 class SimpleBoss extends PositionComponent
     with
@@ -34,6 +34,8 @@ class SimpleBoss extends PositionComponent
   int get cold => -1;
   @override
   int get heat => -1;
+  @override
+  EntityStatus get status => gameRef.entityBloc.state.entities[id]!.status;
   @override
   bool canContinue() => true;
   //#endregion
@@ -123,13 +125,14 @@ class SimpleBoss extends PositionComponent
 
   void startTurn() {
 // generates a new Random object
-    final _random = Random();
-    final playerEntities = gameRef.entityComponentManager.getPlayerEntities();
-    final randomPlayer = playerEntities[_random.nextInt(playerEntities.length)];
+    final rand = Random();
+    final playerEntities =
+        gameRef.entityComponentManager.findAlivePlayerEntities();
+    final randomPlayer = playerEntities[rand.nextInt(playerEntities.length)];
 
     // Get a random damage between min and max
     final randomDamage =
-        _random.nextInt(maxDamageDone - minDamageDone) + minDamageDone;
+        rand.nextInt(maxDamageDone - minDamageDone) + minDamageDone;
 
     // Apply the damage to the player
     gameRef.entityBloc.add(

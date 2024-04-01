@@ -55,9 +55,9 @@ class EntityBloc extends Bloc<EntityEvent, EntityState> {
       (event, emit) => emit(
         state.copyWith(
           id: event.id,
-          health: event.health ?? 0,
-          cold: event.cold ?? 0,
-          heat: event.heat ?? 0,
+          health: event.health,
+          cold: event.cold,
+          heat: event.heat,
         ),
       ),
     );
