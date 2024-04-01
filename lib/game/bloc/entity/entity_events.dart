@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 
 abstract class EntityEvent extends Equatable {
   const EntityEvent();
@@ -78,8 +79,8 @@ class BoostAttributeEvent extends EntityEvent {
 }
 
 /// Whenever an entity dies. Could be a player, mob or a boss.
-class EntityDeath extends EntityEvent {
-  const EntityDeath({
+class EntityDeathEvent extends EntityEvent {
+  const EntityDeathEvent({
     required this.id,
   });
 
@@ -90,8 +91,29 @@ class EntityDeath extends EntityEvent {
 }
 
 /// Whenever an entity is spawned.
-class EntitySpawn extends EntityEvent {
-  const EntitySpawn({
+class SpawnEntityEvent extends EntityEvent {
+  const SpawnEntityEvent({
+    required this.id,
+    this.health,
+    this.cold,
+    this.heat,
+    this.status,
+  });
+
+  final int id;
+  final int? health;
+  final int? cold;
+  final int? heat;
+  final EntityStatus? status;
+
+  @override
+  List<Object?> get props => [id, health, cold, heat, status];
+}
+
+/// Whenever an entity is respawned. It will change the entity status to alive
+/// and also add attributes if provided.
+class RespawnEntityEvent extends EntityEvent {
+  const RespawnEntityEvent({
     required this.id,
     this.health,
     this.cold,
@@ -107,10 +129,9 @@ class EntitySpawn extends EntityEvent {
   List<Object?> get props => [id, health, cold, heat];
 }
 
-/// Whenever an entity is respawned. It will change the entity status to alive
-/// and also add attributes if provided.
-class RespawnEntity extends EntityEvent {
-  const RespawnEntity({
+/// When any attributes get corrected, for example health went above max
+class CorrectEntityAttributeEvent extends EntityEvent {
+  const CorrectEntityAttributeEvent({
     required this.id,
     this.health,
     this.cold,

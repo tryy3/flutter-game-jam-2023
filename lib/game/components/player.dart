@@ -5,7 +5,10 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_bloc/flame_bloc.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/card.dart';
@@ -14,9 +17,10 @@ import 'package:starship_shooter/game/components/cards/heal_card.dart';
 import 'package:starship_shooter/game/components/cards/offense_card.dart';
 import 'package:starship_shooter/game/components/deck_pile/deck_component.dart';
 import 'package:starship_shooter/game/components/information_section.dart';
-import 'package:starship_shooter/game/components/stats_bars.dart';
+import 'package:starship_shooter/game/components/status_bars/player_status.dart';
 import 'package:starship_shooter/game/entities/unicorn/unicorn.dart';
 import 'package:starship_shooter/game/entity_component.dart';
+import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 enum PlayerType {
@@ -31,18 +35,39 @@ class Player extends PositionComponent
     implements EntityComponent {
   Player({
     required this.side,
+    required this.entityBloc,
     this.id = -1,
-  }) : super(anchor: Anchor.center);
+  }) : super(anchor: Anchor.center) {
+    entityBloc.stream.listen((event) {
+      // Check health change for this player entity to make sure health
+      // is within the max and min limit
+      final playerEntity =
+          event.entities.entries.firstWhere((element) => element.key == id);
+      final checkNewHealth = max(
+        min(
+          playerEntity.value.health,
+          GameConfig.maxHealth,
+        ),
+        GameConfig.minHealth,
+      );
+      if (checkNewHealth != playerEntity.value.health) {
+        entityBloc
+            .add(CorrectEntityAttributeEvent(id: id, health: checkNewHealth));
+        return;
+      }
+    });
+  }
 
   // Properties
   SideView side;
   @override
   int id;
+  EntityBloc entityBloc;
 
   late Unicorn unicorn;
   late DeckComponent deck;
   late CardSlotsComponent cardSlots;
-  late StatsBars statsBars;
+  late PlayerStatus statsBars;
   late InformationSection informationSection;
   late List<Card> _cards;
   late SpriteAnimationComponent _animationComponent;
@@ -150,7 +175,7 @@ class Player extends PositionComponent
     // Create player related components
     deck = DeckComponent(side: side, player: this);
     cardSlots = CardSlotsComponent(side: side, player: this);
-    statsBars = StatsBars(side: side, player: this);
+    statsBars = PlayerStatus(side: side, player: this);
     informationSection = InformationSection(side: side, player: this);
     unicorn = Unicorn(side: side, player: this);
 
@@ -181,6 +206,20 @@ class Player extends PositionComponent
     ]);
     await add(statsBars);
     await add(informationSection);
+
+    // Add state changes, for example when player dies
+    await add(
+      FlameBlocListener<EntityBloc, EntityState>(
+        onNewState: (EntityState state) {
+          // Check if player is dead
+          var entity = state.entities[id]!;
+          if (entity.status == EntityStatus.alive && entity.health <= 0) {
+            gameRef.entityBloc.add(EntityDeathEvent(id: id));
+          }
+          if (entity.status == EntityStatus.dead) {}
+        },
+      ),
+    );
   }
 
   Future<void> createCards() async {
@@ -213,4 +252,9 @@ class Player extends PositionComponent
 
   /// Returns whether the animation is playing or not.
   bool isAnimationPlaying() => !animationTicker.done();
+
+  @override
+  SpawnEntityEvent spawnEntity() {
+    return SpawnEntityEvent(id: id);
+  }
 }

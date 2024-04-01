@@ -21,17 +21,18 @@ class EntityBloc extends Bloc<EntityEvent, EntityState> {
         ),
       ),
     );
-    on<EntitySpawn>(
+    on<SpawnEntityEvent>(
       (event, emit) => emit(
         state.addNewEntity(
           id: event.id,
           health: event.health ?? 0,
           cold: event.cold ?? 0,
           heat: event.heat ?? 0,
+          status: event.status ?? EntityStatus.none,
         ),
       ),
     );
-    on<RespawnEntity>(
+    on<RespawnEntityEvent>(
       (event, emit) => emit(
         state.copyWith(
           id: event.id,
@@ -42,11 +43,21 @@ class EntityBloc extends Bloc<EntityEvent, EntityState> {
         ),
       ),
     );
-    on<EntityDeath>(
+    on<EntityDeathEvent>(
       (event, emit) => emit(
         state.copyWith(
           id: event.id,
           status: EntityStatus.dead,
+        ),
+      ),
+    );
+    on<CorrectEntityAttributeEvent>(
+      (event, emit) => emit(
+        state.copyWith(
+          id: event.id,
+          health: event.health ?? 0,
+          cold: event.cold ?? 0,
+          heat: event.heat ?? 0,
         ),
       ),
     );

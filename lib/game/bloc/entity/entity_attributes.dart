@@ -31,13 +31,14 @@ class EntityAttributes extends Equatable {
     EntityStatus? status,
   }) {
     return EntityAttributes(
-      health: max(
-        min(
-          health ?? this.health,
-          GameConfig.maxHealth,
-        ),
-        GameConfig.minHealth,
-      ),
+      // health: max(
+      //   min(
+      //     health ?? this.health,
+      //     GameConfig.maxHealth,
+      //   ),
+      //   GameConfig.minHealth,
+      // ),
+      health: health ?? this.health,
       heat: max(
         min(
           heat ?? this.heat,

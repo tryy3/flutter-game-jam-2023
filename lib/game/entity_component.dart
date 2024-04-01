@@ -1,3 +1,5 @@
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+
 abstract class EntityComponent {
   /// The entity ID
   int get id;
@@ -15,4 +17,6 @@ abstract class EntityComponent {
   /// determined by if they have a card in their hand if that card is playable or
   /// not
   bool canContinue();
+
+  SpawnEntityEvent spawnEntity();
 }

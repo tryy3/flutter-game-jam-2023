@@ -15,6 +15,8 @@ import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
+import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
+import 'package:starship_shooter/game/components/enemies/simple_boss.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/entity_component_manager.dart';
 import 'package:starship_shooter/game/game_config.dart';
@@ -31,7 +33,10 @@ class StarshipShooterGame extends FlameGame {
     required this.entityBloc,
   }) {
     images.prefix = '';
-    entityComponentManager = EntityComponentManager(entityBloc: entityBloc);
+    entityComponentManager = EntityComponentManager(
+      entityBloc: entityBloc,
+      gameBloc: gameBloc,
+    );
   }
 
   final GameBloc gameBloc;
@@ -95,19 +100,33 @@ class StarshipShooterGame extends FlameGame {
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 
     // Add players to the game
-    final players = <Component>[];
+    final entities = <Component>[];
     switch (gameBloc.state.playerMode) {
       case PlayerMode.onePlayer:
-        final player = Player(side: SideView.bottom);
+        final player = Player(
+          side: SideView.bottom,
+          entityBloc: entityBloc,
+        );
         entityComponentManager.addEntity(player);
-        players.add(player);
+        entities.add(player);
       case PlayerMode.twoPlayers:
-        final player1 = Player(side: SideView.left);
-        final player2 = Player(side: SideView.right);
+        final player1 = Player(
+          side: SideView.left,
+          entityBloc: entityBloc,
+        );
+        final player2 = Player(
+          side: SideView.right,
+          entityBloc: entityBloc,
+        );
         entityComponentManager.addEntity(player1);
         entityComponentManager.addEntity(player2);
-        players.add(player1);
-        players.add(player2);
+        entities.add(player1);
+        entities.add(player2);
+    }
+    if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
+      final enemy = SimpleBoss();
+      entityComponentManager.addEntity(enemy);
+      entities.add(enemy);
     }
     await add(
       FlameMultiBlocProvider(
@@ -119,7 +138,7 @@ class StarshipShooterGame extends FlameGame {
             value: gameBloc,
           ),
         ],
-        children: players,
+        children: entities,
       ),
     );
 
@@ -216,7 +235,8 @@ class StarshipShooterGame extends FlameGame {
       gameBloc.add(TurnStartsEvent(currentEntityID: nextEntityID));
     } else if (status == GameStatus.turnStarts) {
       gameBloc.add(
-          TurnProcessEvent(currentEntityID: gameBloc.state.currentEntityID));
+        TurnProcessEvent(currentEntityID: gameBloc.state.currentEntityID),
+      );
     } else if (status == GameStatus.turnProcess) {
       gameBloc
           .add(TurnEndsEvent(currentEntityID: gameBloc.state.currentEntityID));
@@ -230,8 +250,26 @@ class StarshipShooterGame extends FlameGame {
           gameBloc.add(const InBetweenTurnsEvent());
         }
       } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-        // TODO(tryy3): Implement this... requires an actualy enemy object
-        // to continue, could make a 'fake' one
+        // We need to determine if we can continue playing or if the round is
+        // round is over.
+        // Normally to check who the next entity is we go by ID and start with
+        // last playedEntity.
+        // If lastPlayed entity was a Player and next one is a boss then boss
+        // should always play
+        // But if last played was the boss and player can't continue then we
+        // need to end
+        // So we only really need to check if nextPlayableEntity is a boss and
+        // lastPlayedEntity was a boss
+        final nextPlayableEntity = entityComponentManager
+            .nextPlayableEntity(gameBloc.state.currentEntityID);
+        final lastPlayedEntity =
+            entityComponentManager.findEntity(gameBloc.state.currentEntityID);
+        if (nextPlayableEntity is BossEnemy && lastPlayedEntity is BossEnemy) {
+          gameBloc.add(const RoundEndsEvent());
+        } else {
+          // Someone can continue, go to inBetweenTurns and reset timerCounter
+          gameBloc.add(const InBetweenTurnsEvent());
+        }
       }
     } else if (status == GameStatus.roundEnds && timerCounter >= timerLimit) {
       gameBloc.add(const WaitingForRoundStartsEvent());

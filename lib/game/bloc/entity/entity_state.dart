@@ -19,6 +19,7 @@ class EntityState extends Equatable {
     required int health,
     required int cold,
     required int heat,
+    required EntityStatus status,
   }) {
     return EntityState(
       entities: {
@@ -27,6 +28,7 @@ class EntityState extends Equatable {
           health: health,
           cold: cold,
           heat: heat,
+          status: status,
         ),
       },
     );

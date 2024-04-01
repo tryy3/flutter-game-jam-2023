@@ -5,6 +5,12 @@ class GameConfig {
   GameConfig({required this.camera});
   final CameraComponent camera;
 
+  // Calculate numbers by taking (base number / y * 100), this will result
+  // in the number needed for using in the percentage below.
+  // for example with cardWidth, based on y height of 1080 we want the cardwidth
+  // to be 63 pixels. So we divide (63 / 1080) * 100, which results in roughly
+  // 5.83
+
   // Card settings
   double get cardWidth => (camera.viewport.size.y * 5.83) / 100;
   double get cardHeight => (camera.viewport.size.x * 5.46) / 100;
@@ -46,4 +52,9 @@ class GameConfig {
 
   // Game static configs
   static const double delayBetweenRounds = 1;
+
+  // Simple boss settings
+  double get simpleBossWidth => (camera.viewport.size.y * 9.25) / 100;
+  double get simpleBossHeight => (camera.viewport.size.y * 9.25) / 100;
+  Vector2 get simpleBossSize => Vector2(simpleBossWidth, simpleBossHeight);
 }
