@@ -81,6 +81,9 @@ class DeckPileUnit extends PositionComponent
     final column = unitSlot % player.deck.maxColumns;
     final row = (unitSlot / player.deck.maxColumns).floorToDouble();
 
+    // TODO(tryy3): Fix rendering for left and right,
+    // it should render with first card being closest to the deck and then
+    // outwards and up
     switch (side) {
       case SideView.left:
         position = Vector2(
@@ -104,12 +107,15 @@ class DeckPileUnit extends PositionComponent
               (column * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
       case SideView.bottom:
+        final parentSize = (parent! as PositionComponent).size;
         position = Vector2(
-          (size.x / 2) +
-              gameRef.config.padding +
+          parentSize.x -
+              (size.x / 2) -
+              gameRef.config.padding -
               (column * (gameRef.config.padding + gameRef.config.cardWidth)),
-          (size.y / 2) +
-              gameRef.config.padding +
+          parentSize.y -
+              (size.y / 2) -
+              gameRef.config.padding -
               (row * (gameRef.config.cardHeight + gameRef.config.padding)),
         );
       case SideView.bossBottom:
