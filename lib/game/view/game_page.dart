@@ -69,97 +69,104 @@ class _GameViewState extends State<GameView> {
           fontSize: 4,
         );
 
+    final entityBloc = EntityBloc();
     final game = StarshipShooterGame(
       l10n: context.l10n,
       effectPlayer: context.read<AudioCubit>().effectPlayer,
       textStyle: textStyle,
       gameBloc: context.read<GameBloc>(),
-      entityBloc: context.read<EntityBloc>(),
+      entityBloc: entityBloc,
     );
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GameWidget<StarshipShooterGame>(
-            game: game,
-            overlayBuilderMap: const {
-              'PauseMenu': _pauseMenuBuilder,
-            },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<EntityBloc>(create: (_) => entityBloc),
+      ],
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GameWidget<StarshipShooterGame>(
+              game: game,
+              overlayBuilderMap: const {
+                'PauseMenu': _pauseMenuBuilder,
+              },
+            ),
           ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: BlocBuilder<AudioCubit, AudioState>(
-            builder: (context, state) {
-              return IconButton(
-                icon: Icon(
-                  state.volume == 0 ? Icons.volume_off : Icons.volume_up,
-                ),
-                onPressed: () => context.read<AudioCubit>().toggleVolume(),
-              );
-            },
+          Align(
+            alignment: Alignment.topRight,
+            child: BlocBuilder<AudioCubit, AudioState>(
+              builder: (context, state) {
+                return IconButton(
+                  icon: Icon(
+                    state.volume == 0 ? Icons.volume_off : Icons.volume_up,
+                  ),
+                  onPressed: () => context.read<AudioCubit>().toggleVolume(),
+                );
+              },
+            ),
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.only(top: 20),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                  Colors.white,
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    Colors.white,
+                  ),
+                  padding: MaterialStateProperty.all(
+                    const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 10,
+                      bottom: 10,
+                    ),
+                  ),
                 ),
-                padding: MaterialStateProperty.all(
-                  const EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: 10,
-                    bottom: 10,
+                onPressed: () {
+                  entityBloc.close();
+                  Navigator.of(context)
+                      .pushReplacement<void, void>(TitlePage.route());
+                },
+                child: const Text(
+                  'Game Menu',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
               ),
-              onPressed: () {
-                Navigator.of(context)
-                    .pushReplacement<void, void>(TitlePage.route());
-              },
-              child: const Text(
-                'Game Menu',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 70),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: GameButton(
+                game: game,
               ),
             ),
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.only(top: 70),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: GameButton(
-              game: game,
-            ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: BlocBuilder<GameBloc, GameState>(
-            builder: (context, state) {
-              return Text(
-                '''
+          Align(
+            alignment: Alignment.topRight,
+            child: BlocBuilder<GameBloc, GameState>(
+              builder: (context, state) {
+                return Text(
+                  '''
                 GameMode: ${state.gameMode}
                 PlayerMode: ${state.playerMode}
                 ''',
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
-              );
-            },
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

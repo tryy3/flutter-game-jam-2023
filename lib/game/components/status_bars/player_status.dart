@@ -62,11 +62,12 @@ class PlayerStatus extends PositionComponent
                 (gameRef.config.rotatedStatsBarsWidth +
                         gameRef.config.padding) *
                     3,
-            player.deck.size.y)
+            player.deck.size.y,
+          )
         : Vector2(
             player.deck.size.x,
             gameRef.config.padding +
-                (gameRef.config.rotatedStatsBarsHeight +
+                (gameRef.config.rotatedStatsBarsWidth +
                         gameRef.config.padding) *
                     3,
           );

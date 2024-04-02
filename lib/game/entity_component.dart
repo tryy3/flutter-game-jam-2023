@@ -1,4 +1,5 @@
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
+import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 
 abstract class EntityComponent {
   /// The entity ID
@@ -19,5 +20,5 @@ abstract class EntityComponent {
   /// or not
   bool canContinue();
 
-  void respawnEntity();
+  EntityEvent respawnEntity();
 }

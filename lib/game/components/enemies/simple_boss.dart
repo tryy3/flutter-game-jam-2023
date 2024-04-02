@@ -126,12 +126,10 @@ class SimpleBoss extends PositionComponent
   }
 
   @override
-  void respawnEntity() {
-    gameRef.entityBloc.add(
-      RespawnEntityEvent(
-        id: id,
-        health: simpleBossMaxHealth,
-      ),
+  EntityEvent respawnEntity() {
+    return RespawnEntityEvent(
+      id: id,
+      health: simpleBossMaxHealth,
     );
   }
 

@@ -328,14 +328,12 @@ class Player extends PositionComponent
   bool isAnimationPlaying() => !animationTicker.done();
 
   @override
-  void respawnEntity() {
-    gameRef.entityBloc.add(
-      RespawnEntityEvent(
-        id: id,
-        health: GameConfig.maxHealth,
-        heat: GameConfig.maxHeat,
-        cold: GameConfig.maxCold,
-      ),
+  EntityEvent respawnEntity() {
+    return RespawnEntityEvent(
+      id: id,
+      health: GameConfig.maxHealth,
+      heat: GameConfig.maxHeat,
+      cold: GameConfig.maxCold,
     );
   }
 }

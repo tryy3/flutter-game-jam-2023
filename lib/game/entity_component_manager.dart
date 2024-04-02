@@ -146,7 +146,7 @@ class EntityComponentManager {
   /// Initialize the players health and stats in the entity bloc
   void spawnEntities() {
     for (final entity in _entities) {
-      entity.respawnEntity();
+      _entityBloc.add(entity.respawnEntity());
     }
   }
 }
