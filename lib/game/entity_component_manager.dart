@@ -69,7 +69,8 @@ class EntityComponentManager {
     // final id = Random().nextInt(1000000);
     entity.id = id;
     _entities.add(entity);
-    _entityBloc.add(entity.spawnEntity());
+    // entity.spawnEntity();
+    _entityBloc.add(SpawnEntityEvent(id: id));
   }
 
   /// Will return next ID of the entity that is able to play
@@ -144,19 +145,9 @@ class EntityComponentManager {
   }
 
   /// Initialize the players health and stats in the entity bloc
-  void initializePlayerAttributes() {
+  void spawnEntities() {
     for (final entity in _entities) {
-      if (entity is Player) {
-        _entityBloc.add(
-          RespawnEntityEvent(
-            id: entity.id,
-            health: 20,
-            cold: 20,
-            heat: 20,
-          ),
-        );
-        entity.createCards();
-      }
+      entity.respawnEntity();
     }
   }
 }

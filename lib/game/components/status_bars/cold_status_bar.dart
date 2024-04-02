@@ -12,7 +12,7 @@ class ColdStatusBar extends StatusBar {
 
   @override
   int get currentStatus => max(
-        gameRef.entityBloc.state.entities[entityID]!.cold,
+        gameRef.entityBloc.state.entities[entityID]?.cold ?? 0,
         0,
       );
 }

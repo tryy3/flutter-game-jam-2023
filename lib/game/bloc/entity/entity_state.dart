@@ -14,6 +14,15 @@ class EntityState extends Equatable {
   @override
   List<Object?> get props => [entities];
 
+  EntityAttributes findEntityOrCreateNew(int id) {
+    return entities[id] ??
+        const EntityAttributes(
+          health: 0,
+          cold: 0,
+          heat: 0,
+        );
+  }
+
   EntityState addNewEntity({
     required int id,
     required int health,
@@ -41,10 +50,12 @@ class EntityState extends Equatable {
     int? heat,
     EntityStatus? status,
   }) {
+    final entity = findEntityOrCreateNew(id);
+
     return EntityState(
       entities: {
         ...entities,
-        id: entities[id]!.copyWith(
+        id: entity.copyWith(
           health: health,
           cold: cold,
           heat: heat,

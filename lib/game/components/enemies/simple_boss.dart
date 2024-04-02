@@ -29,13 +29,15 @@ class SimpleBoss extends PositionComponent
   @override
   int id;
   @override
-  int get health => gameRef.entityBloc.state.entities[id]!.health;
+  int get health =>
+      gameRef.entityBloc.state.entities[id]?.health ?? GameConfig.minHealth;
   @override
-  int get cold => -1;
+  int get cold => GameConfig.minHealth;
   @override
-  int get heat => -1;
+  int get heat => GameConfig.minHealth;
   @override
-  EntityStatus get status => gameRef.entityBloc.state.entities[id]!.status;
+  EntityStatus get status =>
+      gameRef.entityBloc.state.entities[id]?.status ?? EntityStatus.none;
   @override
   bool canContinue() => true;
   //#endregion
@@ -57,7 +59,9 @@ class SimpleBoss extends PositionComponent
     await add(
       FlameBlocListener<EntityBloc, EntityState>(
         onNewState: (EntityState state) {
-          final entity = state.entities[id]!;
+          final entity = state.entities[id];
+          if (entity == null) return;
+
           // Check for health correction, so that the boss health is within
           // normal range
           final checkNewHealth = max(
@@ -115,11 +119,12 @@ class SimpleBoss extends PositionComponent
   }
 
   @override
-  SpawnEntityEvent spawnEntity() {
-    return SpawnEntityEvent(
-      id: id,
-      health: simpleBossMaxHealth,
-      status: EntityStatus.alive,
+  void respawnEntity() {
+    gameRef.entityBloc.add(
+      RespawnEntityEvent(
+        id: id,
+        health: simpleBossMaxHealth,
+      ),
     );
   }
 

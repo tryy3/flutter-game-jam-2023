@@ -18,6 +18,7 @@ import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
 import 'package:starship_shooter/game/components/enemies/simple_boss.dart';
 import 'package:starship_shooter/game/components/player.dart';
+import 'package:starship_shooter/game/entity_component.dart';
 import 'package:starship_shooter/game/entity_component_manager.dart';
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -100,31 +101,29 @@ class StarshipShooterGame extends FlameGame {
     // FPS component for debug
     await add(FpsTextComponent(position: Vector2(0, size.y - 24)));
 
-    // Add players to the game
+    // Add entities to the game
     final entities = <Component>[];
     switch (gameBloc.state.playerMode) {
       case PlayerMode.onePlayer:
-        final player = Player(
-          side: SideView.bottom,
+        entities.add(
+          Player(
+            side: SideView.bottom,
+          ),
         );
-        entityComponentManager.addEntity(player);
-        entities.add(player);
       case PlayerMode.twoPlayers:
-        final player1 = Player(
-          side: SideView.left,
+        entities.add(
+          Player(
+            side: SideView.left,
+          ),
         );
-        final player2 = Player(
-          side: SideView.right,
+        entities.add(
+          Player(
+            side: SideView.right,
+          ),
         );
-        entityComponentManager.addEntity(player1);
-        entityComponentManager.addEntity(player2);
-        entities.add(player1);
-        entities.add(player2);
     }
     if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-      final enemy = SimpleBoss();
-      entityComponentManager.addEntity(enemy);
-      entities.add(enemy);
+      entities.add(SimpleBoss());
     }
     await add(
       FlameMultiBlocProvider(
@@ -139,6 +138,9 @@ class StarshipShooterGame extends FlameGame {
         children: entities,
       ),
     );
+    for (final entity in entities) {
+      entityComponentManager.addEntity(entity as EntityComponent);
+    }
 
     // Center the viewfinder
     camera.viewfinder.position = size / 2;
@@ -208,8 +210,7 @@ class StarshipShooterGame extends FlameGame {
 
     if (status == GameStatus.gameStarts) {
       // TODO(tryy3): Maybe check if game is fully loaded at this point?
-      // TODO(Tryy3): Move the card spawning logic to here too
-      entityComponentManager.initializePlayerAttributes();
+      entityComponentManager.spawnEntities();
       gameBloc.add(const WaitingForRoundStartsEvent());
     } else if (status == GameStatus.gameRestarts) {
       for (final player in entityComponentManager.players) {

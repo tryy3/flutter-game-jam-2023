@@ -13,7 +13,7 @@ class HealthStatusBar extends StatusBar {
 
   @override
   int get currentStatus => max(
-        gameRef.entityBloc.state.entities[entityID]!.health,
+        gameRef.entityBloc.state.entities[entityID]?.health ?? 0,
         0,
       );
 }

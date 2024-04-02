@@ -11,6 +11,7 @@ import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/components/status_bars/cold_status_bar.dart';
 import 'package:starship_shooter/game/components/status_bars/health_status_bar.dart';
 import 'package:starship_shooter/game/components/status_bars/heat_status_bar.dart';
+import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class PlayerStatus extends PositionComponent
@@ -21,9 +22,9 @@ class PlayerStatus extends PositionComponent
       : super(anchor: Anchor.center);
 
   // Configuration
-  final int maxHeat = 20;
-  final int maxCold = 20;
-  final int maxHealth = 20;
+  final int maxHeat = GameConfig.maxHeat;
+  final int maxCold = GameConfig.maxCold;
+  final int maxHealth = GameConfig.maxHealth;
 
   // Rectangles
   late RRect _rRect;

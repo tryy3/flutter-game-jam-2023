@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:developer' show log;
+import 'dart:math' show Random, max, min;
 
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
@@ -59,13 +59,17 @@ class Player extends PositionComponent
 
   // Helper get for player stats
   @override
-  int get health => gameRef.entityBloc.state.entities[id]!.health;
+  int get health =>
+      gameRef.entityBloc.state.entities[id]?.health ?? GameConfig.minHealth;
   @override
-  int get heat => gameRef.entityBloc.state.entities[id]!.heat;
+  int get heat =>
+      gameRef.entityBloc.state.entities[id]?.heat ?? GameConfig.minHeat;
   @override
-  int get cold => gameRef.entityBloc.state.entities[id]!.cold;
+  int get cold =>
+      gameRef.entityBloc.state.entities[id]?.cold ?? GameConfig.minCold;
   @override
-  EntityStatus get status => gameRef.entityBloc.state.entities[id]!.status;
+  EntityStatus get status =>
+      gameRef.entityBloc.state.entities[id]?.status ?? EntityStatus.none;
 
   // #region State changes
   @override
@@ -193,12 +197,72 @@ class Player extends PositionComponent
     await add(statsBars);
     await add(informationSection);
 
-    // Add state changes, for example when player dies
+    // Add listener for only when this players status change
     await add(
       FlameBlocListener<EntityBloc, EntityState>(
+        listenWhen: (previousState, newState) {
+          final previousPlayerState = previousState.entities[id];
+          final newPlayerState = newState.entities[id];
+
+          if (previousPlayerState != null && newPlayerState != null) {
+            return previousPlayerState.status != newPlayerState.status;
+          }
+
+          return false;
+        },
+        onNewState: (EntityState state) {
+          // Grab the player entity from new state
+          final playerEntity = state.entities[id];
+          if (playerEntity == null) return;
+
+          // Check if player is alive, if so spawn cards to player
+          if (playerEntity.status == EntityStatus.alive) {
+            createCards();
+            return;
+          }
+
+          // If player dies we need to clear the attributes and cards
+          if (playerEntity.status == EntityStatus.dead) {
+            if (_cards.isNotEmpty) {
+              clearCards();
+
+              log(
+                'Clearing cards due to death',
+                name: 'Player',
+              );
+            }
+            if (playerEntity.cold != GameConfig.minCold ||
+                playerEntity.heat != GameConfig.minHeat) {
+              gameRef.entityBloc.add(
+                CorrectEntityAttributeEvent(
+                  id: id,
+                  cold: GameConfig.minCold,
+                  heat: GameConfig.minHeat,
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
+
+    // Add listener for health correction and death state
+    await add(
+      FlameBlocListener<EntityBloc, EntityState>(
+        listenWhen: (previousState, newState) {
+          final previousPlayerState = previousState.entities[id];
+          final newPlayerState = newState.entities[id];
+
+          if (previousPlayerState != null && newPlayerState != null) {
+            return previousPlayerState.health != newPlayerState.health;
+          }
+
+          return false;
+        },
         onNewState: (EntityState state) {
           // Check if player is dead
-          final playerEntity = state.entities[id]!;
+          final playerEntity = state.entities[id];
+          if (playerEntity == null) return;
 
           // Check health change for this player entity to make sure health
           // is within the max and min limit
@@ -211,7 +275,8 @@ class Player extends PositionComponent
           );
           if (checkNewHealth != playerEntity.health) {
             gameRef.entityBloc.add(
-                CorrectEntityAttributeEvent(id: id, health: checkNewHealth));
+              CorrectEntityAttributeEvent(id: id, health: checkNewHealth),
+            );
             return;
           }
 
@@ -220,33 +285,6 @@ class Player extends PositionComponent
               playerEntity.health <= 0) {
             gameRef.entityBloc.add(EntityDeathEvent(id: id));
             return;
-          }
-
-          // If this player is dead we should remove remaining cards and set
-          // reamining stats to 0
-          if (playerEntity.status == EntityStatus.dead) {
-            if (_cards.isNotEmpty) {
-              for (var i = _cards.length - 1; i >= 0; i--) {
-                final card = _cards[i];
-                // Discard the card
-                card.deleteCard(
-                  opacityDuration: .4,
-                  onComplete: () {
-                    _cards.remove(card);
-                  },
-                );
-              }
-            }
-            if (playerEntity.cold != GameConfig.minCold ||
-                playerEntity.heat != GameConfig.minHeat) {
-              gameRef.entityBloc.add(
-                CorrectEntityAttributeEvent(
-                  id: id,
-                  cold: GameConfig.minCold,
-                  heat: GameConfig.minHeat,
-                ),
-              );
-            }
           }
         },
       ),
@@ -285,7 +323,14 @@ class Player extends PositionComponent
   bool isAnimationPlaying() => !animationTicker.done();
 
   @override
-  SpawnEntityEvent spawnEntity() {
-    return SpawnEntityEvent(id: id);
+  void respawnEntity() {
+    gameRef.entityBloc.add(
+      RespawnEntityEvent(
+        id: id,
+        health: GameConfig.maxHealth,
+        heat: GameConfig.maxHeat,
+        cold: GameConfig.maxCold,
+      ),
+    );
   }
 }
