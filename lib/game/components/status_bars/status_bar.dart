@@ -103,23 +103,44 @@ class StatusBar extends PositionComponent with HasGameRef<StarshipShooterGame> {
     super.render(canvas);
 
     // Draw the initial border around the area
-    canvas
-      // Render the health bar
-      ..drawRRect(_statusBarRRect, statsBarBorder)
-      ..drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(
-            0,
-            0,
-            (_statusBarRRect.width / maxStatus) * currentStatus,
-            _statusBarRRect.height,
+    if (side == SideView.bottom) {
+      canvas
+        // Render the health bar
+        ..drawRRect(_statusBarRRect, statsBarBorder)
+        ..drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(
+              0,
+              (_statusBarRRect.height / maxStatus) *
+                  (maxStatus - currentStatus),
+              _statusBarRRect.width,
+              (_statusBarRRect.height / maxStatus) * currentStatus,
+            ),
+            Radius.circular(
+              gameRef.config.radius,
+            ),
           ),
-          Radius.circular(
-            gameRef.config.radius,
+          statusBarPaint,
+        );
+    } else {
+      canvas
+        // Render the health bar
+        ..drawRRect(_statusBarRRect, statsBarBorder)
+        ..drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(
+              0,
+              0,
+              (_statusBarRRect.width / maxStatus) * currentStatus,
+              _statusBarRRect.height,
+            ),
+            Radius.circular(
+              gameRef.config.radius,
+            ),
           ),
-        ),
-        statusBarPaint,
-      );
+          statusBarPaint,
+        );
+    }
   }
 
   @override
