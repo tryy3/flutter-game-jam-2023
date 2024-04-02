@@ -185,7 +185,7 @@ class Player extends PositionComponent
           viewportSize.y / 2,
         );
       case SideView.bottom:
-      // TODO: Handle this case.
+      // TODO(tryy3): Handle this case.
     }
 
     // Add components to the world

@@ -39,8 +39,6 @@ class TitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -99,14 +97,15 @@ class TitleView extends StatelessWidget {
                     .pushReplacement<void, void>(GamePage.route());
               },
               child: const Center(
-                  child: Text(
-                'Multiplayer Boss Fight',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                child: Text(
+                  'Multiplayer Boss Fight',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
-              )),
+              ),
             ),
           ),
           const SizedBox(

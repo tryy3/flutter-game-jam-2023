@@ -74,7 +74,7 @@ class Unicorn extends PositionedEntity with HasGameRef<StarshipShooterGame> {
           ..angle = -pi / 2
           ..position = Vector2(0, _animationComponent.size.y);
       case SideView.bottom:
-      // TODO: Handle this case.
+      // TODO(tryy3): Handle this case.
     }
 
     resetAnimation();

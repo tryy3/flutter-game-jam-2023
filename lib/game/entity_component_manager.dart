@@ -32,7 +32,7 @@ class EntityComponentManager {
         }
 
         // Next check if there is still any players alive
-        // TODO: Can we do anything about the none status?
+        // TODO(tryy3): Can we do anything about the none status?
         final alivePlayers = _entities.where(
           (element) =>
               (element is Player) &&
@@ -141,7 +141,6 @@ class EntityComponentManager {
       final boss = _entities.whereType<BossEnemy>().firstOrNull;
       return boss != null ? boss.id : -1;
     }
-    return -1;
   }
 
   /// Initialize the players health and stats in the entity bloc

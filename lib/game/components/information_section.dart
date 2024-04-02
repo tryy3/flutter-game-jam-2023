@@ -95,7 +95,7 @@ class InformationSection extends PositionComponent
             size.y / 2,
           );
       case SideView.bottom:
-      // TODO: Handle this case.
+      // TODO(tryy3): Handle this case.
     }
 
     _rRect = RRect.fromRectAndRadius(

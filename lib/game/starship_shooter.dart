@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart' as audio_player;
 import 'package:flame/components.dart';
@@ -7,10 +6,8 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart' hide OverlayRoute;
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
@@ -72,7 +69,7 @@ class StarshipShooterGame extends FlameGame {
 
   @override
   void onDispose() {
-    // TODO: implement onDispose
+    // TODO(tryy3): implement onDispose
     super.onDispose();
     gameBlocStream?.cancel();
     entityBlocStream?.cancel();

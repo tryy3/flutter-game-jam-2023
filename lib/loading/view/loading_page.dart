@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:starship_shooter/title/view/title_page.dart';
 import 'package:starship_shooter/loading/loading.dart';
+import 'package:starship_shooter/title/view/title_page.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});

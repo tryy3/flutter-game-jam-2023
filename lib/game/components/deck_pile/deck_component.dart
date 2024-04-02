@@ -142,7 +142,7 @@ class DeckComponent extends PositionComponent
           size.y / 2,
         );
       case SideView.bottom:
-      // TODO: Handle this case.
+      // TODO(tryy3): Handle this case.
     }
 
     // Add the unit slots at the end of rendering for the logic above

@@ -176,7 +176,7 @@ class PlayerStatus extends PositionComponent
           ),
         ]);
       case SideView.bottom:
-      // TODO: Handle this case.
+      // TODO(tryy3): Handle this case.
     }
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
