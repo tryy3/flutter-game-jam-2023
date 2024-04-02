@@ -73,7 +73,9 @@ class DeckPileUnit extends PositionComponent
   //#region Rendering logic
   @override
   Future<void> onLoad() async {
-    size = gameRef.config.cardSize;
+    size = (side == SideView.bottom)
+        ? gameRef.config.normalCardSize
+        : gameRef.config.rotatedCardSize;
 
     // Set positions based on the side view
     final column = unitSlot % player.deck.maxColumns;
@@ -102,7 +104,15 @@ class DeckPileUnit extends PositionComponent
               (column * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        position = Vector2(
+          (size.x / 2) +
+              gameRef.config.padding +
+              (column * (gameRef.config.padding + gameRef.config.cardWidth)),
+          (size.y / 2) +
+              gameRef.config.padding +
+              (row * (gameRef.config.cardHeight + gameRef.config.padding)),
+        );
+      case SideView.bossBottom:
     }
   }
   //#endregion

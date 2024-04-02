@@ -81,6 +81,12 @@ class CardSlotsComponent extends PositionComponent
       gameRef.config.padding +
           ((gameRef.config.cardWidth + gameRef.config.padding) * maxCards),
     );
+    if (side == SideView.bottom) {
+      final x = size.x;
+      size
+        ..x = size.y
+        ..y = x;
+    }
 
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
@@ -136,7 +142,16 @@ class CardSlotsComponent extends PositionComponent
             size.y / 2,
           );
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        position = Vector2(
+          0,
+          -size.y / 2 - gameRef.config.margin,
+        );
+
+        title.position = Vector2(
+          size.x / 2,
+          -gameRef.config.margin,
+        );
+      case SideView.bossBottom:
     }
 
     // Add the unit slots at the end of rendering for the logic above
@@ -150,18 +165,35 @@ class CardSlotsComponent extends PositionComponent
     // Draw the initial border around the area
     canvas.drawRRect(_rRect, StarshipShooterGame.borderPaint);
 
+    final cardRRect = (side == SideView.bottom)
+        ? gameRef.config.normalCardRRect
+        : gameRef.config.rotatedCardRRect;
+
     // Draw border around each playable card area
     for (var i = 0; i < maxCards; i++) {
-      canvas.drawRRect(
-        gameRef.config.cardRRect.shift(
-          Offset(
-            gameRef.config.padding,
-            gameRef.config.padding +
-                i * (gameRef.config.cardWidth + gameRef.config.padding),
+      if (side == SideView.bottom) {
+        canvas.drawRRect(
+          cardRRect.shift(
+            Offset(
+              gameRef.config.padding +
+                  i * (gameRef.config.cardWidth + gameRef.config.padding),
+              gameRef.config.padding,
+            ),
           ),
-        ),
-        StarshipShooterGame.borderPaint,
-      );
+          StarshipShooterGame.borderPaint,
+        );
+      } else {
+        canvas.drawRRect(
+          cardRRect.shift(
+            Offset(
+              gameRef.config.padding,
+              gameRef.config.padding +
+                  i * (gameRef.config.cardWidth + gameRef.config.padding),
+            ),
+          ),
+          StarshipShooterGame.borderPaint,
+        );
+      }
     }
   }
   //#endregion

@@ -15,9 +15,14 @@ class GameConfig {
   double get cardWidth => (camera.viewport.size.y * 5.83) / 100;
   double get cardHeight => (camera.viewport.size.x * 5.46) / 100;
   double get cardRadius => 5;
-  Vector2 get cardSize => Vector2(cardHeight, cardWidth);
-  RRect get cardRRect => RRect.fromRectAndRadius(
+  Vector2 get rotatedCardSize => Vector2(cardHeight, cardWidth);
+  Vector2 get normalCardSize => Vector2(cardWidth, cardHeight);
+  RRect get rotatedCardRRect => RRect.fromRectAndRadius(
         Rect.fromLTWH(0, 0, cardHeight, cardWidth),
+        Radius.circular(cardRadius),
+      );
+  RRect get normalCardRRect => RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, cardWidth, cardHeight),
         Radius.circular(cardRadius),
       );
   double get cardStatsIconWidth => (cardWidth * 37.5) / 100;
@@ -34,8 +39,8 @@ class GameConfig {
   Vector2 get unicornSize => Vector2(unicornWidth, unicornHeight);
 
   // Stats settings
-  double get statsBarsWidth => (camera.viewport.size.y * 2.96) / 100;
-  double get statsBarsLength => (camera.viewport.size.x * 20.83) / 100;
+  double get rotatedStatsBarsWidth => (camera.viewport.size.y * 2.96) / 100;
+  double get rotatedStatsBarsHeight => (camera.viewport.size.x * 20.83) / 100;
 
   // Margin padding settings
   double get margin => (camera.viewport.size.x * 1.04) / 100;

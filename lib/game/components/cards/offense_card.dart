@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
@@ -17,7 +18,17 @@ class OffenseCard extends Card {
   //#region Card API
   @override
   String toString() {
-    return 'Offense card - damage: $damage';
+    // ignore_for_file: no_runtimeType_toString
+    return '''
+$runtimeType(
+  damage: $damage,
+  cold: $cold,
+  heat: $cold,
+  position: ${position.toStringWithMaxPrecision(4)},
+  size: ${size.toStringWithMaxPrecision(4)},
+  angle: $angle,
+  scale: $scale,
+)''';
   }
 
   @override
@@ -39,7 +50,6 @@ class OffenseCard extends Card {
   //#region Component API
   @override
   Future<void> onLoad() async {
-    size = gameRef.config.cardSize;
     var maxRandomValue = 3;
 
     // Different maxRandomValue depending on GameMode due to health issue

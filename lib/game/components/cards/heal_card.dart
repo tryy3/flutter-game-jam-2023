@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flame/components.dart';
 import 'package:flame/text.dart';
 import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
@@ -17,7 +18,17 @@ class HealCard extends Card {
   //#region Card API
   @override
   String toString() {
-    return 'Healing card - health: $health';
+    // ignore_for_file: no_runtimeType_toString
+    return '''
+$runtimeType(
+  health: $health,
+  cold: $cold,
+  heat: $cold,
+  position: ${position.toStringWithMaxPrecision(4)},
+  size: ${size.toStringWithMaxPrecision(4)},
+  angle: $angle,
+  scale: $scale,
+)''';
   }
 
   @override
@@ -35,7 +46,6 @@ class HealCard extends Card {
   //#region Component API
   @override
   Future<void> onLoad() async {
-    size = gameRef.config.cardSize;
     var maxRandomValue = 3;
 
     // Different maxRandomValue depending on GameMode due to health issue

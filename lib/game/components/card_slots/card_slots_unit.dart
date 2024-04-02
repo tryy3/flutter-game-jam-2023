@@ -73,7 +73,9 @@ class CardSlotsUnit extends PositionComponent
   //#region Rendering logic
   @override
   Future<void> onLoad() async {
-    size = gameRef.config.cardSize;
+    size = (side == SideView.bottom)
+        ? gameRef.config.normalCardSize
+        : gameRef.config.rotatedCardSize;
 
     // Set positions based on the side view
     switch (side) {
@@ -94,7 +96,13 @@ class CardSlotsUnit extends PositionComponent
               (unitSlot * (gameRef.config.padding + gameRef.config.cardWidth)),
         );
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        position = Vector2(
+          size.x / 2 +
+              gameRef.config.padding +
+              (unitSlot * (gameRef.config.padding + gameRef.config.cardWidth)),
+          size.y / 2 + gameRef.config.padding,
+        );
+      case SideView.bossBottom:
     }
   }
   //#endregion

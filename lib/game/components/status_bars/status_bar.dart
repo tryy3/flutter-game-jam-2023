@@ -39,10 +39,17 @@ class StatusBar extends PositionComponent with HasGameRef<StarshipShooterGame> {
   //#region Rendering
   @override
   Future<void> onLoad() async {
-    size = Vector2(
-      gameRef.config.statsBarsLength - (gameRef.config.padding * 2),
-      gameRef.config.statsBarsWidth,
-    );
+    size = (side == SideView.bottom)
+        ? Vector2(
+            gameRef.config.rotatedStatsBarsWidth,
+            gameRef.config.rotatedStatsBarsHeight -
+                (gameRef.config.padding * 2),
+          )
+        : Vector2(
+            gameRef.config.rotatedStatsBarsHeight -
+                (gameRef.config.padding * 2),
+            gameRef.config.rotatedStatsBarsWidth,
+          );
 
     _statusBarRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
@@ -63,6 +70,7 @@ class StatusBar extends PositionComponent with HasGameRef<StarshipShooterGame> {
       case SideView.right:
         angle = -pi / 2;
       case SideView.bottom:
+      case SideView.bossBottom:
         angle = 0;
     }
 

@@ -56,11 +56,20 @@ class PlayerStatus extends PositionComponent
     await add(title);
 
     // Resize based on deck size which is the largest element so far
-    size = Vector2(
-      player.deck.size.x,
-      gameRef.config.padding +
-          (gameRef.config.statsBarsWidth + gameRef.config.padding) * 3,
-    );
+    size = (side == SideView.bottom)
+        ? Vector2(
+            gameRef.config.padding +
+                (gameRef.config.rotatedStatsBarsWidth +
+                        gameRef.config.padding) *
+                    3,
+            player.deck.size.y)
+        : Vector2(
+            player.deck.size.x,
+            gameRef.config.padding +
+                (gameRef.config.rotatedStatsBarsHeight +
+                        gameRef.config.padding) *
+                    3,
+          );
 
     switch (side) {
       case SideView.left:
@@ -86,7 +95,7 @@ class PlayerStatus extends PositionComponent
             entityID: player.id,
             position: Vector2(
               size.x / 2,
-              gameRef.config.statsBarsWidth / 2 + gameRef.config.padding,
+              gameRef.config.rotatedStatsBarsWidth / 2 + gameRef.config.padding,
             ),
             side: side,
           ),
@@ -94,9 +103,9 @@ class PlayerStatus extends PositionComponent
             entityID: player.id,
             position: Vector2(
               size.x / 2,
-              gameRef.config.statsBarsWidth / 2 +
+              gameRef.config.rotatedStatsBarsWidth / 2 +
                   gameRef.config.padding +
-                  gameRef.config.statsBarsWidth +
+                  gameRef.config.rotatedStatsBarsWidth +
                   gameRef.config.padding,
             ),
             side: side,
@@ -105,11 +114,11 @@ class PlayerStatus extends PositionComponent
             entityID: player.id,
             position: Vector2(
               size.x / 2,
-              gameRef.config.statsBarsWidth / 2 +
+              gameRef.config.rotatedStatsBarsWidth / 2 +
                   gameRef.config.padding +
-                  gameRef.config.statsBarsWidth +
+                  gameRef.config.rotatedStatsBarsWidth +
                   gameRef.config.padding +
-                  gameRef.config.statsBarsWidth +
+                  gameRef.config.rotatedStatsBarsWidth +
                   gameRef.config.padding,
             ),
             side: side,
@@ -143,7 +152,7 @@ class PlayerStatus extends PositionComponent
             position: Vector2(
               size.x / 2,
               size.y -
-                  (gameRef.config.statsBarsWidth / 2) -
+                  (gameRef.config.rotatedStatsBarsWidth / 2) -
                   gameRef.config.padding,
             ),
             side: side,
@@ -153,9 +162,9 @@ class PlayerStatus extends PositionComponent
             position: Vector2(
               size.x / 2,
               size.y -
-                  (gameRef.config.statsBarsWidth / 2) -
+                  (gameRef.config.rotatedStatsBarsWidth / 2) -
                   gameRef.config.padding -
-                  gameRef.config.statsBarsWidth -
+                  gameRef.config.rotatedStatsBarsWidth -
                   gameRef.config.padding,
             ),
             side: side,
@@ -165,18 +174,63 @@ class PlayerStatus extends PositionComponent
             position: Vector2(
               size.x / 2,
               size.y -
-                  (gameRef.config.statsBarsWidth / 2) -
+                  (gameRef.config.rotatedStatsBarsWidth / 2) -
                   gameRef.config.padding -
-                  gameRef.config.statsBarsWidth -
+                  gameRef.config.rotatedStatsBarsWidth -
                   gameRef.config.padding -
-                  gameRef.config.statsBarsWidth -
+                  gameRef.config.rotatedStatsBarsWidth -
                   gameRef.config.padding,
             ),
             side: side,
           ),
         ]);
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        final cardSlotsSize = player.cardSlots.size;
+        position = Vector2(
+          (cardSlotsSize.x / 2) + (size.x / 2) + gameRef.config.margin,
+          -(size.y / 2) - gameRef.config.padding,
+        );
+
+        title.position = Vector2(
+          size.x / 2,
+          -gameRef.config.margin,
+        );
+
+        await addAll([
+          HealthStatusBar(
+            entityID: player.id,
+            position: Vector2(
+              gameRef.config.rotatedStatsBarsWidth / 2 + gameRef.config.padding,
+              size.y / 2,
+            ),
+            side: side,
+          ),
+          HeatStatusBar(
+            entityID: player.id,
+            position: Vector2(
+              gameRef.config.rotatedStatsBarsWidth / 2 +
+                  gameRef.config.padding +
+                  gameRef.config.rotatedStatsBarsWidth +
+                  gameRef.config.padding,
+              size.y / 2,
+            ),
+            side: side,
+          ),
+          ColdStatusBar(
+            entityID: player.id,
+            position: Vector2(
+              gameRef.config.rotatedStatsBarsWidth / 2 +
+                  gameRef.config.padding +
+                  gameRef.config.rotatedStatsBarsWidth +
+                  gameRef.config.padding +
+                  gameRef.config.rotatedStatsBarsWidth +
+                  gameRef.config.padding,
+              size.y / 2,
+            ),
+            side: side,
+          ),
+        ]);
+      case SideView.bossBottom:
     }
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),

@@ -15,8 +15,8 @@ import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 const simpleBossMaxHealth = 200;
-const minDamageDone = 25;
-const maxDamageDone = 55;
+const minDamageDone = 5;
+const maxDamageDone = 15;
 
 class SimpleBoss extends PositionComponent
     with
@@ -43,7 +43,7 @@ class SimpleBoss extends PositionComponent
   //#endregion
 
   @override
-  bool get debugMode => true;
+  bool get debugMode => false;
 
   @override
   Future<void> onLoad() async {
@@ -55,6 +55,10 @@ class SimpleBoss extends PositionComponent
       viewportSize.y / 2,
     );
     size = gameRef.config.simpleBossSize;
+
+    if (gameRef.gameBloc.state.playerMode == PlayerMode.onePlayer) {
+      position.y = viewportSize.y / 2 / 2;
+    }
 
     await add(
       FlameBlocListener<EntityBloc, EntityState>(
@@ -111,9 +115,12 @@ class SimpleBoss extends PositionComponent
         entityID: id,
         position: Vector2(
           size.x / 2,
-          size.y + gameRef.config.statsBarsWidth / 2 + gameRef.config.padding,
+          size.y +
+              gameRef.config.rotatedStatsBarsWidth / 2 +
+              gameRef.config.padding,
         ),
         maxStatus: simpleBossMaxHealth,
+        side: SideView.bossBottom,
       ),
     );
   }
@@ -129,7 +136,7 @@ class SimpleBoss extends PositionComponent
   }
 
   void startTurn() {
-// generates a new Random object
+    // generates a new Random object
     final rand = Random();
     final playerEntities =
         gameRef.entityComponentManager.findAlivePlayerEntities();

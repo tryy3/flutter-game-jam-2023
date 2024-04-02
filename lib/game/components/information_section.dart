@@ -95,7 +95,29 @@ class InformationSection extends PositionComponent
             size.y / 2,
           );
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        size = Vector2(
+          player.deck.absolutePositionOfAnchor(Anchor.centerRight).x -
+              player.statsBars.absolutePositionOfAnchor(Anchor.centerLeft).x +
+              (gameRef.config.margin * 2),
+          player.deck.absolutePositionOfAnchor(Anchor.topCenter).y -
+              player.cardSlots.absolutePositionOfAnchor(Anchor.topCenter).y +
+              (gameRef.config.margin * 2),
+        );
+
+        position = absoluteToLocal(
+          player.cardSlots.absolutePositionOfAnchor(Anchor.topRight),
+        )..add(
+            Vector2(
+              0,
+              -(gameRef.config.margin * 2),
+            ),
+          );
+
+        title.position = Vector2(
+          size.x / 2,
+          size.y - gameRef.config.margin,
+        );
+      case SideView.bossBottom:
     }
 
     _rRect = RRect.fromRectAndRadius(

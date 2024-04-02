@@ -100,6 +100,13 @@ class DeckComponent extends PositionComponent
       gameRef.config.padding +
           columns * (gameRef.config.cardWidth + gameRef.config.padding),
     );
+    if (side == SideView.bottom) {
+      // If bottom switch around x and y for correct rendering
+      final x = size.y;
+      size
+        ..y = size.x
+        ..x = x;
+    }
 
     _rRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.x, size.y),
@@ -142,7 +149,20 @@ class DeckComponent extends PositionComponent
           size.y / 2,
         );
       case SideView.bottom:
-      // TODO(tryy3): Handle this case.
+        final cardSlotsSize = player.cardSlots.size;
+        position = Vector2(
+          -(cardSlotsSize.x / 2) - (size.x / 2) - gameRef.config.margin,
+          viewportSize.y -
+              parentPosition.y -
+              (size.y / 2) -
+              gameRef.config.margin,
+        );
+
+        title.position = Vector2(
+          size.x / 2,
+          -gameRef.config.margin,
+        );
+      case SideView.bossBottom:
     }
 
     // Add the unit slots at the end of rendering for the logic above
@@ -156,21 +176,40 @@ class DeckComponent extends PositionComponent
     canvas.drawRRect(_rRect, StarshipShooterGame.borderPaint);
 
     // Draw border around each playable card area
+    var cardRRect = gameRef.config.rotatedCardRRect;
+    if (side == SideView.bottom) {
+      cardRRect = gameRef.config.normalCardRRect;
+    }
+
     for (var i = 0; i < maxCards; i++) {
       final column = i % maxColumns;
       final row = (i / maxColumns).floorToDouble();
 
-      canvas.drawRRect(
-        gameRef.config.cardRRect.shift(
-          Offset(
-            gameRef.config.padding +
-                row * (gameRef.config.cardHeight + gameRef.config.padding),
-            gameRef.config.padding +
-                column * (gameRef.config.cardWidth + gameRef.config.padding),
+      if (side == SideView.bottom) {
+        canvas.drawRRect(
+          cardRRect.shift(
+            Offset(
+              gameRef.config.padding +
+                  column * (gameRef.config.cardWidth + gameRef.config.padding),
+              gameRef.config.padding +
+                  row * (gameRef.config.cardHeight + gameRef.config.padding),
+            ),
           ),
-        ),
-        StarshipShooterGame.borderPaint,
-      );
+          StarshipShooterGame.borderPaint,
+        );
+      } else {
+        canvas.drawRRect(
+          cardRRect.shift(
+            Offset(
+              gameRef.config.padding +
+                  row * (gameRef.config.cardHeight + gameRef.config.padding),
+              gameRef.config.padding +
+                  column * (gameRef.config.cardWidth + gameRef.config.padding),
+            ),
+          ),
+          StarshipShooterGame.borderPaint,
+        );
+      }
     }
   }
   //#endregion

@@ -20,7 +20,7 @@ import 'package:starship_shooter/game/entity_component_manager.dart';
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
 
-enum SideView { left, right, bottom }
+enum SideView { left, right, bottom, bossBottom }
 
 class StarshipShooterGame extends FlameGame {
   StarshipShooterGame({
@@ -69,7 +69,6 @@ class StarshipShooterGame extends FlameGame {
 
   @override
   void onDispose() {
-    // TODO(tryy3): implement onDispose
     super.onDispose();
     gameBlocStream?.cancel();
     entityBlocStream?.cancel();

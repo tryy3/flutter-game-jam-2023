@@ -130,6 +130,10 @@ class Card extends PositionComponent
   //#region Component API
   @override
   Future<void> onLoad() async {
+    size = (side == SideView.bottom)
+        ? gameRef.config.normalCardSize
+        : gameRef.config.rotatedCardSize;
+
     final style = DocumentStyle(
       background: BackgroundStyle(),
       text: InlineTextStyle(
@@ -154,7 +158,9 @@ class Card extends PositionComponent
     final textElementComponent = TextElementComponent.fromDocument(
       document: document,
       style: style,
-      size: Vector2(size.y, size.x / 2),
+      size: (side == SideView.bottom)
+          ? Vector2(size.x, size.y / 2)
+          : Vector2(size.y, size.x / 2),
     );
     await add(textElementComponent);
 
@@ -166,6 +172,8 @@ class Card extends PositionComponent
       textElementComponent
         ..position = Vector2(size.x / 2, size.y)
         ..angle = -pi / 2;
+    } else if (side == SideView.bottom) {
+      textElementComponent.position = Vector2(0, size.y / 2);
     }
   }
   // #endregion
@@ -184,9 +192,13 @@ class Card extends PositionComponent
     double scale = 1,
     bool rotate = false,
   }) {
+    final pos = (side == SideView.bottom)
+        ? Vector2(relativeY * size.y, relativeX * size.x)
+        : Vector2(relativeX * size.x, relativeY * size.y);
+
     sprite.render(
       canvas,
-      position: Vector2(relativeX * size.x, relativeY * size.y),
+      position: pos,
       anchor: Anchor.center,
       size: sprite.srcSize.scaled(scale),
       overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
@@ -243,10 +255,14 @@ class Card extends PositionComponent
         frontBackgroundPaint.color.withOpacity(opacity);
     redBorderPaint.color = redBorderPaint.color.withOpacity(opacity);
 
+    final cardRRect = (side == SideView.bottom)
+        ? gameRef.config.normalCardRRect
+        : gameRef.config.rotatedCardRRect;
+
     canvas
-      ..drawRRect(gameRef.config.cardRRect, frontBackgroundPaint)
+      ..drawRRect(cardRRect, frontBackgroundPaint)
       ..drawRRect(
-        gameRef.config.cardRRect,
+        cardRRect,
         redBorderPaint,
       );
 
@@ -360,6 +376,55 @@ class Card extends PositionComponent
       }
 
       canvas.restore();
+    } else if (side == SideView.bottom) {
+      if (cold > 0) {
+        final coldSpriteNumber = _findSpriteNumber(
+          cold.toString(),
+          1344,
+          Vector2(32, 32),
+        );
+        final topLeftPosition = Vector2(
+          gameRef.config.cardStatsIconWidth / 2,
+          gameRef.config.cardStatsIconHeight / 2,
+        );
+        coldSpriteNumber.render(
+          canvas,
+          position: topLeftPosition,
+          anchor: Anchor.center,
+          size: gameRef.config.cardStatsIconSize,
+          overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
+        );
+      }
+
+      if (heat > 0) {
+        final heatSpriteNumber = _findSpriteNumber(
+          heat.toString(),
+          1056,
+          Vector2(32, 32),
+        );
+        final topLeftPosition = Vector2(
+          size.x - (gameRef.config.cardStatsIconWidth / 2),
+          gameRef.config.cardStatsIconHeight / 2,
+        );
+        heatSpriteNumber.render(
+          canvas,
+          position: topLeftPosition,
+          anchor: Anchor.center,
+          size: gameRef.config.cardStatsIconSize,
+          overridePaint: Paint()..color = Colors.white.withOpacity(opacity),
+        );
+      }
+
+      if (logoSprite != null) {
+        logoSprite!.render(
+          canvas,
+          size: gameRef.config.cardIconSize,
+          position: Vector2(
+            gameRef.config.cardIconSize.x / 2,
+            gameRef.config.cardStatsIconSize.y,
+          ),
+        );
+      }
     }
   }
 
