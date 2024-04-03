@@ -14,9 +14,9 @@ import 'package:starship_shooter/game/components/status_bars/health_status_bar.d
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
-const simpleBossMaxHealth = 200;
-const minDamageDone = 5;
-const maxDamageDone = 15;
+const simpleBossMaxHealth = 50;
+const minDamageDone = 3;
+const maxDamageDone = 10;
 
 class SimpleBoss extends PositionComponent
     with

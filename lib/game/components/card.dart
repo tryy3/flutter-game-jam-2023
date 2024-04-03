@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:developer';
+import 'dart:math' show pi;
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -148,7 +149,7 @@ class Card extends PositionComponent
         ),
       ),
       header4: BlockStyle(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+        padding: const EdgeInsets.fromLTRB(15, 2, 15, 0),
         text: InlineTextStyle(
           fontScale: 1.5,
         ),

@@ -148,23 +148,23 @@ class _GameViewState extends State<GameView> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.topRight,
-            child: BlocBuilder<GameBloc, GameState>(
-              builder: (context, state) {
-                return Text(
-                  '''
-                GameMode: ${state.gameMode}
-                PlayerMode: ${state.playerMode}
-                ''',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                );
-              },
-            ),
-          ),
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: BlocBuilder<GameBloc, GameState>(
+          //     builder: (context, state) {
+          //       return Text(
+          //         '''
+          //       GameMode: ${state.gameMode}
+          //       PlayerMode: ${state.playerMode}
+          //       ''',
+          //         style: const TextStyle(
+          //           fontSize: 18,
+          //           color: Colors.white,
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
         ],
       ),
     );
