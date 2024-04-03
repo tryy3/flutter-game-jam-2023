@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:math' show pi;
 
 import 'package:flame/components.dart';
