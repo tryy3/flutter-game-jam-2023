@@ -1,3 +1,3 @@
-import 'package:starship_shooter/game/entity_component.dart';
+import 'package:starship_shooter/game/entity.dart';
 
-abstract class BossEnemy extends EntityComponent {}
+abstract class BossEnemy extends Entity {}

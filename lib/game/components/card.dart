@@ -6,7 +6,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+// import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/components/pile.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
@@ -40,13 +40,9 @@ class Card extends PositionComponent
   //#region Card API
   @mustCallSuper
   void useCard(Player player) {
-    gameRef.entityBloc.add(
-      CardUsedEvent(
-        id: player.id,
-        heat: (heat > 0) ? heat : null,
-        cold: (cold > 0) ? cold : null,
-      ),
-    );
+    player
+      ..heat -= heat
+      ..cold -= cold;
   }
 
   // Attempts to delete itself

@@ -1,7 +1,10 @@
-import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+enum EntityStatus {
+  none, // Default value, status is not set yet
+  alive,
+  dead,
+}
 
-abstract class EntityComponent {
+abstract class Entity {
   /// The entity ID
   int get id;
   set id(int id);
@@ -20,5 +23,10 @@ abstract class EntityComponent {
   /// or not
   bool canContinue();
 
-  EntityEvent respawnEntity();
+  void healEntity(int healing);
+  void damageEntity(int damage);
+
+  Future<bool> respawnEntity();
+
+  void onDispose();
 }

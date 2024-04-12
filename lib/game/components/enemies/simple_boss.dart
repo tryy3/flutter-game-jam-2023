@@ -3,14 +3,12 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame_bloc/flame_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
+import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/components/status_bars/health_status_bar.dart';
+import 'package:starship_shooter/game/entity.dart';
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
@@ -28,19 +26,41 @@ class SimpleBoss extends PositionComponent
   //#region EntityComponent API
   @override
   int id;
+
+  int _health = GameConfig.minHealth;
   @override
-  int get health =>
-      gameRef.entityBloc.state.entities[id]?.health ?? GameConfig.minHealth;
+  int get health => _health;
+  set health(int value) {
+    _health = max(min(value, simpleBossMaxHealth), GameConfig.minHealth);
+    if (_health <= GameConfig.minHealth && status == EntityStatus.alive) {
+      status = EntityStatus.dead;
+    }
+  }
+
   @override
-  int get cold => GameConfig.minHealth;
+  int get heat => -1;
   @override
-  int get heat => GameConfig.minHealth;
+  int get cold => -1;
+
   @override
-  EntityStatus get status =>
-      gameRef.entityBloc.state.entities[id]?.status ?? EntityStatus.none;
+  EntityStatus status = EntityStatus.none;
+
   @override
   bool canContinue() => true;
+
+  @override
+  void healEntity(int healing) {
+    health += healing;
+  }
+
+  @override
+  void damageEntity(int damage) {
+    health -= damage;
+  }
+
   //#endregion
+  @override
+  void onDispose() {}
 
   @override
   bool get debugMode => false;
@@ -59,38 +79,6 @@ class SimpleBoss extends PositionComponent
     if (gameRef.gameBloc.state.playerMode == PlayerMode.onePlayer) {
       position.y = viewportSize.y / 2 / 2;
     }
-
-    await add(
-      FlameBlocListener<EntityBloc, EntityState>(
-        onNewState: (EntityState state) {
-          final entity = state.entities[id];
-          if (entity == null) return;
-
-          // Check for health correction, so that the boss health is within
-          // normal range
-          final checkNewHealth = max(
-            min(
-              entity.health,
-              simpleBossMaxHealth,
-            ),
-            GameConfig.minHealth,
-          );
-          if (checkNewHealth != entity.health) {
-            gameRef.entityBloc.add(
-              CorrectEntityAttributeEvent(id: id, health: checkNewHealth),
-            );
-            return;
-          }
-
-          // Check if boss is dead
-          if (entity.status == EntityStatus.alive && entity.health <= 0) {
-            gameRef.entityBloc.add(EntityDeathEvent(id: id));
-            return;
-          }
-          if (entity.status == EntityStatus.dead) {}
-        },
-      ),
-    );
 
     await add(
       FlameBlocListener<GameBloc, GameState>(
@@ -112,7 +100,7 @@ class SimpleBoss extends PositionComponent
 
     await add(
       HealthStatusBar(
-        entityID: id,
+        entity: this,
         position: Vector2(
           size.x / 2,
           size.y +
@@ -126,11 +114,10 @@ class SimpleBoss extends PositionComponent
   }
 
   @override
-  EntityEvent respawnEntity() {
-    return RespawnEntityEvent(
-      id: id,
-      health: simpleBossMaxHealth,
-    );
+  Future<bool> respawnEntity() async {
+    health = simpleBossMaxHealth;
+    status = EntityStatus.alive;
+    return true;
   }
 
   void startTurn() {
@@ -143,13 +130,10 @@ class SimpleBoss extends PositionComponent
     // Get a random damage between min and max
     final randomDamage =
         rand.nextInt(maxDamageDone - minDamageDone) + minDamageDone;
+    // final randomDamage = 200;
 
-    // Apply the damage to the player
-    gameRef.entityBloc.add(
-      DamageEvent(
-        id: randomPlayer.id,
-        damage: randomDamage,
-      ),
-    );
+    // Apply the damage to entity
+    randomPlayer.damageEntity(randomDamage);
+    (randomPlayer as Player).addNewLogMessage('Took $randomDamage from enemy');
   }
 }
