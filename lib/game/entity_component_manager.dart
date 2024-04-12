@@ -17,6 +17,9 @@ class EntityComponentManager {
     for (final entity in _entities) {
       entity.onDispose();
     }
+    for (final entity in _entities) {
+      entity.onDispose();
+    }
   }
 
   final List<Entity> _entities = [];
@@ -30,8 +33,6 @@ class EntityComponentManager {
     // final id = Random().nextInt(1000000);
     entity.id = id;
     _entities.add(entity);
-    // entity.spawnEntity();
-    // _entityBloc.add(SpawnEntityEvent(id: id));
   }
 
   /// Will return next ID of the entity that is able to play
