@@ -1,68 +1,29 @@
-import 'dart:async';
-
-import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
-import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
 import 'package:starship_shooter/game/components/player.dart';
-import 'package:starship_shooter/game/entity_component.dart';
-import 'package:starship_shooter/game/game_config.dart';
+import 'package:starship_shooter/game/entity.dart';
 
 class EntityComponentManager {
   EntityComponentManager({
-    required EntityBloc entityBloc,
     required GameBloc gameBloc,
-  })  : _entityBloc = entityBloc,
-        _gameBloc = gameBloc {
-    entityBlocStream = entityBloc.stream.listen((state) {
-      if (gameBloc.state.status != GameStatus.gameOver &&
-          gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
-        // First check if boss is dead
-        final deadBoss = _entities.where(
-          (element) =>
-              (element is BossEnemy) && element.status == EntityStatus.dead,
-        );
-        if (deadBoss.isNotEmpty) {
-          gameBloc.add(const GameOverEvent());
-          return;
-        }
-
-        // Next check if there is still any players alive
-        // TODO(tryy3): Can we do anything about the none status?
-        final alivePlayers = _entities.where(
-          (element) =>
-              (element is Player) &&
-              (element.status == EntityStatus.alive ||
-                  element.status == EntityStatus.none),
-        );
-        if (alivePlayers.isEmpty) {
-          gameBloc.add(const GameOverEvent());
-          return;
-        }
-      }
-    });
-  }
+  }) : _gameBloc = gameBloc;
 
   // Internal usage
   int _lastID = -1;
-  final EntityBloc _entityBloc;
   final GameBloc _gameBloc;
 
-  StreamSubscription<EntityState>? entityBlocStream;
-
   void onDispose() {
-    entityBlocStream?.cancel();
+    for (final entity in _entities) {
+      entity.onDispose();
+    }
   }
 
-  final List<EntityComponent> _entities = [];
+  final List<Entity> _entities = [];
   Iterable<Player> get players => _entities.whereType<Player>();
 
   /// Add a new entity and also set it's id
-  void addEntity(EntityComponent entity) {
+  void addEntity(Entity entity) {
     // TODO(Tryy3): Should we use UUID here? could be useful for debugging
     _lastID++;
     final id = _lastID;
@@ -70,7 +31,7 @@ class EntityComponentManager {
     entity.id = id;
     _entities.add(entity);
     // entity.spawnEntity();
-    _entityBloc.add(SpawnEntityEvent(id: id));
+    // _entityBloc.add(SpawnEntityEvent(id: id));
   }
 
   /// Will return next ID of the entity that is able to play
@@ -79,7 +40,7 @@ class EntityComponentManager {
   }
 
   /// Will return next entity that is able to play
-  EntityComponent nextPlayableEntity(int currentID) {
+  Entity nextPlayableEntity(int currentID) {
     final playableEntities =
         _entities.where((element) => element.canContinue());
     var foundEntity = false;
@@ -94,7 +55,7 @@ class EntityComponentManager {
   }
 
   /// Will return the entity of the last played
-  EntityComponent findEntity(int id) {
+  Entity findEntity(int id) {
     return _entities.firstWhere((element) => element.id == id);
   }
 
@@ -108,11 +69,32 @@ class EntityComponentManager {
     return false;
   }
 
-  List<EntityComponent> findAlivePlayerEntities() {
+  List<Entity> findAlivePlayerEntities() {
+    // TODO(tryy3): Can we do anything about the none status?
     return _entities
         .where(
-          (element) =>
-              (element is Player) && (element.health > GameConfig.minHealth),
+          (entity) =>
+              (entity is Player) &&
+              (entity.status == EntityStatus.alive ||
+                  entity.status == EntityStatus.none),
+        )
+        .toList();
+  }
+
+  List<Entity> findDeadPlayerEntities() {
+    return _entities
+        .where(
+          (entity) =>
+              (entity is Player) && (entity.status == EntityStatus.dead),
+        )
+        .toList();
+  }
+
+  List<Entity> findDeadBosses() {
+    return _entities
+        .where(
+          (entity) =>
+              (entity is BossEnemy) && entity.status == EntityStatus.dead,
         )
         .toList();
   }
@@ -120,7 +102,7 @@ class EntityComponentManager {
   /// Tries to find the ID of a enemy, if it's PvP it will go based on
   /// the player that is next in line, if it's PvE then it will go for
   /// whoever the enemy is.
-  int findFirstEnemyID(int currentID) {
+  Entity? findFirstEnemy(int currentID) {
     if (_gameBloc.state.gameMode == GameMode.playerVSPlayer) {
       final players = _entities.whereType<Player>();
       var foundPlayer = false;
@@ -131,22 +113,27 @@ class EntityComponentManager {
           foundPlayer = true;
           continue;
         }
+
+        // Return the next player in list if we previously found the player
         if (foundPlayer) {
-          return player.id;
+          return player;
         }
       }
 
-      return foundPlayer ? players.first.id : -1;
+      // If we have found a player but it was last in list
+      // then simply return the first player
+      return foundPlayer ? players.first : null;
     } else {
       final boss = _entities.whereType<BossEnemy>().firstOrNull;
-      return boss != null ? boss.id : -1;
+      return boss;
     }
   }
 
   /// Initialize the players health and stats in the entity bloc
   void spawnEntities() {
     for (final entity in _entities) {
-      _entityBloc.add(entity.respawnEntity());
+      entity.respawnEntity();
+      // _entityBloc.add(entity.respawnEntity());
     }
   }
 }

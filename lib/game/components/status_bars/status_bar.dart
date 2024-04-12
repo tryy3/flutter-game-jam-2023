@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:starship_shooter/game/entity.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class StatusBar extends PositionComponent with HasGameRef<StarshipShooterGame> {
   StatusBar({
-    required this.entityID,
+    required this.entity,
     required super.position,
     this.side = SideView.bottom,
     this.maxStatus = 20,
@@ -18,7 +19,7 @@ class StatusBar extends PositionComponent with HasGameRef<StarshipShooterGame> {
     statusBarPaint.color = paintColor;
   }
 
-  int entityID;
+  Entity entity;
   int maxStatus;
   SideView side;
   Color paintColor;

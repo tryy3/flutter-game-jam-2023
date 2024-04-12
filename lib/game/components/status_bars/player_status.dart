@@ -3,10 +3,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/components/player.dart';
 import 'package:starship_shooter/game/components/status_bars/cold_status_bar.dart';
 import 'package:starship_shooter/game/components/status_bars/health_status_bar.dart';
@@ -15,9 +12,7 @@ import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/game/starship_shooter.dart';
 
 class PlayerStatus extends PositionComponent
-    with
-        HasGameRef<StarshipShooterGame>,
-        FlameBlocListenable<EntityBloc, EntityState> {
+    with HasGameRef<StarshipShooterGame> {
   PlayerStatus({required this.side, required this.player, super.position})
       : super(anchor: Anchor.center);
 
@@ -93,7 +88,7 @@ class PlayerStatus extends PositionComponent
 
         await addAll([
           HealthStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               gameRef.config.rotatedStatsBarsWidth / 2 + gameRef.config.padding,
@@ -101,7 +96,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           HeatStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               gameRef.config.rotatedStatsBarsWidth / 2 +
@@ -112,7 +107,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           ColdStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               gameRef.config.rotatedStatsBarsWidth / 2 +
@@ -149,7 +144,7 @@ class PlayerStatus extends PositionComponent
 
         await addAll([
           HealthStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               size.y -
@@ -159,7 +154,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           HeatStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               size.y -
@@ -171,7 +166,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           ColdStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               size.x / 2,
               size.y -
@@ -199,7 +194,7 @@ class PlayerStatus extends PositionComponent
 
         await addAll([
           HealthStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               gameRef.config.rotatedStatsBarsWidth / 2 + gameRef.config.padding,
               size.y / 2,
@@ -207,7 +202,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           HeatStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               gameRef.config.rotatedStatsBarsWidth / 2 +
                   gameRef.config.padding +
@@ -218,7 +213,7 @@ class PlayerStatus extends PositionComponent
             side: side,
           ),
           ColdStatusBar(
-            entityID: player.id,
+            entity: player,
             position: Vector2(
               gameRef.config.rotatedStatsBarsWidth / 2 +
                   gameRef.config.padding +

@@ -37,8 +37,15 @@ class CardSlotsUnit extends PositionComponent
     card
       ..pile = this
       ..priority = 0
-      ..position = absolutePosition;
+      ..position = relativePositionToParent(card);
     _card = card;
+  }
+
+  Vector2 relativePositionToParent(Card card) {
+    final parentComponent = parent! as PositionComponent;
+
+    final relativePosition = parentComponent.positionOf(position);
+    return relativePosition;
   }
 
   @override
@@ -60,7 +67,7 @@ class CardSlotsUnit extends PositionComponent
   @override
   void returnCard(Card card) {
     card
-      ..position = absolutePosition
+      ..position = relativePositionToParent(card)
       ..priority = 0;
   }
 
@@ -103,6 +110,11 @@ class CardSlotsUnit extends PositionComponent
           size.y / 2 + gameRef.config.padding,
         );
       case SideView.bossBottom:
+    }
+
+    // Adjust card position if there is one
+    if (_card != null) {
+      _card!.position = relativePositionToParent(_card!);
     }
   }
   //#endregion

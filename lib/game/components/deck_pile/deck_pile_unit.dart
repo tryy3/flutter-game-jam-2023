@@ -37,8 +37,16 @@ class DeckPileUnit extends PositionComponent
     card
       ..pile = this
       ..priority = 0
-      ..position = absolutePosition;
+      ..position = relativePositionToParent(card);
     _card = card;
+  }
+
+  Vector2 relativePositionToParent(Card card) {
+    if (parent == null) return Vector2(0, 0);
+    final parentComponent = parent! as PositionComponent;
+
+    final relativePosition = parentComponent.positionOf(position);
+    return relativePosition;
   }
 
   @override
@@ -60,7 +68,7 @@ class DeckPileUnit extends PositionComponent
   @override
   void returnCard(Card card) {
     card
-      ..position = absolutePosition
+      ..position = relativePositionToParent(card)
       ..priority = 0;
   }
 

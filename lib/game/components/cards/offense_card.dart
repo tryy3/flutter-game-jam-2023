@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
+// import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/player.dart';
@@ -35,15 +35,14 @@ $runtimeType(
   void useCard(Player player) {
     super.useCard(player);
 
-    final enemyID =
-        player.gameRef.entityComponentManager.findFirstEnemyID(player.id);
+    final enemy =
+        player.gameRef.entityComponentManager.findFirstEnemy(player.id);
+    enemy?.damageEntity(damage);
 
-    gameRef.entityBloc.add(
-      DamageEvent(
-        id: enemyID,
-        damage: damage,
-      ),
-    );
+    player.addNewLogMessage('Damaged enemy with $damage HP');
+    if (enemy != null && enemy is Player) {
+      enemy.addNewLogMessage('Took $damage damage from enemy');
+    }
   }
   //#endregion
 
@@ -59,7 +58,7 @@ $runtimeType(
       maxRandomValue = 3;
 
       // Debug mode
-      maxRandomValue = 20;
+      // maxRandomValue = 20;
     }
 
     // Randomize if it's gonna be cold or heat card

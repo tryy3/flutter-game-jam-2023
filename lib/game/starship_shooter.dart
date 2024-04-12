@@ -6,16 +6,13 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart' hide OverlayRoute;
 import 'package:flame_bloc/flame_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_attributes.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_bloc.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_state.dart';
 import 'package:starship_shooter/game/bloc/game/game_bloc.dart';
 import 'package:starship_shooter/game/bloc/game/game_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/enemies/boss_enemy.dart';
 import 'package:starship_shooter/game/components/enemies/simple_boss.dart';
 import 'package:starship_shooter/game/components/player.dart';
-import 'package:starship_shooter/game/entity_component.dart';
+import 'package:starship_shooter/game/entity.dart';
 import 'package:starship_shooter/game/entity_component_manager.dart';
 import 'package:starship_shooter/game/game_config.dart';
 import 'package:starship_shooter/l10n/l10n.dart';
@@ -28,17 +25,14 @@ class StarshipShooterGame extends FlameGame {
     required this.effectPlayer,
     required this.textStyle,
     required this.gameBloc,
-    required this.entityBloc,
   }) {
     images.prefix = '';
     entityComponentManager = EntityComponentManager(
-      entityBloc: entityBloc,
       gameBloc: gameBloc,
     );
   }
 
   final GameBloc gameBloc;
-  final EntityBloc entityBloc;
   late RouterComponent router;
   late GameConfig config;
   late EntityComponentManager entityComponentManager;
@@ -48,6 +42,7 @@ class StarshipShooterGame extends FlameGame {
 
   static const Color lightBlack80 = Color(0x80000000);
   static const Color lightGrey50 = Color(0x50ffffff);
+  static const Color lightGrey70 = Color(0x70ffffff);
   static final borderPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 3
@@ -58,7 +53,6 @@ class StarshipShooterGame extends FlameGame {
   final TextStyle textStyle;
 
   StreamSubscription<GameState>? gameBlocStream;
-  StreamSubscription<EntityState>? entityBlocStream;
 
   double timerCounter = 0;
   double timerLimit = 0;
@@ -71,7 +65,6 @@ class StarshipShooterGame extends FlameGame {
   void onDispose() {
     super.onDispose();
     gameBlocStream?.cancel();
-    entityBlocStream?.cancel();
     entityComponentManager.onDispose();
   }
 
@@ -124,9 +117,6 @@ class StarshipShooterGame extends FlameGame {
     await add(
       FlameMultiBlocProvider(
         providers: [
-          FlameBlocProvider<EntityBloc, EntityState>.value(
-            value: entityBloc,
-          ),
           FlameBlocProvider<GameBloc, GameState>.value(
             value: gameBloc,
           ),
@@ -135,7 +125,7 @@ class StarshipShooterGame extends FlameGame {
       ),
     );
     for (final entity in entities) {
-      entityComponentManager.addEntity(entity as EntityComponent);
+      entityComponentManager.addEntity(entity as Entity);
     }
 
     // Center the viewfinder
@@ -161,20 +151,20 @@ class StarshipShooterGame extends FlameGame {
       }
     });
 
-    entityBlocStream = entityBloc.stream.listen((state) {
-      if (gameBloc.state.status != GameStatus.gameOver) {
-        // Check for game over state, in PvP mode this will be if anyone dies
-        // in PvE mode it will be when either the boss is dead or when all
-        // players are dead
-        if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
-          final deadPlayers = state.entities.entries
-              .where((element) => element.value.status == EntityStatus.dead);
-          if (deadPlayers.isNotEmpty) {
-            gameBloc.add(const GameOverEvent());
-          }
-        }
-      }
-    });
+    // entityBlocStream = entityBloc.stream.listen((state) {
+    //   if (gameBloc.state.status != GameStatus.gameOver) {
+    //     // Check for game over state, in PvP mode this will be if anyone dies
+    //     // in PvE mode it will be when either the boss is dead or when all
+    //     // players are dead
+    //     if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+    //       final deadPlayers = state.entities.entries
+    //           .where((element) => element.value.status == EntityStatus.dead);
+    //       if (deadPlayers.isNotEmpty) {
+    //         gameBloc.add(const GameOverEvent());
+    //       }
+    //     }
+    //   }
+    // });
 
     // Last thing we do in onLoad is change game state to starting the game
     gameBloc.add(const GameStartsEvent());
@@ -202,6 +192,32 @@ class StarshipShooterGame extends FlameGame {
         status == GameStatus.roundEnds ||
         status == GameStatus.gameOver) {
       timerCounter += dt;
+    }
+
+    // Check for game over state, in PvP mode this will be if anyone dies
+    // in PvE mode it will be when either the boss is dead or when all
+    // players are dead
+    if (gameBloc.state.isGameStarted()) {
+      if (gameBloc.state.gameMode == GameMode.playerVSPlayer) {
+        final deadPlayers = entityComponentManager.findDeadPlayerEntities();
+        if (deadPlayers.isNotEmpty) {
+          gameBloc.add(const GameOverEvent());
+        }
+      } else if (gameBloc.state.gameMode == GameMode.playerVSEnvironment) {
+        // First check if boss is dead
+        final deadBosses = entityComponentManager.findDeadBosses();
+        if (deadBosses.isNotEmpty) {
+          gameBloc.add(const GameOverEvent());
+          return;
+        }
+
+        // Next check if there is still any players alive
+        final alivePlayers = entityComponentManager.findAlivePlayerEntities();
+        if (alivePlayers.isEmpty) {
+          gameBloc.add(const GameOverEvent());
+          return;
+        }
+      }
     }
 
     if (status == GameStatus.gameStarts) {

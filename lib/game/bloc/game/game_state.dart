@@ -44,6 +44,22 @@ class GameState extends Equatable {
   final PlayerMode playerMode;
   final int currentEntityID;
 
+  bool isGameStatusOver() {
+    return status == GameStatus.gameOver;
+  }
+
+  // Return any status where the game is considered started, so exclude over and
+  // status that indicate starting the game
+  bool isGameStarted() {
+    return status == GameStatus.waitingForRoundStart ||
+        status == GameStatus.roundStarts ||
+        status == GameStatus.inBetweenTurns ||
+        status == GameStatus.turnStarts ||
+        status == GameStatus.turnProcess ||
+        status == GameStatus.turnEnds ||
+        status == GameStatus.roundEnds;
+  }
+
   GameState copyWith({
     int? currentEntityID,
     GameStatus? status,

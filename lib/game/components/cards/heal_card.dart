@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:starship_shooter/game/bloc/entity/entity_events.dart';
 import 'package:starship_shooter/game/bloc/game/game_state.dart';
 import 'package:starship_shooter/game/components/card.dart';
 import 'package:starship_shooter/game/components/player.dart';
@@ -34,12 +33,9 @@ $runtimeType(
   @override
   void useCard(Player player) {
     super.useCard(player);
-    gameRef.entityBloc.add(
-      HealingEvent(
-        id: player.id,
-        health: health,
-      ),
-    );
+    player
+      ..healEntity(health)
+      ..addNewLogMessage('Healed yourself with $health HP');
   }
   //#endregion
 

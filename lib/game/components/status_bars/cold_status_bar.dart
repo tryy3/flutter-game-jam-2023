@@ -5,14 +5,11 @@ import 'package:starship_shooter/game/components/status_bars/status_bar.dart';
 
 class ColdStatusBar extends StatusBar {
   ColdStatusBar({
-    required super.entityID,
+    required super.entity,
     required super.position,
     super.side,
   }) : super(paintColor: Colors.blue);
 
   @override
-  int get currentStatus => max(
-        gameRef.entityBloc.state.entities[entityID]?.cold ?? 0,
-        0,
-      );
+  int get currentStatus => max(entity.cold, 0);
 }
